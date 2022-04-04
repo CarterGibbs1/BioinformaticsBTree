@@ -23,7 +23,7 @@ public class GeneBankSearch {
     // test3 query7 result can be found in the directory
     //note: query7_result and dump.6 have the same format, example of a line: ccactg: 2
 
-    //btree file
+    //btree file can be called from btree class if implemented there
 
 
 }
