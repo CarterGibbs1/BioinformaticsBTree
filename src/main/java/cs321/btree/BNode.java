@@ -14,7 +14,7 @@ import java.util.LinkedList;
 public class BNode<E> {
 
 	//child0 <= key0 <= child1 <= key1 <= child2 ... childn <= keyn <= childn + 1
-	private LinkedList<TreeObject<E>> keys; //objects in this node, also size() = n
+	private LinkedList<TreeObject<E>> keys; //objects/keys in this node, also size() = n
 	private LinkedList<BNode<E>> children;  //children in this node
 	
 	private BNode<E> parent;  //parent pointer
@@ -57,47 +57,53 @@ public class BNode<E> {
 		children.add(leftChild);
 		children.add(rightChild);
 		
-		DEGREE = degree;
+		//if degree is invalid, take the degree from whatever pointer is not null
+		if(degree < 2) {
+			if(parent != null) {
+				DEGREE = parent.DEGREE;
+			}
+			else if(leftChild != null) {
+				DEGREE = leftChild.DEGREE;
+			}
+			else {
+				DEGREE = rightChild.DEGREE;
+			}
+		}
+		else {
+			DEGREE = degree;
+		}
+		
 		this.parent = parent;
 		
 		//determine BNode type
-		//if no parent --> ROOT; if no children --> LEAF; else --> INTERIOR
-		if(this.parent == null) {
-			type = NodeType.ROOT;
-		}
-		else if((children.get(0) == null) && (children.get(1) == null)) {
-			type = NodeType.LEAF;
-		}
-		else {
-			type = NodeType.INTERIOR;
-		}
+		updateType(); 
 	}
 	
 	/**
 	 * Constructor: Create BNode with one key initialKey, a parent pointer
 	 * parent, and two children leftChild and rightChild. BNode type is
-	 * determined automatically by parameters.
+	 * determined automatically by parameters. Degree (t) is determined by
+	 * either the parent pointer or one of the children.
 	 * 
-	 * @param degree     (t) how many keys/objects (t - 1 to 2t - 1) and
-	 * 					 children (t to 2t) this BNode can have.
 	 * @param intialKey  the initial object in this BNode
 	 * @param parent	 pointer to the parent of this BNode
 	 * @param leftChild  pointer to the child left of initialKey
 	 * @param rightChild pointer to the child right of initialKey
 	 */
 	public BNode(TreeObject<E> initialKey, BNode<E> parent, BNode<E> leftChild, BNode<E> rightChild) {
-		this(parent.DEGREE, initialKey, parent, leftChild, rightChild);
+		this(-1, initialKey, parent, leftChild, rightChild);
 	}
 	
 	/**
 	 * Constructor: Create LEAF BNode with one key initialKey and a
-	 * parent pointer parent.
+	 * parent pointer parent. Degree (t) is determined by the parent
+	 * pointer.
 	 * 
-	 * @param initialKey
-	 * @param parent
+	 * @param intialKey  the initial object in this BNode
+	 * @param parent	 pointer to the parent of this BNode
 	 */
 	public BNode(TreeObject<E> initialKey, BNode<E> parent) {
-		this(parent.DEGREE, initialKey, parent, null, null);
+		this(-1, initialKey, parent, null, null);
 	}
 	
 	/**
@@ -166,6 +172,24 @@ public class BNode<E> {
 		for(i = ( keys.size() - 1); i >= 0 && key.equals(keys.get(i)); i--){}
 		
 		return children.get(i + 1);
+	}
+	
+	/**
+	 * Update what type of Node this is based on parent and child
+	 * pointers. If no parent --> ROOT; if no children --> LEAF;
+	 * else --> INTERIOR
+	 */
+	private void updateType() {
+		//
+		if(parent == null) {
+			type = NodeType.ROOT;
+		}
+		else if(children.get(0) == null) {
+			type = NodeType.LEAF;
+		}
+		else {
+			type = NodeType.INTERIOR;
+		}
 	}
 	
 	//=================================================================================================================
