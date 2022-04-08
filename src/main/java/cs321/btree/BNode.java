@@ -43,10 +43,10 @@ public class BNode<E> {
 	 * Example Demonstration:
 	 * 
 	 * 
-	 *    new BNode(?, a, ?, /, \)
+	 *      new BNode(?, a, ?, /, \)
 	 * 
-	 * result     -  a
-	 *              / \
+	 * result     -    a
+	 *                / \
 	 */
 	public BNode(int degree, TreeObject<E> initialKey, BNode<E> parent, BNode<E> leftChild, BNode<E> rightChild) {
 		//initialize instance variables
@@ -61,9 +61,6 @@ public class BNode<E> {
 		if(degree < 2) {
 			if(parent != null) {
 				DEGREE = parent.DEGREE;
-			}
-			else if(leftChild != null) {
-				DEGREE = leftChild.DEGREE;
 			}
 			else {
 				DEGREE = rightChild.DEGREE;
@@ -179,8 +176,7 @@ public class BNode<E> {
 	 * pointers. If no parent --> ROOT; if no children --> LEAF;
 	 * else --> INTERIOR
 	 */
-	private void updateType() {
-		//
+	public void updateType() {
 		if(parent == null) {
 			type = NodeType.ROOT;
 		}
@@ -190,6 +186,70 @@ public class BNode<E> {
 		else {
 			type = NodeType.INTERIOR;
 		}
+	}
+	
+	/**
+	 * Splits the current BNode into two new BNodes, removing and
+	 * inserting the middle object and a pointer to the new right
+	 * BNode into the parent. The left BNode (this BNode) will
+	 * contain everything to the left of the removed object and
+	 * the right BNode (new BNode) will be contain everything to
+	 * the right. Can only be run when the list is full.
+	 * 
+	 * @return the parent of the two BNodes
+	 * 
+	 * @throws IllegalStateException When attempting to split a not
+	 *         full list.
+	 */
+	public BNode<E> split() throws IllegalStateException{
+		
+		//if this BNode is not full, throw exception. Mostly here for debugging purposes
+		if(!isFull()) {
+			throw new IllegalStateException("Attempted to split BNode when not full");
+		}
+		
+		
+		//==== for better understanding when coming back to look at this method, I'm going to ====
+		//==== create an example split and show how it changes through comments:              ====
+		//Keys     -  a b c d e f g
+		//Pointers - 0 1 2 3 4 5 6 7
+		
+		int originalN = keys.size();
+		
+		
+		//remove key and two pointers right of middle and insert into new BNode 'splitRight':
+		//Keys     -  a b c d f g    |  e
+		//Pointers - 0 1 2 3   6 7   | 4 5
+		BNode<E> splitRight = new BNode<E>(keys.remove(keys.size()/2 + 1), parent, children.remove(children.size()/2), children.remove(children.size()/2 + 1));
+		
+		
+		//starting at end of this BNode, remove pointers and keys and insert into splitRight:
+		//Keys     -  a b c d  |  e f g
+		//Pointers - 0 1 2 3   | 4 5 6 7
+		while((keys.size() - 1) != originalN/2) {
+			splitRight.insert(keys.removeLast(), children.removeLast());
+		}
+		
+		
+		//lastly, remove last node (original middle) from this and insert into parent with
+		//a pointer to splitRight
+		//Parent   -    .. x x d x x ..
+		//                    / \
+		//Keys     -  a b c d  |  e f g
+		//Pointers - 0 1 2 3   | 4 5 6 7
+		
+		//if this is the ROOT, create new parent/root to insert into and update types
+		if(type == NodeType.ROOT) {
+			BNode<E> newRoot = new BNode<E>(keys.removeLast(), null, this, splitRight);
+			this.parent = splitRight.parent = newRoot;
+			this.updateType();
+			splitRight.updateType();
+			
+			return newRoot;
+		}
+		
+		parent.insert(keys.removeLast(), splitRight);
+		return parent;
 	}
 	
 	//=================================================================================================================
