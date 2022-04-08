@@ -4,7 +4,9 @@ import java.util.LinkedList;
 
 /**
  * Used to create BNode objects that hold Generic Type (passed down by
- * the BTree they belong to) objects.
+ * the BTree they belong to) objects. Notable methods are insert(),
+ * getSubtree(), and split() which are important in creating a functional
+ * BTree.
  * 
  * @author  Mesa Greear
  * @version Spring 2022
@@ -24,7 +26,7 @@ public class BNode<E> {
 							  //children (t to 2t) this BNode can have
 	
 	//=================================================================================================================
-	//												CONSTRUCTORS
+	//                                               CONSTRUCTORS
 	//=================================================================================================================
 	
 	/**
@@ -116,7 +118,7 @@ public class BNode<E> {
 	}
 	
 	//=================================================================================================================
-	//												MAIN METHODS
+	//                                         BTREE FUNCTIONALITY METHODS
 	//=================================================================================================================
 	
 	/**
@@ -169,23 +171,6 @@ public class BNode<E> {
 		for(i = ( keys.size() - 1); i >= 0 && key.equals(keys.get(i)); i--){}
 		
 		return children.get(i + 1);
-	}
-	
-	/**
-	 * Update what type of Node this is based on parent and child
-	 * pointers. If no parent --> ROOT; if no children --> LEAF;
-	 * else --> INTERIOR
-	 */
-	public void updateType() {
-		if(parent == null) {
-			type = NodeType.ROOT;
-		}
-		else if(children.get(0) == null) {
-			type = NodeType.LEAF;
-		}
-		else {
-			type = NodeType.INTERIOR;
-		}
 	}
 	
 	/**
@@ -253,7 +238,7 @@ public class BNode<E> {
 	}
 	
 	//=================================================================================================================
-	//												GET/SET METHODS
+	//                                           GET/SET/UTILITY METHODS
 	//=================================================================================================================
 	
 	/**
@@ -291,5 +276,22 @@ public class BNode<E> {
 	 */
 	public boolean isFull() {
 		return ((2 * DEGREE) - 1) == keys.size();
+	}
+	
+	/**
+	 * Update what type of Node this is based on parent and child
+	 * pointers. If no parent --> ROOT; if no children --> LEAF;
+	 * else --> INTERIOR
+	 */
+	public void updateType() {
+		if(parent == null) {
+			type = NodeType.ROOT;
+		}
+		else if(children.get(0) == null) {
+			type = NodeType.LEAF;
+		}
+		else {
+			type = NodeType.INTERIOR;
+		}
 	}
 }
