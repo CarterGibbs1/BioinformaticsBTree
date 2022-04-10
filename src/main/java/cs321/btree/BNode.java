@@ -143,9 +143,8 @@ public class BNode<E> {
 	public void insert(TreeObject<E> key, BNode<E> child) {
 		
 		//get to the index of the first k less than key
-		//TODO: 'key.equals(keys.get(i))' needs to be something like 'key.compareTo(keys.get(i)) <= 0'
 		int i;
-		for(i = ( keys.size() - 1); i >= 0 && key.equals(keys.get(i)); i--){}
+		for(i = ( keys.size() - 1); i >= 0 && key.leftGreaterThanRight(keys.get(i)) <= 0; i--){}
 		
 		//add new key and child to lists
 		keys.add(i + 1, key);
@@ -166,9 +165,8 @@ public class BNode<E> {
 	public BNode<E> getSubtree(TreeObject<E> key){
 		
 		//get to the index of the first k less than key
-		//TODO: 'key.equals(keys.get(i))' needs to be something like 'key.compareTo(keys.get(i)) <= 0'
 		int i;
-		for(i = ( keys.size() - 1); i >= 0 && key.equals(keys.get(i)); i--){}
+		for(i = ( keys.size() - 1); i >= 0 && key.leftGreaterThanRight(keys.get(i)) <= 0; i--){}
 		
 		return children.get(i + 1);
 	}
