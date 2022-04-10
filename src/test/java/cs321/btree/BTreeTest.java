@@ -38,6 +38,9 @@ public class BTreeTest
 //        }
     }
 
+    /**
+     * Test that a BNode correctly inserts given elements in sorted order.
+     */
     @Test
     public void singleBNode_TestInsertion() {
     	String inputLetters = "TGCATAAG";
@@ -50,5 +53,53 @@ public class BTreeTest
     	
     	//see if the BNode contains AAACGGTT in int/byte value
     	assertEquals(testNode.toString(), "00012233");
+    }
+    
+    /**
+     * Test that a ROOT BNode correctly splits itself into three new nodes,
+     * the new root and it's two children.
+     */
+    @Test
+    public void BNode_TestSplit() {
+    	String inputLetters = "ATGTC";
+    	BNode<String> parent;
+    	BNode<String> rightChild;
+    	
+    	//instantiate and populate BNode with inputLetters
+    	BNode<String> testNode = new BNode<String>(3, new TreeObject<String>(inputLetters.substring(0, 1)));
+    	for(int i = 1; i < inputLetters.length(); i++) {
+    		testNode.insert(new TreeObject<String>(inputLetters.substring(i, i + 1)), null);
+    	}
+    	
+    	//split BNode and save parent and rightChild
+    	parent = testNode.split();
+    	rightChild = parent.getSubtree(new TreeObject<String>("T"));
+    	
+    	assertEquals(parent.toString(), "2");      //parent = 2 (G)
+    	assertEquals(testNode.toString(), "01");   //leftChild = 01 (AC)
+    	assertEquals(rightChild.toString(), "33"); //rightChild = 33 (TT)
+    }
+    
+    /**
+     * Test that when a BNode is not full, isFull() will return false and
+     * when BNode is full, isFull() will return true.
+     */
+    @Test
+    public void BNode_TestIsFull() {
+    	String inputLetters = "ATGTCTGACCGT";
+    	
+    	//instantiate and populate BNode with inputLetters
+    	BNode<String> testNode = new BNode<String>(7, new TreeObject<String>(inputLetters.substring(0, 1)));
+    	for(int i = 1; i < inputLetters.length(); i++) {
+    		testNode.insert(new TreeObject<String>(inputLetters.substring(i, i + 1)), null);
+    	}
+    	
+    	//testNode is not full
+    	if(testNode.isFull())
+    		assert(false);
+    	
+    	//testNode is now full
+    	testNode.insert(new TreeObject<String>("A"), null);
+    	assert(testNode.isFull());
     }
 }

@@ -203,7 +203,7 @@ public class BNode<E> {
 		//remove key and two pointers right of middle and insert into new BNode 'splitRight':
 		//Keys     -  a b c d f g    |  e
 		//Pointers - 0 1 2 3   6 7   | 4 5
-		BNode<E> splitRight = new BNode<E>(keys.remove(keys.size()/2 + 1), parent, children.remove(children.size()/2), children.remove(children.size()/2 + 1));
+		BNode<E> splitRight = new BNode<E>(DEGREE, keys.remove(keys.size()/2 + 1), parent, children.remove(children.size()/2), children.remove(children.size()/2 + 1));
 		
 		
 		//starting just to the right of the middle of this BNode, continuously remove the pointers and keys
