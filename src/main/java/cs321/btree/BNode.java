@@ -23,7 +23,7 @@ public class BNode<E> {
 	private NodeType type;    //Either root, interior, or leaf node
 	
 	private final int DEGREE; //t -  how many keys/objects (t - 1 to 2t - 1) and
-							  //children (t to 2t) this BNode can have
+	                          //children (t to 2t) this BNode can have
 	
 	//=================================================================================================================
 	//                                               CONSTRUCTORS
@@ -37,7 +37,7 @@ public class BNode<E> {
 	 * @param degree     (t) how many keys/objects (t - 1 to 2t - 1) and
 	 * 					 children (t to 2t) this BNode can have.
 	 * @param intialKey  the initial object in this BNode
-	 * @param parent	 pointer to the parent of this BNode
+	 * @param parent     pointer to the parent of this BNode
 	 * @param leftChild  pointer to the child left of initialKey
 	 * @param rightChild pointer to the child right of initialKey
 	 */
@@ -85,7 +85,7 @@ public class BNode<E> {
 	 * either the parent pointer or one of the children.
 	 * 
 	 * @param intialKey  the initial object in this BNode
-	 * @param parent	 pointer to the parent of this BNode
+	 * @param parent     pointer to the parent of this BNode
 	 * @param leftChild  pointer to the child left of initialKey
 	 * @param rightChild pointer to the child right of initialKey
 	 */
@@ -99,7 +99,7 @@ public class BNode<E> {
 	 * pointer.
 	 * 
 	 * @param intialKey  the initial object in this BNode
-	 * @param parent	 pointer to the parent of this BNode
+	 * @param parent     pointer to the parent of this BNode
 	 */
 	public BNode(TreeObject<E> initialKey, BNode<E> parent) {
 		this(-1, initialKey, parent, null, null);
@@ -110,7 +110,7 @@ public class BNode<E> {
 	 * (t).
 	 * 
 	 * @param degree    (t) how many keys/objects (t - 1 to 2t - 1) and
-	 * 					children (t to 2t) this BNode can have.
+	 *                  children (t to 2t) this BNode can have.
 	 * @param intialKey the initial object in this BNode
 	 */
 	public BNode(int degree, TreeObject<E> initialKey) {
@@ -208,11 +208,12 @@ public class BNode<E> {
 		BNode<E> splitRight = new BNode<E>(keys.remove(keys.size()/2 + 1), parent, children.remove(children.size()/2), children.remove(children.size()/2 + 1));
 		
 		
-		//starting at end of this BNode, remove pointers and keys and insert into splitRight:
+		//starting just to the right of the middle of this BNode, continuously remove the pointers and keys
+		//at that position and insert them into splitRight:
 		//Keys     -  a b c d  |  e f g
 		//Pointers - 0 1 2 3   | 4 5 6 7
 		while((keys.size() - 1) != originalN/2) {
-			splitRight.insert(keys.removeLast(), children.removeLast());
+			splitRight.insert(keys.remove(originalN/2 + 1), children.remove(originalN/2 + 1));
 		}
 		
 		
