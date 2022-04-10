@@ -144,7 +144,7 @@ public class BNode<E> {
 		
 		//get to the index of the first k less than key
 		int i;
-		for(i = ( keys.size() - 1); i >= 0 && key.leftGreaterThanRight(keys.get(i)) <= 0; i--){}
+		for(i = ( keys.size() - 1); i >= 0 && key.compare(keys.get(i)) <= 0; i--){}
 		
 		//add new key and child to lists
 		keys.add(i + 1, key);
@@ -166,7 +166,7 @@ public class BNode<E> {
 		
 		//get to the index of the first k less than key
 		int i;
-		for(i = ( keys.size() - 1); i >= 0 && key.leftGreaterThanRight(keys.get(i)) <= 0; i--){}
+		for(i = ( keys.size() - 1); i >= 0 && key.compare(keys.get(i)) <= 0; i--){}
 		
 		return children.get(i + 1);
 	}
@@ -292,5 +292,17 @@ public class BNode<E> {
 		else {
 			type = NodeType.INTERIOR;
 		}
+	}
+	
+	//most likely temporary toString.
+	//returns int value for each key in a single, no space, String
+	@Override
+	public String toString() {
+		StringBuilder retString = new StringBuilder();
+		for(int i = 0; i < keys.size(); i++) {
+			retString.append(keys.get(i).getB());
+		}
+		
+		return retString.toString();
 	}
 }

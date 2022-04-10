@@ -5,7 +5,7 @@ package cs321.btree;
  * Specific placement in the BTree is determined by previous TreeObjects and key values.
  * A notable method is compare(), which determines which object is larger in key value.
  *
- * @author Aaron Goin
+ * @authors Aaron Goin, Mesa Greear
  * @version Spring 2022
  *
  * @param <E> Generic Type for this TreeObject to hold
@@ -43,13 +43,13 @@ public class TreeObject<E> {
      */
     private byte toBinary(E possibleKey) {
         byte b;
-        if (possibleKey == "A") {
+        if (possibleKey.equals("A")) {
             b = 0b00;
-        } else if (possibleKey  == "T") {
+        } else if (possibleKey.equals("T")) {
             b = 0b11;
-        } else if (possibleKey  == "C") {
+        } else if (possibleKey.equals("C")) {
             b = 0b01;
-        } else if (possibleKey == "G") {
+        } else if (possibleKey.equals("G")) {
             b = 0b10;
         } else {
             b = -1;

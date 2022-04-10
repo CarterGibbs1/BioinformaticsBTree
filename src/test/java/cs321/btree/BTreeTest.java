@@ -4,6 +4,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+
 public class BTreeTest
 {
     // HINT:
@@ -36,4 +38,17 @@ public class BTreeTest
 //        }
     }
 
+    @Test
+    public void singleBNode_TestInsertion() {
+    	String inputLetters = "TGCATAAG";
+    	
+    	//instantiate and populate BNode with inputLetters
+    	BNode<String> testNode = new BNode<String>(10, new TreeObject<String>(inputLetters.substring(0, 1)));
+    	for(int i = 1; i < inputLetters.length(); i++) {
+    		testNode.insert(new TreeObject<String>(inputLetters.substring(i, i + 1)), null);
+    	}
+    	
+    	//see if the BNode contains AAACGGTT in int/byte value
+    	assertEquals(testNode.toString(), "00012233");
+    }
 }
