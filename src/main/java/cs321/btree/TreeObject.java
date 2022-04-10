@@ -84,7 +84,7 @@ public class TreeObject<E> {
     }
 
     /**
-     * Determines if the left TreeObject is larger than the parameter "right" TreeObject
+     * Determines if the left TreeObject's b value is larger than the parameter "right" TreeObject's b value
      * TreeObjects that are being inserted into a BTree go through this method.
      * If left is equal or less than right, then they go the same direction.
      * The return value is exact in terms of the difference of the two byte values.
@@ -93,7 +93,7 @@ public class TreeObject<E> {
      * @return negative number if left is less than right, positive number if left is larger than right,
      * 0 if equal
      */
-    public int leftGreaterThanRight(TreeObject<E> right) {
+    public int compare(TreeObject<E> right) {
         byte left = b;// for easier code explanation in documentation
         return Byte.compare(left, right.getB());
     }
@@ -117,6 +117,6 @@ public class TreeObject<E> {
             byteS = "-1";
         }
 
-        return "Key: " + treeObjectKey + "\n Binary Number: " + byteS + "\n";
+        return "TreeObject Key: " + treeObjectKey + "\n TreeObject Binary Number: " + byteS + "\n";
     }
 }
