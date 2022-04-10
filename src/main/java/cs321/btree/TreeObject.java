@@ -11,10 +11,11 @@ package cs321.btree;
  * @param <E> Generic Type for this TreeObject to hold
  */
 public class TreeObject<E> {
-    //valid treeObjects:        "A", "T", "C", "G"
-    //corresponding byte value:  00,  11,  01,  10
+    // valid treeObjects: "A", "T", "C", "G"
+    // corresponding byte value: 00, 11, 01, 10
     private E treeObjectKey;
-    private byte b;
+    private byte b = 0;
+    private String stringOfBytes;
 
     /**
      * Constructor: Creates a TreeObject with the specified key.
@@ -22,34 +23,59 @@ public class TreeObject<E> {
      * The key must be "A", "C", "G", or "T" for treeObjectKey to not be null.
      * -1 is used to equal b if the possibleKey is invalid
      *
-     * @param possibleKey a key that may get assigned to the object, if listed above
+     * @param possibleKey a key that may get assigned to the object, if all chars are listed above
      */
     public TreeObject(E possibleKey) {
-        b = toBinary(possibleKey);
+        char[] c = keyToCharArray(possibleKey);
+        StringBuilder toStringChars = new StringBuilder();
+        for (int i = 0; i < c.length; i++) {
+            byte index = toBinary(c[i]);
+            if (index == -1) {
+                b = -1;
+                break;
+            }
+            toStringChars.append(charToBinary(c[i]));
+            if (i != c.length - 1) {
+                toStringChars.append(" ");
+            }
+            b += index;
+        }
         if (b == -1) {
             treeObjectKey = null;
+            stringOfBytes = null;
         } else {
             treeObjectKey = possibleKey;
+            stringOfBytes = toStringChars.toString();
         }
     }
 
     /**
-     * Converts treeObjectKey to a 2-bit binary number.
-     * This helps preserve memory.
-     * Used in constructor
+     * Used to simplify processes where a char array is needed to find an overall byte value or toString.
      *
-     * @param possibleKey a key that is being evaluated
+     * @param objectKey an element value that may get converted to a treeObjectKey
+     * @return a char array of the objectKey
+     */
+    private char[] keyToCharArray(E objectKey) {
+        String s = (String) objectKey;
+        return s.toCharArray();
+    }
+
+    /**
+     * Converts a char in a treeObjectKey to a 2-bit binary number. This helps
+     * preserve memory. Used in constructor.
+     *
+     * @param possibleKeyChar a char in a key that is being evaluated
      * @return byte that represents the key, or -1 if treeObjectKey isn't valid
      */
-    private byte toBinary(E possibleKey) {
+    private byte toBinary(char possibleKeyChar) {
         byte b;
-        if (possibleKey.equals("A")) {
+        if (possibleKeyChar == 'A') {
             b = 0b00;
-        } else if (possibleKey.equals("T")) {
+        } else if (possibleKeyChar == 'T') {
             b = 0b11;
-        } else if (possibleKey.equals("C")) {
+        } else if (possibleKeyChar == 'C') {
             b = 0b01;
-        } else if (possibleKey.equals("G")) {
+        } else if (possibleKeyChar == 'G') {
             b = 0b10;
         } else {
             b = -1;
@@ -58,22 +84,32 @@ public class TreeObject<E> {
     }
 
     /**
+     * Converts a char to a 2-bit binary number if it is a valid TreeObject
+     *
+     * @param c a character that can get converted to its respective 2-bit binary number
+     * @return a String of the corresponding binary number of the char
+     */
+    private String charToBinary(char c) {
+        String byteS;
+        if (c == 'A') {
+            byteS = "00";
+        } else if (c == 'T') {
+            byteS = "11";
+        } else if (c == 'C') {
+            byteS = "01";
+        } else if (c == 'G') {
+            byteS = "10";
+        } else {
+            byteS = "-1";
+        }
+        return byteS;
+    }
+
+    /**
      * @return the key of the TreeObject
      */
     public E getElement() {
         return treeObjectKey;
-    }
-
-    /**
-     * Setter for treeObjectKey (and corresponding b) if newKey is "A", "C", "G", or "T".
-     *
-     * @param newKey the new key of the TreeObject, if listed above
-     */
-    public void setElement(E newKey) {
-        if (newKey == "A" || newKey == "C" || newKey == "G" || newKey == "T") {
-            treeObjectKey = newKey;
-            b = toBinary(newKey);
-        }
     }
 
     /**
@@ -104,19 +140,6 @@ public class TreeObject<E> {
      * @return a String representation of a TreeObject
      */
     public String toString() {
-        String byteS;
-        if (b == 0) {
-            byteS = "00";
-        } else if (b == 11) {
-            byteS = "11";
-        } else if (b == 1) {
-            byteS = "01";
-        } else if (b == 10) {
-            byteS = "10";
-        } else {
-            byteS = "-1";
-        }
-
-        return "TreeObject Key: " + treeObjectKey + "\n TreeObject Binary Number: " + byteS + "\n";
+        return "TreeObject Key: " + treeObjectKey + "\nTreeObject Binary Number: " + stringOfBytes + "\n";
     }
 }
