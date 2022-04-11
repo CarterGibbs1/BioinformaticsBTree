@@ -35,9 +35,6 @@ public class TreeObject<E> {
                 break;
             }
             toStringChars.append(charToBinary(c[i]));
-            if (i != c.length - 1) {
-                toStringChars.append(" ");
-            }
             b += index;
         }
         if (b == -1) {
@@ -140,6 +137,6 @@ public class TreeObject<E> {
      * @return a String representation of a TreeObject
      */
     public String toString() {
-        return "TreeObject Key: " + treeObjectKey + "\nTreeObject Binary Number: " + stringOfBytes + "\n";
+        return stringOfBytes;
     }
 }
