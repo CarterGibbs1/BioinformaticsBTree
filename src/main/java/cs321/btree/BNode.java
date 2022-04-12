@@ -154,6 +154,16 @@ public class BNode<E> {
 	}
 	
 	/**
+	 * Insert the given key into this BNode. Should only be used on LEAF
+	 * nodes.
+	 * 
+	 * @param key TreeObject containing Object to insert
+	 */
+	public void insert(TreeObject<E> key) {
+		insert(key, null);
+	}
+	
+	/**
 	 * Get the child of this BNode where the given key should be
 	 * inserted or would be located. Does NOT insert the key, only
 	 * returns the subtree that it belongs to.

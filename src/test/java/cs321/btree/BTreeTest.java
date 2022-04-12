@@ -48,7 +48,7 @@ public class BTreeTest
     	//instantiate and populate BNode with inputLetters
     	BNode<String> testNode = new BNode<String>(10, new TreeObject<String>(inputLetters.substring(0, 1)));
     	for(int i = 1; i < inputLetters.length(); i++) {
-    		testNode.insert(new TreeObject<String>(inputLetters.substring(i, i + 1)), null);
+    		testNode.insert(new TreeObject<String>(inputLetters.substring(i, i + 1)));
     	}
     	
     	//see if the BNode contains AAACGGTT in int/byte value
@@ -68,7 +68,7 @@ public class BTreeTest
     	//instantiate and populate BNode with inputLetters
     	BNode<String> testNode = new BNode<String>(3, new TreeObject<String>(inputLetters.substring(0, 1)));
     	for(int i = 1; i < inputLetters.length(); i++) {
-    		testNode.insert(new TreeObject<String>(inputLetters.substring(i, i + 1)), null);
+    		testNode.insert(new TreeObject<String>(inputLetters.substring(i, i + 1)));
     	}
     	
     	//split BNode and save parent and rightChild
@@ -91,7 +91,7 @@ public class BTreeTest
     	//instantiate and populate BNode with inputLetters
     	BNode<String> testNode = new BNode<String>(7, new TreeObject<String>(inputLetters.substring(0, 1)));
     	for(int i = 1; i < inputLetters.length(); i++) {
-    		testNode.insert(new TreeObject<String>(inputLetters.substring(i, i + 1)), null);
+    		testNode.insert(new TreeObject<String>(inputLetters.substring(i, i + 1)));
     	}
     	
     	//testNode is not full
@@ -99,8 +99,67 @@ public class BTreeTest
     		assert(false);
     	
     	//testNode is now full
-    	testNode.insert(new TreeObject<String>("A"), null);
+    	testNode.insert(new TreeObject<String>("A"));
     	assert(testNode.isFull());
+    }
+    
+    /**
+     * Test using a rudimentary BTree that the BNode methods isFull(), insert(key),
+     * and split() function correctly resulting in a BTree with the correct number of
+     * nodes and correct height.
+     */
+    @Test
+    public void BNode_CorrectHeightAndNodeCount() {
+    	String inputLetters = "ATGTCTGACCGTGACTTACGAAG";
+    	
+    	//instantiate and BNode root
+    	BNode<String> root = new BNode<String>(2, new TreeObject<String>(inputLetters.substring(0, 1)));
+    	BNode<String> currentNode;
+    	
+    	//create a rudimentary BTree to insert into while counting the total BNode amount and the height
+    	int height = 1;
+    	int totalNodes = 1;
+    	TreeObject<String> key;
+    	for(int i = 1; i < inputLetters.length(); i++) {
+    		currentNode = root;
+    		key = new TreeObject<String>(inputLetters.substring(i, i + 1));
+    		
+    		//if only root, insert into it
+    		if(currentNode.getType() == NodeType.ROOT && totalNodes == 1 &&!root.isFull()) { 
+    			currentNode.insert(key);
+    			continue;
+    		}
+    		
+    		//if the root is full, reassign root, increment height, and increase totalNodes by 2
+    		if(root.isFull()) {
+    			root = currentNode = currentNode.split();
+    			totalNodes += 2;
+    			height++;
+    		}
+    		
+    		//get to appropriate leaf node
+    		while(currentNode.getType() != NodeType.LEAF) {
+    			currentNode = currentNode.getSubtree(key);
+    			
+    			//if the currentNode is full, split it
+    			if(currentNode.isFull()) {
+    				currentNode = currentNode.split();
+    				totalNodes++;
+    			}
+    		}
+    		
+    		//once at LEAF, insert key
+    		currentNode.insert(key);
+    		
+    		//TODO: might need to check and split the leaf node we just inserted into
+//    		if(currentNode.isFull()) {
+//    			currentNode = currentNode.split();
+//    			totalNodes++;
+//    		}
+    	}
+    	
+    	assertEquals(totalNodes, 16); //18 if we perform a split on the leaf nodes we just inserted into
+    	assertEquals(height, 4);
     }
 
 	/**
