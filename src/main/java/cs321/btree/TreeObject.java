@@ -239,32 +239,44 @@ public class TreeObject<E> {
 //		return b;
 //	}
 //
-//	public String[] getEntireB() {// all possible sequences
-//		String l[] = new String[howManySequences()];
-//		String b = binarySequences();
-//		String s[] = keyToStringArray();
-//		int i = 0;
-//		int j = 0;
-//		for(String str : s) {
-//			char ch[] = str.toCharArray();
-//			String string = "";
-//			j = frequency * i;
-//			for (char c : ch) {
-//				string += b.charAt(j);
-//				j++;
-//				string += b.charAt(j);
-//				j++;
-//			}
-//			l[i] = string;
-//			i++;
-//		}
-//		return l;
-//	}
+////	public String[] getEntireB() {// all possible sequences
+////		String l[] = new String[howManySequences()];
+////		String b = binarySequences();
+////		String s[] = keyToStringArray();
+////		int i = 0;
+////		int j = 0;
+////		for(String str : s) {
+////			char ch[] = str.toCharArray();
+////			String string = "";
+////			j = frequency * i;
+////			for (char c : ch) {
+////				string += b.charAt(j);
+////				j++;
+////				string += b.charAt(j);
+////				j++;
+////			}
+////			l[i] = string;
+////			i++;
+////		}
+////		return l;
+////	}
 //
-//	private int howManySequences() {
-//		int start = treeObjectKey.toString().length() + 1;
-//		int x = -1 * (frequency);
-//		return x + start;
+////	private int howManySequences() {
+////		int start = treeObjectKey.toString().length() + 1;
+////		int x = -1 * (frequency);
+////		return x + start;
+////	}
+//
+//	public String[] binarySequences() {
+//		String[] kTSA = keyToStringArray();
+//		int j = 0;
+//		for (String s : kTSA) {
+//			String str = s.replaceAll("A", "00").replaceAll("T", "11")
+//			.replaceAll("C", "01").replaceAll("G", "10");
+//			kTSA[j] = str;
+//			j++;
+//		}
+//		return kTSA;
 //	}
 //
 //	/**
@@ -273,7 +285,7 @@ public class TreeObject<E> {
 //	 * @return a char array of the objectKey
 //	 */
 //	public String[] keyToStringArray() {
-//		String tOK = treeObjectKey.toString();
+//		String tOK = this.toString();
 //		String[] s = new String[tOK.length() - frequency + 1];
 //		for (int i = 0; i <= tOK.length() - frequency; i++) {
 //			String t = "";
@@ -289,15 +301,9 @@ public class TreeObject<E> {
 //		return s;
 //	}
 //
-//	public String binarySequences() {
-//		String bS = treeObjectKey.toString().replaceAll("A", "00").replaceAll("T", "11")
-//				.replaceAll("C", "01").replaceAll("G", "10");
-//		return bS;
-//	}
-//
 ////	public byte getEntireB() {
 ////		String s = binarySequences();
-//		String[] t = keyToStringArray();
+////		String[] t = keyToStringArray();
 ////		byte a[] = new byte[s.length()];
 ////		for (int i = 0; i < s.length(); i++) {
 ////
