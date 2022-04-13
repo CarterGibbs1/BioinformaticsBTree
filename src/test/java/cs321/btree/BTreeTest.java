@@ -156,9 +156,21 @@ public class BTreeTest
 	// The following are tests for TreeObject //
 
 	/**
-	 * Test all public methods for TreeObject with a vareity of cases
+	 * Test most public methods for TreeObject with a variety of cases
 	 */
 	@Test
 	public void TreeObject_PublicMethods() {
+		TreeObject<String> tO = new TreeObject<String>("tcacgaggtc", 5);
+		long key = Long.parseLong("11010001100010101101", 2);
+		assertEquals(tO.getKey(), key);
+		assertEquals(tO.withZeros(), "11010001100010101101");
+		assertEquals(tO.getFrequency(), 5);
+
+		tO.setFrequency(6);
+		assertEquals(tO.getFrequency(), 6);
+		tO.setFrequency(5);
+		TreeObject<String> tOTwo = new TreeObject<String>("tcacgaggta", 5);
+		assert(tO.compare(tOTwo) > 0);
+		assertEquals(tO.toString(), "tcacgaggtc: 5");
 	}
 }
