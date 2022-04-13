@@ -153,4 +153,12 @@ public class BTreeTest
     	assertEquals(totalNodes, 16); //18 if we perform a split on the leaf nodes we just inserted into
     	assertEquals(height, 4);
     }
+	// The following are tests for TreeObject //
+
+	/**
+	 * Test all public methods for TreeObject with a vareity of cases
+	 */
+	@Test
+	public void TreeObject_PublicMethods() {
+	}
 }
