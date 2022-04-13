@@ -6,7 +6,7 @@ package cs321.btree;
  * determined by previous TreeObjects and key values. A notable method is
  * compare(), which determines which object is larger in key value.
  *
- * @author Aaron Goin
+ * @author Aaron Goin, Mesa Greear
  * @version Spring 2022
  *
  * @param <E> Generic Type for this TreeObject to hold
