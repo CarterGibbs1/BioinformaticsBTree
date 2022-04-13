@@ -26,7 +26,7 @@ public class GeneBankCreateBTree {
     }
 
     private static void printUsageAndExit(String errorMessage) {
-
+        System.err.println(errorMessage);
         System.exit(1);
     }
 
