@@ -176,7 +176,7 @@ public class TreeObject<E> {
      * @return a String representation of a TreeObject
      */
     public String toString() {
-        return withZeros() + ": " + frequency;
+        return stringWithLetters() + ": " + frequency;
     }
 
 }
