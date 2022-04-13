@@ -62,6 +62,13 @@ public class TreeObject<E> {
     }
 
     /**
+     * @param newFrequency the integer that will replace the current frequency value
+     */
+    public void setFrequency(int newFrequency) {
+        this.frequency = newFrequency;
+    }
+
+    /**
      * Determines if the left TreeObject's b value is larger than the parameter
      * "right" TreeObject's key value TreeObjects that are being inserted into a BTree
      * go through this method. If left is equal or less than right, then they go the
