@@ -12,17 +12,19 @@ package cs321.btree;
  * @param <E> Generic Type for this TreeObject to hold
  */
 public class TreeObject<E> {
-    // valid treeObjects:               "a", "t", "c", "g" (lowercase)
+    // valid treeObjects: "a", "t", "c", "g" (lowercase)
     // corresponding 2-bit binary value: 00, 11, 01, 10
     private long treeObjectKey;
     private int frequency;
+    private int numZeros = -1;
 
     /**
      * Constructor: Creates a TreeObject with the specified key. Also sets the value
      * of b depending on the possibleKey. The key values in treeObjectKey must all
      * consist of "a", "c", "g", or "t" to convert to a usable long value. -1 will
      * be the value for instance variables if treeObjectKey is too large for a long
-     * value or frequency is below 0/greater than the length of the object.
+     * value or frequency is below 0/greater than the length of the object. If first
+     * value is a or c, it will be replaced for future method utilization.
      *
      * @param treeObjectKey the key of the object
      * @param frequency     size of each, individual sequence in possibleKey
@@ -34,6 +36,10 @@ public class TreeObject<E> {
             this.frequency = -1;
             return;
         }
+        if (s.charAt(0) == 'a' || s.charAt(0) == 'c') {
+            getZeroPlacement(s);
+        }
+
         String b = "";
         for (int i = 0; i < s.length(); i++) {
             if (s.charAt(i) == 'a') {
@@ -59,6 +65,26 @@ public class TreeObject<E> {
     }
 
     /**
+     * Set values that will help get exact key values if key starts with a or c.
+     *
+     * @param s the String of the key
+     */
+    private void getZeroPlacement(String s) {
+        int stopIndex = 0;
+        numZeros = 0;
+        while (s.charAt(stopIndex) != 'g' && s.charAt(stopIndex) != 't') {
+            if (s.charAt(stopIndex) == 'a') {
+                stopIndex++;
+                numZeros++;
+                numZeros++;
+            } else if (s.charAt(stopIndex) == 'c') {
+                numZeros++;
+                break;
+            }
+        }
+    }
+
+    /**
      * @return the key of the TreeObject
      */
     public long getKey() {
@@ -71,7 +97,15 @@ public class TreeObject<E> {
      * @return a String value with the correct binary values
      */
     public String withZeros() {
-        return Long.toBinaryString(treeObjectKey);
+        String s = "";
+        if (numZeros != -1) {
+            int j = 0;
+            while (j < numZeros) {
+                s += "0";
+                j++;
+            }
+        }
+        return s + Long.toBinaryString(treeObjectKey);
     }
 
     /**
@@ -82,7 +116,8 @@ public class TreeObject<E> {
     }
 
     /**
-     * @param newFrequency the integer that will replace the current frequency value if it's valid
+     * @param newFrequency the integer that will replace the current frequency value
+     *                     if it's valid
      */
     public void setFrequency(int newFrequency) {
         if (newFrequency < 1 || newFrequency > stringWithLetters().length()) {
@@ -170,8 +205,8 @@ public class TreeObject<E> {
     }
 
     /**
-     * A String form of the TreeObject's "lettered" key and frequency, formatted for dump
-     * files.
+     * A String form of the TreeObject's "lettered" key and frequency, formatted for
+     * dump files.
      *
      * @return a String representation of a TreeObject
      */
