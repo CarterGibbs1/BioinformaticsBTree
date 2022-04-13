@@ -20,10 +20,6 @@ public class BNode<E> {
 	private LinkedList<BNode<E>> children;  //children in this node
 	
 	private BNode<E> parent;  //parent pointer
-	private NodeType type;    //Either root, interior, or leaf node
-	
-	private final int DEGREE; //t -  how many keys/objects (t - 1 to 2t - 1) and
-	                          //children (t to 2t) this BNode can have
 	
 	//=================================================================================================================
 	//                                               CONSTRUCTORS
@@ -34,8 +30,6 @@ public class BNode<E> {
 	 * parent, two children leftChild and rightChild, and the degree (t) of
 	 * this BNode. BNode type is determined automatically by parameters.
 	 * 
-	 * @param degree     (t) how many keys/objects (t - 1 to 2t - 1) and
-	 * 					 children (t to 2t) this BNode can have.
 	 * @param intialKey  the initial object in this BNode
 	 * @param parent     pointer to the parent of this BNode
 	 * @param leftChild  pointer to the child left of initialKey
@@ -50,7 +44,7 @@ public class BNode<E> {
 	 * result     -    a
 	 *                / \
 	 */
-	public BNode(int degree, TreeObject<E> initialKey, BNode<E> parent, BNode<E> leftChild, BNode<E> rightChild) {
+	public BNode(TreeObject<E> initialKey, BNode<E> parent, BNode<E> leftChild, BNode<E> rightChild) {
 		//initialize instance variables
 		keys = new LinkedList<TreeObject<E>>();
 		children = new LinkedList<BNode<E>>();
@@ -59,38 +53,7 @@ public class BNode<E> {
 		children.add(leftChild);
 		children.add(rightChild);
 		
-		//if degree is invalid, take the degree from whatever pointer is not null
-		if(degree < 2) {
-			if(parent != null) {
-				DEGREE = parent.DEGREE;
-			}
-			else {
-				DEGREE = rightChild.DEGREE;
-			}
-		}
-		else {
-			DEGREE = degree;
-		}
-		
 		this.parent = parent;
-		
-		//determine BNode type
-		updateType(); 
-	}
-	
-	/**
-	 * Constructor: Create BNode with one key initialKey, a parent pointer
-	 * parent, and two children leftChild and rightChild. BNode type is
-	 * determined automatically by parameters. Degree (t) is determined by
-	 * either the parent pointer or one of the children.
-	 * 
-	 * @param intialKey  the initial object in this BNode
-	 * @param parent     pointer to the parent of this BNode
-	 * @param leftChild  pointer to the child left of initialKey
-	 * @param rightChild pointer to the child right of initialKey
-	 */
-	public BNode(TreeObject<E> initialKey, BNode<E> parent, BNode<E> leftChild, BNode<E> rightChild) {
-		this(-1, initialKey, parent, leftChild, rightChild);
 	}
 	
 	/**
@@ -102,19 +65,17 @@ public class BNode<E> {
 	 * @param parent     pointer to the parent of this BNode
 	 */
 	public BNode(TreeObject<E> initialKey, BNode<E> parent) {
-		this(-1, initialKey, parent, null, null);
+		this(initialKey, parent, null, null);
 	}
 	
 	/**
 	 * Constructor: Create ROOT BNode with one key initialKey and the degree
 	 * (t).
 	 * 
-	 * @param degree    (t) how many keys/objects (t - 1 to 2t - 1) and
-	 *                  children (t to 2t) this BNode can have.
 	 * @param intialKey the initial object in this BNode
 	 */
-	public BNode(int degree, TreeObject<E> initialKey) {
-		this(degree, initialKey, null, null, null);
+	public BNode(TreeObject<E> initialKey) {
+		this(initialKey, null, null, null);
 	}
 	
 	//=================================================================================================================
@@ -190,18 +151,8 @@ public class BNode<E> {
 	 * the right. Can only be run when the list is full.
 	 * 
 	 * @return the parent of the two BNodes
-	 * 
-	 * @throws IllegalStateException When attempting to split a not
-	 *         full list.
 	 */
 	public BNode<E> split() throws IllegalStateException{
-		
-		//if this BNode is not full, throw exception. Mostly here for debugging purposes
-		if(!isFull()) {
-			throw new IllegalStateException("Attempted to split BNode when not full");
-		}
-		
-		
 		//==== for better understanding when coming back to look at this method, I'm going to ====
 		//==== create an example split and show how it changes through comments:              ====
 		//Keys     -  a b c d e f g
@@ -213,7 +164,7 @@ public class BNode<E> {
 		//remove key and two pointers right of middle and insert into new BNode 'splitRight':
 		//Keys     -  a b c d f g    |  e
 		//Pointers - 0 1 2 3   6 7   | 4 5
-		BNode<E> splitRight = new BNode<E>(DEGREE, keys.remove(keys.size()/2 + 1), parent, children.remove(children.size()/2), children.remove(children.size()/2 + 1));
+		BNode<E> splitRight = new BNode<E>(keys.remove(keys.size()/2 + 1), parent, children.remove(children.size()/2), children.remove(children.size()/2 + 1));
 		
 		
 		//starting just to the right of the middle of this BNode, continuously remove the pointers and keys
@@ -233,11 +184,9 @@ public class BNode<E> {
 		//Pointers - 0 1 2 3   | 4 5 6 7
 		
 		//if this is the ROOT, create new parent/root to insert into and update types
-		if(type == NodeType.ROOT) {
+		if(isRoot()) {
 			BNode<E> newRoot = new BNode<E>(keys.removeLast(), null, this, splitRight);
 			this.parent = splitRight.parent = newRoot;
-			this.updateType();
-			splitRight.updateType();
 			
 			return newRoot;
 		}
@@ -261,47 +210,33 @@ public class BNode<E> {
 	}
 	
 	/**
-	 * Get the type this BNode is, i.e. ROOT, INTERIOR, or LEAF.
+	 * Indicate if this node is a leaf or not
 	 * 
-	 * @return this BNode's type
+	 * @return true if leaf, false otherwise
 	 */
-	public NodeType getType() {
-		return type;
+	public boolean isLeaf() {
+		return children.get(0) == null;
 	}
 	
 	/**
-	 * Set the type for this BNode, i.e. ROOT, INTERIOR, or LEAF.
+	 * Indicate if this node is the root or not
 	 * 
-	 * @param type New type for this BNode
+	 * @return true if root, false otherwise
 	 */
-	public void setType(NodeType type) {
-		this.type = type;
+	public boolean isRoot() {
+		return parent == null;
 	}
 	
 	/**
 	 * Indicates whether or not this BNode is full (n = 2t - 1)
 	 * 
+	 * 
+	 * @param  degree the degree of this BTree
+	 * 
 	 * @return true is full, false otherwise
 	 */
-	public boolean isFull() {
-		return ((2 * DEGREE) - 1) == keys.size();
-	}
-	
-	/**
-	 * Update what type of Node this is based on parent and child
-	 * pointers. If no parent --> ROOT; if no children --> LEAF;
-	 * else --> INTERIOR
-	 */
-	public void updateType() {
-		if(parent == null) {
-			type = NodeType.ROOT;
-		}
-		else if(children.get(0) == null) {
-			type = NodeType.LEAF;
-		}
-		else {
-			type = NodeType.INTERIOR;
-		}
+	public boolean isFull(int degree) {
+		return ((2 * degree) - 1) == keys.size();
 	}
 	
 	//most likely temporary toString.

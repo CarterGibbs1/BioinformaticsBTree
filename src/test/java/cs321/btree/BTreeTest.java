@@ -4,8 +4,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
-
 public class BTreeTest
 {
     // HINT:
@@ -46,7 +44,7 @@ public class BTreeTest
     	String inputLetters = "TGCATAAG";
     	
     	//instantiate and populate BNode with inputLetters
-    	BNode<String> testNode = new BNode<String>(10, new TreeObject<String>(inputLetters.substring(0, 1)));
+    	BNode<String> testNode = new BNode<String>( new TreeObject<String>(inputLetters.substring(0, 1)));
     	for(int i = 1; i < inputLetters.length(); i++) {
     		testNode.insert(new TreeObject<String>(inputLetters.substring(i, i + 1)));
     	}
@@ -66,7 +64,7 @@ public class BTreeTest
     	BNode<String> rightChild;
     	
     	//instantiate and populate BNode with inputLetters
-    	BNode<String> testNode = new BNode<String>(3, new TreeObject<String>(inputLetters.substring(0, 1)));
+    	BNode<String> testNode = new BNode<String>(new TreeObject<String>(inputLetters.substring(0, 1)));
     	for(int i = 1; i < inputLetters.length(); i++) {
     		testNode.insert(new TreeObject<String>(inputLetters.substring(i, i + 1)));
     	}
@@ -87,20 +85,21 @@ public class BTreeTest
     @Test
     public void BNode_TestIsFull() {
     	String inputLetters = "ATGTCTGACCGT";
+    	int degree = 7;
     	
     	//instantiate and populate BNode with inputLetters
-    	BNode<String> testNode = new BNode<String>(7, new TreeObject<String>(inputLetters.substring(0, 1)));
+    	BNode<String> testNode = new BNode<String>(new TreeObject<String>(inputLetters.substring(0, 1)));
     	for(int i = 1; i < inputLetters.length(); i++) {
     		testNode.insert(new TreeObject<String>(inputLetters.substring(i, i + 1)));
     	}
     	
     	//testNode is not full
-    	if(testNode.isFull())
+    	if(testNode.isFull(degree))
     		assert(false);
     	
     	//testNode is now full
     	testNode.insert(new TreeObject<String>("A"));
-    	assert(testNode.isFull());
+    	assert(testNode.isFull(degree));
     }
     
     /**
@@ -111,9 +110,10 @@ public class BTreeTest
     @Test
     public void BNode_CorrectHeightAndNodeCount() {
     	String inputLetters = "ATGTCTGACCGTGACTTACGAAG";
+    	int degree = 2;
     	
     	//instantiate and BNode root
-    	BNode<String> root = new BNode<String>(2, new TreeObject<String>(inputLetters.substring(0, 1)));
+    	BNode<String> root = new BNode<String>(new TreeObject<String>(inputLetters.substring(0, 1)));
     	BNode<String> currentNode;
     	
     	//create a rudimentary BTree to insert into while counting the total BNode amount and the height
@@ -124,27 +124,20 @@ public class BTreeTest
     		currentNode = root;
     		key = new TreeObject<String>(inputLetters.substring(i, i + 1));
     		
-    		//if only root, insert into it
-    		if(currentNode.getType() == NodeType.ROOT && totalNodes == 1 &&!root.isFull()) { 
-    			currentNode.insert(key);
-    			continue;
-    		}
-    		
-    		//if the root is full, reassign root, increment height, and increase totalNodes by 2
-    		if(root.isFull()) {
-    			root = currentNode = currentNode.split();
-    			totalNodes += 2;
-    			height++;
+    		if(root.isFull(degree)) {
+	    		root = currentNode = currentNode.split();
+	    		totalNodes += 2;
+	    		height++;
     		}
     		
     		//get to appropriate leaf node
-    		while(currentNode.getType() != NodeType.LEAF) {
+    		while(!currentNode.isLeaf()) {
     			currentNode = currentNode.getSubtree(key);
-    			
+    				
     			//if the currentNode is full, split it
-    			if(currentNode.isFull()) {
-    				currentNode = currentNode.split();
-    				totalNodes++;
+    			if(currentNode.isFull(degree)) {
+	    			currentNode = currentNode.split();
+	    			totalNodes++;
     			}
     		}
     		
