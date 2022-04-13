@@ -17,37 +17,38 @@ public class BNode<E> {
 
 	//child0 <= key0 <= child1 <= key1 <= child2 ... childn <= keyn <= childn + 1
 	private LinkedList<TreeObject<E>> keys; //objects/keys in this node, also size() = n
-	private LinkedList<BNode<E>> children;  //children in this node
+	private LinkedList<Long> children;      //addresses to the children of this node 
 	
-	private BNode<E> parent;  //parent pointer
+	private long parent;      //parent address
 	
 	//=================================================================================================================
 	//                                               CONSTRUCTORS
 	//=================================================================================================================
 	
 	/**
-	 * Constructor: Create BNode with one key initialKey, a parent pointer
-	 * parent, two children leftChild and rightChild, and the degree (t) of
-	 * this BNode. BNode type is determined automatically by parameters.
+	 * Constructor: Create BNode with one key 'initialKey,' a parent address
+	 * 'parent,' and two children 'leftChild' and 'rightChild.' An address that
+	 * is less than 0 is considered null.
 	 * 
 	 * @param intialKey  the initial object in this BNode
-	 * @param parent     pointer to the parent of this BNode
-	 * @param leftChild  pointer to the child left of initialKey
-	 * @param rightChild pointer to the child right of initialKey
+	 * @param parent     address of the parent of this BNode
+	 * @param leftChild  address of the child left of initialKey
+	 * @param rightChild address of the child right of initialKey
 	 */
 	/*
 	 * Example Demonstration:
 	 * 
 	 * 
-	 *      new BNode(?, a, ?, /, \)
+	 *      new BNode(a, |, /, \)
 	 * 
-	 * result     -    a
+	 * result     -    |
+	 *                 a
 	 *                / \
 	 */
-	public BNode(TreeObject<E> initialKey, BNode<E> parent, BNode<E> leftChild, BNode<E> rightChild) {
+	public BNode(TreeObject<E> initialKey, long parent, long leftChild, long rightChild) {
 		//initialize instance variables
 		keys = new LinkedList<TreeObject<E>>();
-		children = new LinkedList<BNode<E>>();
+		children = new LinkedList<Long>();
 		
 		keys.add(initialKey);
 		children.add(leftChild);
@@ -57,25 +58,24 @@ public class BNode<E> {
 	}
 	
 	/**
-	 * Constructor: Create LEAF BNode with one key initialKey and a
-	 * parent pointer parent. Degree (t) is determined by the parent
-	 * pointer.
+	 * Constructor: Create leaf BNode with one key 'initialKey' and
+	 * a parent address 'parent.' An address that is less than 0 is
+	 * considered null.
 	 * 
 	 * @param intialKey  the initial object in this BNode
-	 * @param parent     pointer to the parent of this BNode
+	 * @param parent     address of the parent of this BNode
 	 */
-	public BNode(TreeObject<E> initialKey, BNode<E> parent) {
-		this(initialKey, parent, null, null);
+	public BNode(TreeObject<E> initialKey, long parent) {
+		this(initialKey, parent, -1, -1);
 	}
 	
 	/**
-	 * Constructor: Create ROOT BNode with one key initialKey and the degree
-	 * (t).
+	 * Constructor: Create root BNode with one key initialKey.
 	 * 
 	 * @param intialKey the initial object in this BNode
 	 */
 	public BNode(TreeObject<E> initialKey) {
-		this(initialKey, null, null, null);
+		this(initialKey, -1, -1, -1);
 	}
 	
 	//=================================================================================================================
@@ -101,7 +101,7 @@ public class BNode<E> {
 	 * keys     -  a b c d e f
 	 * children - # # # * # # #
 	 */
-	public void insert(TreeObject<E> key, BNode<E> child) {
+	public void insert(TreeObject<E> key, long child) {
 		
 		//get to the index of the first k less than key
 		int i;
@@ -115,13 +115,13 @@ public class BNode<E> {
 	}
 	
 	/**
-	 * Insert the given key into this BNode. Should only be used on LEAF
+	 * Insert the given key into this BNode. Should only be used on leaf
 	 * nodes.
 	 * 
 	 * @param key TreeObject containing Object to insert
 	 */
 	public void insert(TreeObject<E> key) {
-		insert(key, null);
+		insert(key, -1);
 	}
 	
 	/**
@@ -129,11 +129,12 @@ public class BNode<E> {
 	 * inserted or would be located. Does NOT insert the key, only
 	 * returns the subtree that it belongs to.
 	 * 
-	 * @param key Object to use to locate the appropriate subtree
+	 * @param  key Object to use to locate the appropriate subtree
 	 * 
-	 * @return subtree (child of this BNode) that key belongs to
+	 * @return subtree address (child of this BNode) that key
+	 *         belongs to
 	 */
-	public BNode<E> getSubtree(TreeObject<E> key){
+	public long getSubtree(TreeObject<E> key){
 		
 		//get to the index of the first k less than key
 		int i;
@@ -150,22 +151,25 @@ public class BNode<E> {
 	 * the right BNode (new BNode) will be contain everything to
 	 * the right. Can only be run when the list is full.
 	 * 
+	 * @param  address The address of this BNode in the RAF
+	 * 
 	 * @return the parent of the two BNodes
 	 */
-	public BNode<E> split() throws IllegalStateException{
+	public long split(long address) {
 		//==== for better understanding when coming back to look at this method, I'm going to ====
 		//==== create an example split and show how it changes through comments:              ====
 		//Keys     -  a b c d e f g
 		//Pointers - 0 1 2 3 4 5 6 7
 		
 		int originalN = keys.size();
+		BNode<E> parentNode = new BNode<E>(new TreeObject<E>(null, 1), 1);//TODO: read parent from RAF
 		
 		
 		//remove key and two pointers right of middle and insert into new BNode 'splitRight':
 		//Keys     -  a b c d f g    |  e
 		//Pointers - 0 1 2 3   6 7   | 4 5
 		BNode<E> splitRight = new BNode<E>(keys.remove(keys.size()/2 + 1), parent, children.remove(children.size()/2), children.remove(children.size()/2 + 1));
-		
+		long splitRightAddress = 0; //TODO: find next available address to write new BNode
 		
 		//starting just to the right of the middle of this BNode, continuously remove the pointers and keys
 		//at that position and insert them into splitRight:
@@ -185,13 +189,16 @@ public class BNode<E> {
 		
 		//if this is the ROOT, create new parent/root to insert into and update types
 		if(isRoot()) {
-			BNode<E> newRoot = new BNode<E>(keys.removeLast(), null, this, splitRight);
-			this.parent = splitRight.parent = newRoot;
+			BNode<E> newRoot = new BNode<E>(keys.removeLast(), -1, address, splitRightAddress);
+			long newRootAddress = 0; //TODO: find next available address to write new BNode
+			this.parent = splitRight.parent = newRootAddress;
 			
-			return newRoot;
+			//TODO: write changes to RAF;
+			return newRootAddress;
 		}
 		
-		parent.insert(keys.removeLast(), splitRight);
+		//TODO: write changes to RAF;
+		parentNode.insert(keys.removeLast(), splitRightAddress);
 		return parent;
 	}
 	
@@ -215,7 +222,7 @@ public class BNode<E> {
 	 * @return true if leaf, false otherwise
 	 */
 	public boolean isLeaf() {
-		return children.get(0) == null;
+		return children.get(0) < 0;
 	}
 	
 	/**
@@ -224,7 +231,7 @@ public class BNode<E> {
 	 * @return true if root, false otherwise
 	 */
 	public boolean isRoot() {
-		return parent == null;
+		return parent < 0;
 	}
 	
 	/**
@@ -245,7 +252,7 @@ public class BNode<E> {
 	public String toString() {
 		StringBuilder retString = new StringBuilder();
 		for(int i = 0; i < keys.size(); i++) {
-			retString.append(keys.get(i).getB());
+			retString.append(keys.get(i).getKey()); //TODO: return letters instead
 		}
 		
 		return retString.toString();
