@@ -3,7 +3,7 @@ package cs321.btree;
 /**
  * Used to create BTree objects that hold Generic Type objects.
  * Notable method is insert() which is important in structuring the
- * BTree. Aaron's version.
+ * BTree. Aaron's version, using Carter's code as baseline.
  *
  * @author  Aaron Goin
  * @version Spring 2022
@@ -32,6 +32,6 @@ public class BTreeAaron<E> {
      * @param toInsert the TreeObject that will be inserted
      */
     public void insert(TreeObject<E> toInsert) {
-
+        BNode<E> r = root;
     }
 }
