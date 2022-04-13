@@ -33,5 +33,14 @@ public class BTreeAaron<E> {
      */
     public void insert(TreeObject<E> toInsert) {
         BNode<E> r = root;
+        if (r.getN() == 2 * degree - 1) {
+            BNode<E> newNode = new BNode<E>(degree,null, null, r, null);
+            root = newNode;
+            root.split();
+            root.insert(toInsert, newNode);
+            numNodes++;
+        } else {
+            root.insert(toInsert, r);
+        }
     }
 }
