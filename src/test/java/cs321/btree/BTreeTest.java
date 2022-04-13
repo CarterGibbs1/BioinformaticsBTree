@@ -154,30 +154,4 @@ public class BTreeTest
     	assertEquals(totalNodes, 16); //18 if we perform a split on the leaf nodes we just inserted into
     	assertEquals(height, 4);
     }
-
-	/**
-	 * Test that a TreeObject's keys all have the correct 2-bit binary numbers.
-	 * Every A should be 00, Every T should be 11, every C should be 01, every G should be 10
-	 */
-	@Test
-	public void TreeObject_TestCorrectBinary() {
-		String inputLetters = "ATCG";
-
-		//create TreeObject with inputLetters
-		TreeObject<String> testTreeObject = new TreeObject<String>(inputLetters);
-
-		//testTreeObject should have the same inputLetters as its element
-		assertEquals(testTreeObject.getElement(), "ATCG");
-
-		//testTreeObject should have the number 00110110 returned by toString
-		assertEquals(testTreeObject.toString(), "00110110");
-
-		//testTreeObject should also have a byte value of six that results from inputLetters
-		assertEquals(testTreeObject.getB(), 6);
-
-		//testTreeObject should have a working compare method
-		assert(testTreeObject.compare(new TreeObject<String>("ATCT")) < 0 );
-		assert(testTreeObject.compare(new TreeObject<String>("ATCC")) > 0 );
-		assert(testTreeObject.compare(new TreeObject<String>("GCTA")) == 0 );
-	}
 }
