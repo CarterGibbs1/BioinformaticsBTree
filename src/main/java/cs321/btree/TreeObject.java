@@ -20,13 +20,20 @@ public class TreeObject<E> {
     /**
      * Constructor: Creates a TreeObject with the specified key. Also sets the value
      * of b depending on the possibleKey. The key values in treeObjectKey must all
-     * consist of "a", "c", "g", or "t" to convert to a usable long value.
+     * consist of "a", "c", "g", or "t" to convert to a usable long value. -1 will
+     * be the value for instance variables if treeObjectKey is too large for a long
+     * value or frequency is below 0/greater than the length of the object.
      *
      * @param treeObjectKey the key of the object
      * @param frequency     size of each, individual sequence in possibleKey
      */
     public TreeObject(E treeObjectKey, int frequency) {
         String s = (String) treeObjectKey;
+        if (frequency < 1 || frequency > s.length()) {
+            this.treeObjectKey = -1;
+            this.frequency = -1;
+            return;
+        }
         String b = "";
         for (int i = 0; i < s.length(); i++) {
             if (s.charAt(i) == 'a') {
@@ -42,8 +49,13 @@ public class TreeObject<E> {
                 b += "11";
             }
         }
-        this.treeObjectKey = Long.parseLong(b, 2);
-        this.frequency = frequency;
+        if (b.length() > 62) {
+            this.treeObjectKey = -1;
+            this.frequency = -1;
+        } else {
+            this.treeObjectKey = Long.parseLong(b, 2);
+            this.frequency = frequency;
+        }
     }
 
     /**
@@ -70,9 +82,12 @@ public class TreeObject<E> {
     }
 
     /**
-     * @param newFrequency the integer that will replace the current frequency value
+     * @param newFrequency the integer that will replace the current frequency value if it's valid
      */
     public void setFrequency(int newFrequency) {
+        if (newFrequency < 1 || newFrequency > stringWithLetters().length()) {
+            return;
+        }
         this.frequency = newFrequency;
     }
 
