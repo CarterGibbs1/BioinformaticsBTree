@@ -29,7 +29,7 @@ public class TestBNode<E> {
 	 * parent, two children leftChild and rightChild, and the degree (t) of
 	 * this BNode. BNode type is determined automatically by parameters.
 	 * 
-	 * @param intialKey  the initial object in this BNode
+	 * @param initialKey  the initial object in this BNode
 	 * @param parent     pointer to the parent of this BNode
 	 * @param leftChild  pointer to the child left of initialKey
 	 * @param rightChild pointer to the child right of initialKey
@@ -60,7 +60,7 @@ public class TestBNode<E> {
 	 * parent pointer parent. Degree (t) is determined by the parent
 	 * pointer.
 	 * 
-	 * @param intialKey  the initial object in this BNode
+	 * @param initialKey  the initial object in this BNode
 	 * @param parent     pointer to the parent of this BNode
 	 */
 	public TestBNode(TreeObject<E> initialKey, TestBNode<E> parent) {
@@ -71,7 +71,7 @@ public class TestBNode<E> {
 	 * Constructor: Create ROOT BNode with one key initialKey and the degree
 	 * (t).
 	 * 
-	 * @param intialKey the initial object in this BNode
+	 * @param initialKey the initial object in this BNode
 	 */
 	public TestBNode(TreeObject<E> initialKey) {
 		this(initialKey, null, null, null);
@@ -197,7 +197,16 @@ public class TestBNode<E> {
 	//=================================================================================================================
 	//                                           GET/SET/UTILITY METHODS
 	//=================================================================================================================
-	
+
+	/**
+	 * Gets the first key for the root. Used and needed for B-Tree insert.
+	 *
+	 * @return the key of the root
+	 */
+	public TreeObject<E> rootKey() {
+		return keys.getFirst();
+	}
+
 	/**
 	 * Get the number of objects (n) in this BNode represented by
 	 * keys.size().
