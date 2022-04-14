@@ -41,16 +41,17 @@ public class BTreeTest
      */
     @Test
     public void singleBNode_TestInsertion() {
-    	String inputLetters = "TGCATAAG".toLowerCase();
+    	//                       57  12  8   59  7   10  44
+    	String inputSequences = "TGC ATA AGA TGT ACT AGG GTA".toLowerCase();
     	
     	//instantiate and populate BNode with inputLetters
-    	TestBNode<String> testNode = new TestBNode<String>(new TreeObject<String>(inputLetters.substring(0, 1), 1));
-    	for(int i = 1; i < inputLetters.length(); i++) {
-    		testNode.insert(new TreeObject<String>(inputLetters.substring(i, i + 1), 1));
+    	TestBNode<String> testNode = new TestBNode<String>(new TreeObject<String>(inputSequences.substring(0, 3), 1));
+    	for(int i = 4; i < inputSequences.length(); i += 4) {
+    		testNode.insert(new TreeObject<String>(inputSequences.substring(i, i + 3), 1));
     	}
     	
-    	//see if the BNode contains AAACGGTT in int/byte value
-    	assertEquals(testNode.toString(), "00012233");
+    	//see if the BNode contains sequences in order in long value
+    	assertEquals(testNode.toString(), "7 8 10 12 44 57 59");
     }
     
     /**
@@ -59,23 +60,24 @@ public class BTreeTest
      */
     @Test
     public void BNode_TestSplit() {
-    	String inputLetters = "ATGTC".toLowerCase();
+    	//                     59   108  14   103  46
+    	String inputLetters = "ATGT CGTA AATG CGCT AGTG".toLowerCase();
     	TestBNode<String> parent;
     	TestBNode<String> rightChild;
     	
     	//instantiate and populate BNode with inputLetters
-    	TestBNode<String> testNode = new TestBNode<String>(new TreeObject<String>(inputLetters.substring(0, 1), 1));
-    	for(int i = 1; i < inputLetters.length(); i++) {
-    		testNode.insert(new TreeObject<String>(inputLetters.substring(i, i + 1), 1));
+    	TestBNode<String> testNode = new TestBNode<String>(new TreeObject<String>(inputLetters.substring(0, 4), 1));
+    	for(int i = 5; i < inputLetters.length(); i += 5) {
+    		testNode.insert(new TreeObject<String>(inputLetters.substring(i, i + 4), 1));
     	}
     	
     	//split BNode and save parent and rightChild
     	parent = testNode.split();
-    	rightChild = parent.getSubtree(new TreeObject<String>("t", 1));
+    	rightChild = parent.getSubtree(new TreeObject<String>("tttt", 1));
     	
-    	assertEquals(parent.toString(), "2");      //parent = 2 (G)
-    	assertEquals(testNode.toString(), "01");   //leftChild = 01 (AC)
-    	assertEquals(rightChild.toString(), "33"); //rightChild = 33 (TT)
+    	assertEquals(parent.toString(), "59");
+    	assertEquals(testNode.toString(), "14 46");
+    	assertEquals(rightChild.toString(), "103 108");
     }
     
     /**

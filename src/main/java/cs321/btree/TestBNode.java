@@ -238,15 +238,14 @@ public class TestBNode<E> {
 		return ((2 * degree) - 1) == keys.size();
 	}
 	
-	//most likely temporary toString.
-	//returns int value for each key in a single, no space, String
+	//returns long value for each key in a single String seperated by spaces
 	@Override
 	public String toString() {
 		StringBuilder retString = new StringBuilder();
 		for(int i = 0; i < keys.size(); i++) {
-			retString.append(keys.get(i).getKey()); //TODO: return letters instead
+			retString.append(keys.get(i).getKey() + " "); //TODO: return letters instead
 		}
 		
-		return retString.toString();
+		return retString.toString().substring(0, retString.length() - 1);
 	}
 }
