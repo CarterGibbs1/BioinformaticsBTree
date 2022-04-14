@@ -61,14 +61,14 @@ public class BTreeTest
     @Test
     public void BNode_TestSplit() {
     	//                     59   108  14   103  46
-    	String inputLetters = "ATGT CGTA AATG CGCT AGTG".toLowerCase();
+    	String inputSequences = "ATGT CGTA AATG CGCT AGTG".toLowerCase();
     	TestBNode<String> parent;
     	TestBNode<String> rightChild;
     	
     	//instantiate and populate BNode with inputLetters
-    	TestBNode<String> testNode = new TestBNode<String>(new TreeObject<String>(inputLetters.substring(0, 4), 1));
-    	for(int i = 5; i < inputLetters.length(); i += 5) {
-    		testNode.insert(new TreeObject<String>(inputLetters.substring(i, i + 4), 1));
+    	TestBNode<String> testNode = new TestBNode<String>(new TreeObject<String>(inputSequences.substring(0, 4), 1));
+    	for(int i = 5; i < inputSequences.length(); i += 5) {
+    		testNode.insert(new TreeObject<String>(inputSequences.substring(i, i + 4), 1));
     	}
     	
     	//split BNode and save parent and rightChild
@@ -86,13 +86,13 @@ public class BTreeTest
      */
     @Test
     public void BNode_TestIsFull() {
-    	String inputLetters = "ATGTCTGACCGT".toLowerCase();
+    	String inputSequences = "ATGTCTGACCGT".toLowerCase();
     	int degree = 7;
     	
     	//instantiate and populate BNode with inputLetters
-    	TestBNode<String> testNode = new TestBNode<String>(new TreeObject<String>(inputLetters.substring(0, 1), 1));
-    	for(int i = 1; i < inputLetters.length(); i++) {
-    		testNode.insert(new TreeObject<String>(inputLetters.substring(i, i + 1), 1));
+    	TestBNode<String> testNode = new TestBNode<String>(new TreeObject<String>(inputSequences.substring(0, 1), 1));
+    	for(int i = 1; i < inputSequences.length(); i++) {
+    		testNode.insert(new TreeObject<String>(inputSequences.substring(i, i + 1), 1));
     	}
     	
     	//testNode is not full
@@ -110,20 +110,20 @@ public class BTreeTest
      */
     @Test
     public void BNode_CorrectHeightAndNodeCount() {
-    	String inputLetters = "ATGTCTGACCGTGACTTACGAAG".toLowerCase();
+    	String inputSequences = "ATGTCTGACCGTGACTTACGAAG".toLowerCase();
     	int degree = 2;
     	
     	//instantiate and BNode root
-    	TestBNode<String> root = new TestBNode<String>(new TreeObject<String>(inputLetters.substring(0, 1), 1));
+    	TestBNode<String> root = new TestBNode<String>(new TreeObject<String>(inputSequences.substring(0, 1), 1));
     	TestBNode<String> currentNode;
     	
     	//create a rudimentary BTree to insert into while counting the total BNode amount and the height
     	int height = 1;
     	int totalNodes = 1;
     	TreeObject<String> key;
-    	for(int i = 1; i < inputLetters.length(); i++) {
+    	for(int i = 1; i < inputSequences.length(); i++) {
     		currentNode = root;
-    		key = new TreeObject<String>(inputLetters.substring(i, i + 1), 1);
+    		key = new TreeObject<String>(inputSequences.substring(i, i + 1), 1);
     		
     		if(root.isFull(degree)) {
 	    		root = currentNode = currentNode.split();
@@ -155,8 +155,11 @@ public class BTreeTest
     	assertEquals(totalNodes, 16); //18 if we perform a split on the leaf nodes we just inserted into
     	assertEquals(height, 4);
     }
-	// The following are tests for TreeObject //
+    
+    
+    // The following are tests for TreeObject //
 
+    
 	/**
 	 * Test most public methods for TreeObject with a variety of cases
 	 */
