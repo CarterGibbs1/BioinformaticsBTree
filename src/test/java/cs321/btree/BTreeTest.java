@@ -6,6 +6,9 @@ import static org.junit.Assert.assertEquals;
 
 public class BTreeTest
 {
+	//test 1
+	//test 2
+	
     // HINT:
     //  instead of checking all intermediate states of constructing a tree
     //  you can check the final state of the tree and
@@ -35,6 +38,7 @@ public class BTreeTest
 //            assertEquals(expectedNodesContent[indexNode], bTree.getArrayOfNodeContentsForNodeIndex(indexNode).toString());
 //        }
     }
+	//end of BTree tests
 
     /**
      * Test that a BNode correctly inserts given elements in sorted order.
