@@ -1,5 +1,8 @@
 package cs321.btree;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.LinkedList;
 
 /**
@@ -19,7 +22,12 @@ public class BNode<E> {
 	private LinkedList<TreeObject<E>> keys; //objects/keys in this node, also size() = n
 	private LinkedList<Long> children;      //addresses to the children of this node 
 	
-	private long parent;      //parent address
+	private long parent; //parent address
+	private int n;
+	
+	static private FileChannel RAF; //TODO: final?
+	static private int DEGREE; 
+	static private ByteBuffer buffer;
 	
 	//=================================================================================================================
 	//                                               CONSTRUCTORS
@@ -53,6 +61,7 @@ public class BNode<E> {
 		keys.add(initialKey);
 		children.add(leftChild);
 		children.add(rightChild);
+		n = 1;
 		
 		this.parent = parent;
 	}
@@ -110,6 +119,7 @@ public class BNode<E> {
 		//add new key and child to lists
 		keys.add(i + 1, key);
 		children.add(i + 2, child);
+		n++;
 		
 		//TODO: write to disk, probably in BTree.java
 	}
@@ -178,7 +188,7 @@ public class BNode<E> {
 		while((keys.size() - 1) != originalN/2) {
 			splitRight.insert(keys.remove(originalN/2 + 1), children.remove(originalN/2 + 1));
 		}
-		
+		n = keys.size() - 1;
 		
 		//lastly, remove last node (original middle) from this and insert into parent with
 		//a pointer to splitRight
@@ -213,7 +223,7 @@ public class BNode<E> {
 	 * @return Number of objects in this BNode
 	 */
 	public int getN() {
-		return keys.size();
+		return n;
 	}
 	
 	/**
@@ -257,4 +267,75 @@ public class BNode<E> {
 		
 		return retString.toString();
 	}
+	
+	
+	
+	
+	
+	
+//	static public void setStatics(FileChannel i, int degree) {
+//		RAF = i;
+//		DEGREE = degree;
+//	}
+	
+	
+	static public int getDiskSize(int degree) {
+		return Long.BYTES + (((2 * degree) - 1) * (Integer.BYTES + Long.BYTES)) + (2 * degree * Long.BYTES);
+	}
+	
+	/**
+	 * Write the given BNode to the RAF at the specified address.
+	 * Writes the n and then the lists: child0, key0, child1, key1,
+	 * child2 ... childn, keyn, childn + 1.
+	 * 
+	 * @param <E>     Generic type this BTree holds
+	 * @param node    BNode to write to RAF
+	 * @param address Address to write this BNode to
+	 * 
+	 * @throws IOException Writing to file may throw exception
+	 */
+	static public <E> void writeBNode(BNode<E> node, long address) throws IOException{
+		//start at address and make buffer ready to read
+		RAF.position(address);
+		buffer.clear();
+		
+		//store and write n
+		int n = node.getN();
+		buffer.putInt(n);
+		
+		//write the children and keys in alternating order
+		buffer.putLong(node.children.get(0));
+		for(int i = 0; i < n; i++) {
+			buffer.putLong(node.keys.get(i).getKey());
+			buffer.putInt(node.keys.get(i).getFrequency());
+			
+			buffer.putLong(node.children.get(i + 1));
+		}
+		
+		//make buffer ready to write and then write to RAF
+		buffer.flip();
+		RAF.write(buffer);
+	}
+	
+	
+	static public BNode readBNode() {
+		return null;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
