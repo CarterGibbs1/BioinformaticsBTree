@@ -72,7 +72,7 @@ public class TreeObject<E> {
     private void getZeroPlacement(String s) {
         int stopIndex = 0;
         numZeros = 0;
-        while (s.charAt(stopIndex) != 'g' && s.charAt(stopIndex) != 't') {
+        while (s.length() > stopIndex && (s.charAt(stopIndex) != 'g' && s.charAt(stopIndex) != 't')) {
             if (s.charAt(stopIndex) == 'a') {
                 stopIndex++;
                 numZeros++;

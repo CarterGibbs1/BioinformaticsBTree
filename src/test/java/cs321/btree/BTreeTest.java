@@ -41,7 +41,7 @@ public class BTreeTest
      */
     @Test
     public void singleBNode_TestInsertion() {
-    	String inputLetters = "TGCATAAG";
+    	String inputLetters = "TGCATAAG".toLowerCase();
     	
     	//instantiate and populate BNode with inputLetters
     	TestBNode<String> testNode = new TestBNode<String>(new TreeObject<String>(inputLetters.substring(0, 1), 1));
@@ -59,7 +59,7 @@ public class BTreeTest
      */
     @Test
     public void BNode_TestSplit() {
-    	String inputLetters = "ATGTC";
+    	String inputLetters = "ATGTC".toLowerCase();
     	TestBNode<String> parent;
     	TestBNode<String> rightChild;
     	
@@ -71,7 +71,7 @@ public class BTreeTest
     	
     	//split BNode and save parent and rightChild
     	parent = testNode.split();
-    	rightChild = parent.getSubtree(new TreeObject<String>("T", 1));
+    	rightChild = parent.getSubtree(new TreeObject<String>("t", 1));
     	
     	assertEquals(parent.toString(), "2");      //parent = 2 (G)
     	assertEquals(testNode.toString(), "01");   //leftChild = 01 (AC)
@@ -84,7 +84,7 @@ public class BTreeTest
      */
     @Test
     public void BNode_TestIsFull() {
-    	String inputLetters = "ATGTCTGACCGT";
+    	String inputLetters = "ATGTCTGACCGT".toLowerCase();
     	int degree = 7;
     	
     	//instantiate and populate BNode with inputLetters
@@ -97,7 +97,7 @@ public class BTreeTest
     	assert(!testNode.isFull(degree));
     	
     	//testNode is now full
-    	testNode.insert(new TreeObject<String>("A", 1));
+    	testNode.insert(new TreeObject<String>("a", 1));
     	assert(testNode.isFull(degree));
     }
     
@@ -108,7 +108,7 @@ public class BTreeTest
      */
     @Test
     public void BNode_CorrectHeightAndNodeCount() {
-    	String inputLetters = "ATGTCTGACCGTGACTTACGAAG";
+    	String inputLetters = "ATGTCTGACCGTGACTTACGAAG".toLowerCase();
     	int degree = 2;
     	
     	//instantiate and BNode root
