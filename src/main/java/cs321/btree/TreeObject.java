@@ -139,6 +139,9 @@ public class TreeObject<E> {
      */
     public int compare(TreeObject<E> right) {
         long left = this.getKey();// for easier code explanation in documentation
+        if (right == null) {
+            return Long.compare(left, -1);
+        }
         return Long.compare(left, right.getKey());
     }
 
