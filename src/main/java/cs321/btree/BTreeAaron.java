@@ -9,10 +9,9 @@ package cs321.btree;
  * @author  Aaron Goin, Mesa Greear, Carter Gibbs
  * @version Spring 2022
  *
- * @param <E> Generic Type for this BNode to hold
  */
-public class BTreeAaron<E> {
-    private TestBNode<E> root;
+public class BTreeAaron {
+    private TestBNode root;
     private final int degree;
     private int numNodes;
 
@@ -22,7 +21,7 @@ public class BTreeAaron<E> {
      * @param degree the degree of the BTree (minimum number of children for internal nodes other than the root)
      */
     public BTreeAaron(int degree) {
-        root = new TestBNode<E>(null);
+        root = new TestBNode(null);
         numNodes = 0;
         this.degree = degree;
     }
@@ -33,14 +32,14 @@ public class BTreeAaron<E> {
      *
      * @param element Generic to insert into BTree
      */
-    public void insert(E element) {
-        TreeObject<E> k = new TreeObject<E>(element, 1);
-        TestBNode<E> r = root;// step 1 of pseudo code
+    public void insert(String element) {
+        TreeObjectNoE k = new TreeObject(element, 1);
+        TestBNodeNoE r = root;// step 1 of pseudo code
 
         //====BInsert==================
         //if root is full, split it and reassign to the new root
         if(r.isFull(degree)) {//step 2
-            TestBNode<E> s = null; // part of step 3, need to allocate
+            TestBNode s = null; // part of step 3, need to allocate
             root = s; // step 4, step 5 and 6 may already be covered
             s.insert(r.rootKey(), r);// step 7?
             s = r.split();//step 8 //TODO: write to disk could be dealt in BNode or in BTree
@@ -60,7 +59,7 @@ public class BTreeAaron<E> {
      * @param x the node that isn't full
      * @param key the key that is being inserted
      */
-    private void insertNonFull(TestBNode<E> x, TreeObject<E> key) {
+    private void insertNonFull(TestBNode x, TreeObject key) {
         //starting at root, search down BTree to find correct leaf node to insert into
         int i = x.getN();//step 1
         while(!x.isLeaf()) {
@@ -75,7 +74,7 @@ public class BTreeAaron<E> {
         x.insert(key);
     }
 
-    public TestBNode<E> getRoot() {
+    public TestBNode getRoot() {
         return root;
     }
 
