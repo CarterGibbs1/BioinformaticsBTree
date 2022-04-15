@@ -1,6 +1,7 @@
 package cs321.btree;
 
 
+import java.nio.ByteBuffer;
 import java.util.LinkedList;
 
 /**
@@ -15,11 +16,14 @@ import java.util.LinkedList;
 public class TestBNodeNoE {
 
     // child0 <= key0 <= child1 <= key1 <= child2 ... childn <= keyn <= childn + 1
-    private LinkedList<TreeObjectNoE> keys; // objects/keys in this node, also size() = n
-    private LinkedList<String> children; // children in this node
-    private String parent; // parent pointer
-    private boolean isLeaf;
-    private long location;// in Random Access File
+    private TreeObjectNoE[] keys; // objects/keys in this node, also size() = n //array, max size of btreenode + 1 (2t)
+    private long[] children; // children in this node // max size of btree array + 1 (2t)
+    private long parent; // parent pointer
+    private boolean isLeaf;// determines if it's a leaf
+    private long location;// in Random Access File, increment by max value of btreenode(1000 or so)
+    private int n;// number of nodes in btree
+    private long nextAddressToAllocate;
+    private long maxAddressMinusOne;
 
     // =================================================================================================================
     // CONSTRUCTORS
@@ -43,38 +47,24 @@ public class TestBNodeNoE {
      *
      * result - a / \
      */
-    public TestBNodeNoE(TreeObjectNoE initialKey, String parent, String leftChild, String rightChild) {
-        // initialize instance variables
-        keys = new LinkedList<TreeObjectNoE>();
-        children = new LinkedList<String>();
-
-        keys.add(initialKey);
-        children.add(leftChild);
-        children.add(rightChild);
-
-        this.parent = parent;
+    public TestBNodeNoE(int degree) {
+        // initialize certain instance variables
+        children = new long[2 * degree + 1];
+        int i = 0;
+        while (i < children.length) {
+            children[i] = -1;
+            i++;
+        }
+        keys = new TreeObjectNoE[2 * degree];
+//    	TreeObjectNoE blank = new TreeObjectNoE("", -1, -1);
+//    	int j = 0;
+//    	while (j < keys.length) {
+//    		keys[j] = blank;
+//    		j++;
+//    	}
         this.isLeaf = true;
         this.location = -1;// indicate it's not written to disk yet
-    }
-
-    /**
-     * Constructor: Create LEAF BNode with one key initialKey and a parent pointer
-     * parent. Degree (t) is determined by the parent pointer.
-     *
-     * @param initialKey the initial object in this BNode
-     * @param parent    pointer to the parent of this BNode
-     */
-    public TestBNodeNoE(TreeObjectNoE initialKey, String parent) {
-        this(initialKey, parent, null, null);
-    }
-
-    /**
-     * Constructor: Create ROOT BNode with one key initialKey and the degree (t).
-     *
-     * @param initialKey the initial object in this BNode
-     */
-    public TestBNodeNoE(TreeObjectNoE initialKey) {
-        this(initialKey, null, null, null);
+        this.n = 0;
     }
 
     // =================================================================================================================
@@ -120,11 +110,11 @@ public class TestBNodeNoE {
      */
     public void insert(TreeObjectNoE key) {
         int i = 0;
-        while (i < keys.size()) {
-            if (key.compare(keys.get(i)) > 0) {
+        while (i < n) {
+            if (key.compare(keys[i]) > 0) {
                 i++;
             } else {// satisfies the condition in javadoc
-                keys.add(i, key);
+                keys[i] = key;
             }
         }
     }
@@ -205,20 +195,18 @@ public class TestBNodeNoE {
     // GET/SET/UTILITY METHODS
     // =================================================================================================================
     /**
-     * Gets the specified key. Used and needed for B-Tree insert.
-     *
-     * @return the index of a key
+     * @return the index of a
      */
     public long getLongKey(int index) {
-        return keys.get(index).getLongKey();
+        return keys[index].getLongKey();
     }
 
     public String getStringKey(int index) {
-        return keys.get(index).getStringKey();
+        return keys[index].getStringKey();
     }
 
     public void setKey(int index, String stringNewKey, long longNewKey) {
-        keys.get(index).setKeys(stringNewKey, longNewKey);
+        keys[index] = new TreeObjectNoE(stringNewKey, longNewKey, 1);
     }
 
     /**
@@ -227,7 +215,11 @@ public class TestBNodeNoE {
      * @return Number of objects in this BNode
      */
     public int getN() {
-        return keys.size();
+        return n;
+    }
+
+    public void setN(int newN) {
+        this.n = newN;
     }
 
     /**
@@ -252,7 +244,7 @@ public class TestBNodeNoE {
      * @return true if root, false otherwise
      */
     public boolean isRoot() {
-        return parent == null;
+        return parent == -1;
     }
 
     /**
@@ -269,6 +261,22 @@ public class TestBNodeNoE {
         this.location = location;
     }
 
+    public long getParent() {
+        return parent;
+    }
+
+    public void setParent(long newParent) {
+        this.parent = newParent;
+    }
+
+    public long getChild(int index) {
+        return children[index];
+    }
+
+    public void setChild(int index, long newChild) {
+        children[index] = newChild;
+    }
+
     /**
      * Indicates whether or not this BNode is full (n = 2t - 1)
      *
@@ -278,17 +286,34 @@ public class TestBNodeNoE {
      * @return true is full, false otherwise
      */
     public boolean isFull(int degree) {
-        return ((2 * degree) - 1) == keys.size();
+        return ((2 * degree) - 1) == n;
+    }
+
+    /**
+     * Returns a ByteBuffer for the current BNode
+     *
+     * @return ByteBuffer for current BNode
+     */
+    public byte[] serializeNode() {
+        ByteBuffer b = ByteBuffer.allocate(1000);
+        b.putInt(getN());
+        for (int i = 0; i < getN(); i++) {
+            b.putLong(keys[i].getLongKey());
+            b.putInt(keys[i].getFrequency());
+        }
+
+        return b.array();
     }
 
     // returns long value for each key in a single String seperated by spaces
     @Override
     public String toString() {
         StringBuilder retString = new StringBuilder();
-        for (int i = 0; i < keys.size(); i++) {
-            retString.append(keys.get(i).getStringKey() + " ");
+        for (int i = 1; i < n; i++) {
+            retString = retString.append(keys[i].getStringKey() + " ");
         }
+        retString = retString.append(keys[n].getStringKey());
 
-        return retString.toString().substring(0, retString.length() - 1);
+        return retString.toString();
     }
 }
