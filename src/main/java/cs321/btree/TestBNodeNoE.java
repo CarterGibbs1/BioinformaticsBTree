@@ -214,7 +214,7 @@ public class TestBNodeNoE {
     }
 
     public void setKey(int index, String stringNewKey, long longNewKey) {
-        keys.get(index).setKeys(stringNewKey, longNewKey);;
+        keys.get(index).setKeys(stringNewKey, longNewKey);
     }
 
     /**
