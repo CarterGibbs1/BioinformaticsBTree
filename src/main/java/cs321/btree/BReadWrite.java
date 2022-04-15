@@ -85,5 +85,84 @@ public class BReadWrite {
 		
 		return retNode;
 	}
-
+	
+	/**
+	 * Write the given BTree to the RAF. Always rights to
+	 * address 0.
+	 * 
+	 * @param <E>  Generic type this BTree holds
+	 * @param tree BTree to write to RAF
+	 * 
+	 * @throws IOException Reading RAF may throw exception
+	 */
+	static public <E> void writeBTree(BTree<E> tree) throws IOException{
+		//set buffer capacity to match BTree size TODO: static BTree disk size method
+//		buffer = ByteBuffer.allocateDirect(BNode.getDiskSize(BTree.));
+		
+		//start at 0 and make buffer ready to read
+		RAF.position(0);
+		buffer.clear();
+		
+		//write to RAF: TODO: BTree get methods & maybe more info to write
+		buffer.putLong(-1); //root address
+		buffer.putInt(-1);  //degree
+		buffer.putInt(-1);  //frequency
+//		buffer.putInt(-1);  //number of nodes? Height?
+		
+		//make buffer ready to write and then write to RAF
+		buffer.flip();
+		RAF.write(buffer);
+		
+		//reset buffer capacity to match BNode size
+		buffer = ByteBuffer.allocateDirect(BNode.getDiskSize(0));
+	}
+	
+	/**
+	 * Returns the BTree held at the beginning of the RAF.
+	 * 
+	 * @param <E> Generic type this BTree holds
+	 * 
+	 * @return BTree at beginning of RAF
+	 * 
+	 * @throws IOException Reading RAF may throw exception
+	 */
+	static public <E> BTree<E> readBTree() throws IOException {
+		//set buffer capacity to match BTree size TODO: static BTree disk size method
+//		buffer = ByteBuffer.allocateDirect(BNode.getDiskSize(BTree.));
+		
+		//start at 0 and make buffer ready to read
+		RAF.position(0);
+		buffer.clear();
+		RAF.read(buffer);
+		buffer.flip();
+		
+		//get root address, sequence, and degree TODO: might be in different order/more stuff
+		long root = buffer.getInt();
+		int k = buffer.getInt();
+		int t = buffer.getInt();
+		
+		//initialize BTree and return TODO: no proper constructor
+		BTree<E> retTree = new BTree<E>(t);
+		
+		//reset buffer capacity to match BNode size
+		buffer = ByteBuffer.allocateDirect(BNode.getDiskSize(0));
+		
+		return null;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
