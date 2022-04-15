@@ -7,6 +7,15 @@ import static org.junit.Assert.assertEquals;
 public class BTreeTest
 {
 	//test 1
+//	@Test
+//	public void btreeTestOne() {
+//		BTreeAaron bT = new BTreeAaron(2);
+//		bT.insert("t");
+//		bT.insert("g");
+//		bT.insert("c");
+//		assertEquals(3, bT.getNumNodes());
+//		assertEquals("cgt", bT.toString());
+//	}
 	//test 2
 	
     // HINT:
