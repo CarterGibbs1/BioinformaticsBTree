@@ -1,15 +1,57 @@
 package cs321.btree;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.LinkedList;
 
+/**
+ * Contains static methods used to read and write to a Random
+ * Access File. Used in conjunction with a BTree to allow the
+ * storing of data in the computers storage.
+ * 
+ * @author  Mesa Greear
+ * @version Spring 2022
+ */
 public class BReadWrite {
 
 	private static FileChannel RAF;
 	private static ByteBuffer buffer;
 	
+	/**
+	 * Sets this class to read and write from the given Random
+	 * Access File. If the RAF does not exist a new one will be
+	 * created with the given name.
+	 * 
+	 * @param fileName Name of file to read from and possibly
+	 *                 create as well
+	 *                 
+	 * @throws IOException Creating RAF may throw exception
+	 */
+	static public void setRAF(String fileName) throws IOException {
+		File file = new File(fileName);
+		RandomAccessFile RAFRaw = null;
+		
+		try {
+			//if file doesn't exist, create it
+			if(!file.exists()) {
+				file.createNewFile();
+			}
+			
+			//get the Random Access File channel and store it
+			RAFRaw = new RandomAccessFile(file, "rw");
+			RAF = RAFRaw.getChannel();
+			RAFRaw.close();
+		}
+		catch (Exception e) {
+			if(RAFRaw != null) {
+				RAFRaw.close();
+			}
+			throw e;
+		}
+	}
 	
 	/**
 	 * Write the given BNode to the RAF at the specified address.
