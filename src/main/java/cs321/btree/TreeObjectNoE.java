@@ -4,6 +4,7 @@ package cs321.btree;
 
 
 
+
 /**
  * An object that is to be stored in a BTree. Specific placement in the BTree is
  * determined by previous TreeObjects and key values. A notable method is
@@ -37,7 +38,7 @@ public class TreeObjectNoE {
         this.frequency = frequency;
     }
 
-    public String getStringTreeObjectKey() {
+    public String getStringKey() {
         return stringTreeObjectKey;
     }
 

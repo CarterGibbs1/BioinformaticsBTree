@@ -213,6 +213,10 @@ public class TestBNodeNoE {
         return keys.get(index).getLongKey();
     }
 
+    public String getStringKey(int index) {
+        return keys.get(index).getStringKey();
+    }
+
     public void setKey(int index, String stringNewKey, long longNewKey) {
         keys.get(index).setKeys(stringNewKey, longNewKey);
     }
@@ -282,7 +286,7 @@ public class TestBNodeNoE {
     public String toString() {
         StringBuilder retString = new StringBuilder();
         for (int i = 0; i < keys.size(); i++) {
-            retString.append(keys.get(i).getStringTreeObjectKey() + " ");
+            retString.append(keys.get(i).getStringKey() + " ");
         }
 
         return retString.toString().substring(0, retString.length() - 1);
