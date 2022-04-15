@@ -1,5 +1,6 @@
 package cs321.btree;
 
+
 import java.util.LinkedList;
 
 /**
@@ -203,7 +204,6 @@ public class TestBNodeNoE {
     // =================================================================================================================
     // GET/SET/UTILITY METHODS
     // =================================================================================================================
-
     /**
      * Gets the first key for the root. Used and needed for B-Tree insert.
      *
@@ -211,6 +211,14 @@ public class TestBNodeNoE {
      */
     public TreeObjectNoE rootKey() {
         return keys.getFirst();
+    }
+
+    /**
+     * @param index the index of the key to be set
+     * @param newKey the new key of the key being set
+     */
+    public void setKey(int index, String newKey) {
+        keys.get(index).setKey(newKey);
     }
 
     /**

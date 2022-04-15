@@ -1,6 +1,7 @@
 package cs321.btree;
 
 
+
 /**
  * An object that is to be stored in a BTree. Specific placement in the BTree is
  * determined by previous TreeObjects and key values. A notable method is
@@ -44,11 +45,20 @@ public class TreeObjectNoE {
     }
 
     /**
+     * Set values that will help get exact key values if key starts with a or c.
+     *
+     * @param s the String of the key
+     */
+    private void getZeroPlacement(String s) {
+        stringLengthStartAC = s.length();
+    }
+
+    /**
      * Creates a long value from a treeObjectKey in String form
      *
      * @param s the treeObjectKey in String form
-     * @return the corresponding long value according to 2-bit keys:
-     * a = 00, c = 01, g = 10, t = 11
+     * @return the corresponding long value according to 2-bit keys: a = 00, c = 01,
+     *         g = 10, t = 11
      */
     private long byteShift(String s) {
         long b = 0;
@@ -84,19 +94,23 @@ public class TreeObjectNoE {
     }
 
     /**
-     * Set values that will help get exact key values if key starts with a or c.
-     *
-     * @param s the String of the key
-     */
-    private void getZeroPlacement(String s) {
-        stringLengthStartAC = s.length();
-    }
-
-    /**
      * @return the key of the TreeObject
      */
     public long getKey() {
         return treeObjectKey;
+    }
+
+    /**
+     * Sets new key for current TreeObject. By doing so, a new object must be
+     * created to ensure correct values are maintained.
+     *
+     * @param treeObjectKey the new treeObjectKey for this TreeObject
+     */
+    public void setKey(String treeObjectKey) {
+        TreeObjectNoE replacement = new TreeObjectNoE(treeObjectKey, frequency);
+        this.treeObjectKey = replacement.getKey();
+        this.frequency = replacement.getFrequency();
+        this.stringLengthStartAC = replacement.stringLengthStartAC;
     }
 
     /**
@@ -115,28 +129,6 @@ public class TreeObjectNoE {
             return;
         }
         this.frequency = newFrequency;
-    }
-
-    /**
-     * Replaces all placeholder values with their corresponding values
-     *
-     * @return a String value with the correct binary values
-     */
-    public String withZeros() {
-        if (treeObjectKey == -1) {
-            return "null";
-        }
-        String s = "";
-        String bS = Long.toBinaryString(treeObjectKey);
-        if (stringLengthStartAC != -1) {
-            int j = bS.length();
-            while (j < stringLengthStartAC * 2) {
-                s += "0";
-                j++;
-            }
-            return s + bS;
-        }
-        return bS;
     }
 
     /**
@@ -197,6 +189,28 @@ public class TreeObjectNoE {
             }
         }
         return b;
+    }
+
+    /**
+     * Replaces all placeholder values with their corresponding values
+     *
+     * @return a String value with the correct binary values
+     */
+    public String withZeros() {
+        if (treeObjectKey == -1) {
+            return "null";
+        }
+        String s = "";
+        String bS = Long.toBinaryString(treeObjectKey);
+        if (stringLengthStartAC != -1) {
+            int j = bS.length();
+            while (j < stringLengthStartAC * 2) {
+                s += "0";
+                j++;
+            }
+            return s + bS;
+        }
+        return bS;
     }
 
 }
