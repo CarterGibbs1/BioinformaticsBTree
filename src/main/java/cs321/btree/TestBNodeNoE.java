@@ -129,24 +129,24 @@ public class TestBNodeNoE {
         }
     }
 
-    /**
-     * Get the child of this BNode where the given key should be inserted or would
-     * be located. Does NOT insert the key, only returns the subtree that it belongs
-     * to.
-     *
-     * @param key Object to use to locate the appropriate subtree
-     *
-     * @return subtree (child of this BNode) that key belongs to
-     */
-    public String getSubtree(TreeObjectNoE key) {
-
-        // get to the index of the first k less than key
-        int i;
-        for (i = (keys.size() - 1); i >= 0 && key.compare(keys.get(i)) <= 0; i--) {
-        }
-
-        return children.get(i + 1);
-    }
+//    /**
+//     * Get the child of this BNode where the given key should be inserted or would
+//     * be located. Does NOT insert the key, only returns the subtree that it belongs
+//     * to.
+//     *
+//     * @param key Object to use to locate the appropriate subtree
+//     *
+//     * @return subtree (child of this BNode) that key belongs to
+//     */
+//    public String getSubtree(TreeObjectNoE key) {
+//
+//        // get to the index of the first k less than key
+//        int i;
+//        for (i = (keys.size() - 1); i >= 0 && key.compare(keys.get(i)) <= 0; i--) {
+//        }
+//
+//        return children.get(i + 1);
+//    }
 
 //	/**
 //	 * Splits the current BNode into two new BNodes, removing and
@@ -205,12 +205,12 @@ public class TestBNodeNoE {
     // GET/SET/UTILITY METHODS
     // =================================================================================================================
     /**
-     * Gets the first key for the root. Used and needed for B-Tree insert.
+     * Gets the specified key. Used and needed for B-Tree insert.
      *
-     * @return the key of the root
+     * @return the index of a key
      */
-    public TreeObjectNoE rootKey() {
-        return keys.getFirst();
+    public long getKey(int index) {
+        return keys.get(index).getKey();
     }
 
     /**
