@@ -114,11 +114,13 @@ public class BReadWrite {
 		RAF.write(buffer);
 		
 		//reset buffer capacity to match BNode size
-		buffer = ByteBuffer.allocateDirect(BNode.getDiskSize(0));
+		buffer = ByteBuffer.allocateDirect(BNode.getDiskSize());
 	}
 	
 	/**
-	 * Returns the BTree held at the beginning of the RAF.
+	 * Returns the BTree held at the beginning of the RAF
+	 * and sets the static BNode degree to match the BTree
+	 * degree.
 	 * 
 	 * @param <E> Generic type this BTree holds
 	 * 
@@ -144,8 +146,11 @@ public class BReadWrite {
 		//initialize BTree and return TODO: no proper constructor
 		BTree<E> retTree = new BTree<E>(t);
 		
+		//set static BNode degree
+		BNode.setDegree(t);
+		
 		//reset buffer capacity to match BNode size
-		buffer = ByteBuffer.allocateDirect(BNode.getDiskSize(0));
+		buffer = ByteBuffer.allocateDirect(BNode.getDiskSize());
 		
 		return null;
 	}

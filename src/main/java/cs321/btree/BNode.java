@@ -1,8 +1,5 @@
 package cs321.btree;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.LinkedList;
 
 /**
@@ -24,6 +21,8 @@ public class BNode<E> {
 	
 	private long parent; //parent address
 	private int n;
+	
+	private static int DEGREE;
 	
 	//=================================================================================================================
 	//                                               CONSTRUCTORS
@@ -50,6 +49,11 @@ public class BNode<E> {
 	 *                / \
 	 */
 	public BNode(TreeObject<E> initialKey, long parent, long leftChild, long rightChild) {
+		//check that DEGREE has been set
+		if(DEGREE < 1) {
+			throw new IllegalStateException("Degree is an invalid value. It might have not been set before BNodes are used.");
+		}
+		
 		//initialize instance variables
 		keys = new LinkedList<TreeObject<E>>();
 		children = new LinkedList<Long>();
@@ -261,13 +265,10 @@ public class BNode<E> {
 	/**
 	 * Indicates whether or not this BNode is full (n = 2t - 1)
 	 * 
-	 * 
-	 * @param  degree the degree of this BTree
-	 * 
 	 * @return true is full, false otherwise
 	 */
-	public boolean isFull(int degree) {
-		return ((2 * degree ) - 1) == keys.size();
+	public boolean isFull() {
+		return ((2 * DEGREE ) - 1) == keys.size();
 	}
 	
 	//most likely temporary toString.
@@ -282,22 +283,31 @@ public class BNode<E> {
 		return retString.toString();
 	}
 	
+	//=================================================================================================================
+	//                                           STATIC METHODS
+	//=================================================================================================================
 	
-	
-	
-	
-	
-//	static public void setStatics(FileChannel i, int degree) {
-//		RAF = i;
-//		DEGREE = degree;
-//	}
-	
-	
-	static public int getDiskSize(int degree) {
-		return Long.BYTES + (((2 * degree) - 1) * (Integer.BYTES + Long.BYTES)) + (2 * degree * Long.BYTES);
+	/**
+	 * Set the shared static degree of all BNodes.
+	 * 
+	 * @param degree (t) How many keys/objects (t - 1 to 2t - 1)
+	 *               and children (t to 2t) BNodes can have
+	 */
+	static public void setDegree(int degree) {
+		DEGREE = degree;
 	}
 	
-	
+	/**
+	 * Get the max size in bytes a BNode written to disk could
+	 * be. This will be the parent address (8), the number of
+	 * objects n (4), max number of objects ((2t - 1) * (8 + 4)),
+	 * and the max number of children (2t * 8) summed together.
+	 * 
+	 * @return Max bytes a BNode will take up on the disk
+	 */
+	static public int getDiskSize() {
+		return Long.BYTES + Integer.BYTES + (((2 * DEGREE) - 1) * (Integer.BYTES + Long.BYTES)) + (2 * DEGREE * Long.BYTES);
+	}
 }
 
 
