@@ -209,16 +209,12 @@ public class TestBNodeNoE {
      *
      * @return the index of a key
      */
-    public long getKey(int index) {
-        return keys.get(index).getKey();
+    public long getLongKey(int index) {
+        return keys.get(index).getLongKey();
     }
 
-    /**
-     * @param index the index of the key to be set
-     * @param newKey the new key of the key being set
-     */
-    public void setKey(int index, String newKey) {
-        keys.get(index).setKey(newKey);
+    public void setKey(int index, String stringNewKey, long longNewKey) {
+        keys.get(index).setKeys(stringNewKey, longNewKey);;
     }
 
     /**
@@ -256,18 +252,6 @@ public class TestBNodeNoE {
     }
 
     /**
-     * Indicates whether or not this BNode is full (n = 2t - 1)
-     *
-     *
-     * @param degree the degree of this BTree
-     *
-     * @return true is full, false otherwise
-     */
-    public boolean isFull(int degree) {
-        return ((2 * degree) - 1) == keys.size();
-    }
-
-    /**
      * @return the location of this node in memory
      */
     public long getLocation() {
@@ -281,12 +265,24 @@ public class TestBNodeNoE {
         this.location = location;
     }
 
+    /**
+     * Indicates whether or not this BNode is full (n = 2t - 1)
+     *
+     *
+     * @param degree the degree of this BTree
+     *
+     * @return true is full, false otherwise
+     */
+    public boolean isFull(int degree) {
+        return ((2 * degree) - 1) == keys.size();
+    }
+
     // returns long value for each key in a single String seperated by spaces
     @Override
     public String toString() {
         StringBuilder retString = new StringBuilder();
         for (int i = 0; i < keys.size(); i++) {
-            retString.append(keys.get(i).getKey() + " "); // TODO: return letters instead
+            retString.append(keys.get(i).getStringTreeObjectKey() + " ");
         }
 
         return retString.toString().substring(0, retString.length() - 1);
