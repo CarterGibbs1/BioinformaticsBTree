@@ -14,7 +14,7 @@ import java.util.LinkedList;
  * in conjunction with a BTree to allow the storing of data in the computers
  * storage.
  * 
- * @author Mesa Greear
+ * @author  Mesa Greear
  * @version Spring 2022
  */
 public class BReadWrite {
@@ -85,15 +85,15 @@ public class BReadWrite {
 	 * @throws IllegalStateException   If thrown, it's likely RAF or buffer have not
 	 *                                 been set
 	 */
-	static public <E> void writeBNode(BNode<E> node, long address)
+	static public <E> void writeBNode(BNode<E> node)
 			throws IOException, BufferOverflowException, IllegalStateException {
 		try {
 			// start at address and make buffer ready to read
-			RAF.position(address);
+			RAF.position(node.getAddress());
 			buffer.clear();
 
 			// write parent
-			buffer.putLong(address);
+			buffer.putLong(node.getParent());
 			// store and write n
 			int n = node.getN();
 			buffer.putInt(n);
@@ -154,7 +154,7 @@ public class BReadWrite {
 			long rightChild = buffer.getLong();
 
 			// construct the return BNode and insert the other n - 1 keys and children
-			BNode<E> retNode = new BNode<E>(initialKey, parent, leftChild, rightChild);
+			BNode<E> retNode = new BNode<E>(initialKey, address, parent, leftChild, rightChild);
 			for (int i = 1; i < n; i++) {
 				retNode.insert(new TreeObject<E>(null, buffer.getInt()), buffer.getLong());
 			}
@@ -173,7 +173,7 @@ public class BReadWrite {
 	 * @param <E>  Generic type this BTree holds
 	 * @param tree BTree to write to RAF
 	 * 
-	 * @throws IOException             Reading RAF may throw exception
+	 * @throws IOException             Writing to RAF may throw exception
 	 * @throws BufferOverflowException Indicates buffer capacity was incorrect for
 	 *                                 what is was writing
 	 * @throws IllegalStateException   If thrown, it's likely RAF or buffer have not
@@ -251,5 +251,16 @@ public class BReadWrite {
 			throw new IllegalStateException(
 					e.getClass() + " thrown, may indicate that RAF or buffer have not been set properly.");
 		}
+	}
+	
+	/**
+	 * Get the next available address in the RAF, i.e. the end of the RAF.
+	 * 
+	 * @return The next available address in the RAF.
+	 * 
+	 * @throws IOException Reading RAF may throw exception
+	 */
+	static public long getNextAddress() throws IOException {
+		return RAF.size();
 	}
 }
