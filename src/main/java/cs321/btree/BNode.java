@@ -1,5 +1,6 @@
 package cs321.btree;
 
+import java.io.IOException;
 import java.util.LinkedList;
 
 /**
@@ -14,15 +15,19 @@ import java.util.LinkedList;
  * @param <E> Generic Type for this BNode to hold
  */
 public class BNode<E> {
+	
+	//TODO: Add cache functionality
 
 	//child0 <= key0 <= child1 <= key1 <= child2 ... childn <= keyn <= childn + 1
 	private LinkedList<TreeObject<E>> keys; //objects/keys in this node, also size() = n
 	private LinkedList<Long> children;      //addresses to the children of this node 
 	
 	private long parent; //parent address
-	private int n;
+	private int n; //TODO: Not needed?
 	
-	private static int DEGREE;
+	private int address; //not written to RAF
+	
+	private static int degree; //shared degree amongst all BNodes
 	
 	//=================================================================================================================
 	//                                               CONSTRUCTORS
@@ -33,10 +38,13 @@ public class BNode<E> {
 	 * 'parent,' and two children 'leftChild' and 'rightChild.' An address that
 	 * is less than 0 is considered null.
 	 * 
-	 * @param intialKey  the initial object in this BNode
-	 * @param parent     address of the parent of this BNode
-	 * @param leftChild  address of the child left of initialKey
-	 * @param rightChild address of the child right of initialKey
+	 * @param intialKey   the initial object in this BNode
+	 * @param thisAddress address of this BNode
+	 * @param parent      address of the parent of this BNode
+	 * @param leftChild   address of the child left of initialKey
+	 * @param rightChild  address of the child right of initialKey
+	 * 
+	 * @throws IllegalStateException Static degree has not been set
 	 */
 	/*
 	 * Example Demonstration:
@@ -48,9 +56,9 @@ public class BNode<E> {
 	 *                 a
 	 *                / \
 	 */
-	public BNode(TreeObject<E> initialKey, long parent, long leftChild, long rightChild) {
+	public BNode(TreeObject<E> initialKey, long thisAddress, long parent, long leftChild, long rightChild) throws IllegalStateException {
 		//check that DEGREE has been set
-		if(DEGREE < 1) {
+		if(degree < 1) {
 			throw new IllegalStateException("Degree is an invalid value. It might have not been set before BNodes are used.");
 		}
 		
@@ -72,19 +80,24 @@ public class BNode<E> {
 	 * considered null.
 	 * 
 	 * @param intialKey  the initial object in this BNode
+	 * @param thisAddress address of this BNode
 	 * @param parent     address of the parent of this BNode
+	 * 
+	 * @throws IllegalStateException Static degree has not been set
 	 */
-	public BNode(TreeObject<E> initialKey, long parent) {
-		this(initialKey, parent, -1, -1);
+	public BNode(TreeObject<E> initialKey, long address, long parent) throws IllegalStateException {
+		this(initialKey, address, parent, -1, -1);
 	}
 	
 	/**
-	 * Constructor: Create root BNode with one key initialKey.
+	 * Constructor: Create singular BNode with one key initialKey.
 	 * 
 	 * @param intialKey the initial object in this BNode
+	 * 
+	 * @throws IllegalStateException Static degree has not been set
 	 */
-	public BNode(TreeObject<E> initialKey) {
-		this(initialKey, -1, -1, -1);
+	public BNode(TreeObject<E> initialKey, long address) throws IllegalStateException {
+		this(initialKey, address, -1, -1, -1);
 	}
 	
 	//=================================================================================================================
@@ -97,6 +110,8 @@ public class BNode<E> {
 	 * 
 	 * @param key   TreeObject containing Object to insert
 	 * @param child Child related to key to insert 
+	 * 
+	 * @throws IOException Writing to RAF may throw exception
 	 */
 	/*
 	 * Example Demonstration:
@@ -110,7 +125,7 @@ public class BNode<E> {
 	 * keys     -  a b c d e f
 	 * children - # # # * # # #
 	 */
-	public void insert(TreeObject<E> key, long child) {
+	public void insert(TreeObject<E> key, long child) throws IOException {
 		
 		//get to the index of the first k less than key
 		int i;
@@ -121,7 +136,7 @@ public class BNode<E> {
 		children.add(i + 2, child);
 		n++;
 		
-		//TODO: write to disk, probably in BTree.java
+		BReadWrite.writeBNode(this);
 	}
 	
 	/**
@@ -129,8 +144,10 @@ public class BNode<E> {
 	 * nodes.
 	 * 
 	 * @param key TreeObject containing Object to insert
+	 * 
+	 * @throws IOException Writing to RAF may throw exception
 	 */
-	public void insert(TreeObject<E> key) {
+	public void insert(TreeObject<E> key) throws IOException {
 		insert(key, -1);
 	}
 	
@@ -161,25 +178,24 @@ public class BNode<E> {
 	 * the right BNode (new BNode) will be contain everything to
 	 * the right. Can only be run when the list is full.
 	 * 
-	 * @param  address The address of this BNode in the RAF
-	 * 
 	 * @return the parent of the two BNodes
+	 * 
+	 * @throws IOException Reading/Writing to RAF may throw exception
 	 */
-	public long split(long address) {
+	public long split() throws IOException {
 		//==== for better understanding when coming back to look at this method, I'm going to ====
 		//==== create an example split and show how it changes through comments:              ====
 		//Keys     -  a b c d e f g
 		//Pointers - 0 1 2 3 4 5 6 7
 		
 		int originalN = keys.size();
-		BNode<E> parentNode = new BNode<E>(new TreeObject<E>(null, 1), 1);//TODO: read parent from RAF
+		BNode<E> parentNode; //TODO: parent can be kept by BTree and passed in for performance increase
 		
 		
 		//remove key and two pointers right of middle and insert into new BNode 'splitRight':
 		//Keys     -  a b c d f g    |  e
 		//Pointers - 0 1 2 3   6 7   | 4 5
-		BNode<E> splitRight = new BNode<E>(keys.remove(keys.size()/2 + 1), parent, children.remove(children.size()/2), children.remove(children.size()/2 + 1));
-		long splitRightAddress = 0; //TODO: find next available address to write new BNode
+		BNode<E> splitRight = new BNode<E>(keys.remove(keys.size()/2 + 1), BReadWrite.getNextAddress(), parent, children.remove(children.size()/2), children.remove(children.size()/2 + 1));
 		
 		//starting just to the right of the middle of this BNode, continuously remove the pointers and keys
 		//at that position and insert them into splitRight:
@@ -197,18 +213,25 @@ public class BNode<E> {
 		//Keys     -  a b c d  |  e f g
 		//Pointers - 0 1 2 3   | 4 5 6 7
 		
-		//if this is the ROOT, create new parent/root to insert into and update types
+		//if this is the ROOT, create new parent/root to insert into
+		//else read the parent and insert into
 		if(isRoot()) {
-			BNode<E> newRoot = new BNode<E>(keys.removeLast(), -1, address, splitRightAddress);
-			long newRootAddress = 0; //TODO: find next available address to write new BNode
-			this.parent = splitRight.parent = newRootAddress;
-			
-			//TODO: write changes to RAF;
-			return newRootAddress;
+			//                                           Already new node 'splitRight' at getNextAddress, so
+			//                                           have to compensate with additional offset getDiskSize
+			parentNode = new BNode<E>(keys.removeLast(), BReadWrite.getNextAddress() + BNode.getDiskSize(), -1, address, splitRight.getAddress());
+			this.parent = splitRight.parent = parentNode.getAddress();
+		}
+		else {
+			parentNode = BReadWrite.readBNode(parent); //TODO: see other parentNode todo, prevent read here
+			parentNode.insert(keys.removeLast(), splitRight.getAddress());
 		}
 		
-		//TODO: write changes to RAF;
-		parentNode.insert(keys.removeLast(), splitRightAddress);
+		//write changed BNodes to RAF
+		BReadWrite.writeBNode(splitRight);
+		BReadWrite.writeBNode(this);
+		BReadWrite.writeBNode(parentNode);
+		
+		
 		return parent;
 	}
 	
@@ -224,6 +247,24 @@ public class BNode<E> {
 	 */
 	public int getN() {
 		return n;
+	}
+	
+	/**
+	 * Get the address of this BNode in the RAF.
+	 * 
+	 * @return address of this in RAF
+	 */
+	public long getAddress() {
+		return address;
+	}
+	
+	/**
+	 * Get the address of this BNode's parent in the RAF.
+	 * 
+	 * @return address of parent in RAF
+	 */
+	public long getParent() {
+		return parent;
 	}
 	
 	/**
@@ -268,7 +309,7 @@ public class BNode<E> {
 	 * @return true is full, false otherwise
 	 */
 	public boolean isFull() {
-		return ((2 * DEGREE ) - 1) == keys.size();
+		return ((2 * degree ) - 1) == keys.size();
 	}
 	
 	//most likely temporary toString.
@@ -277,7 +318,7 @@ public class BNode<E> {
 	public String toString() {
 		StringBuilder retString = new StringBuilder();
 		for(int i = 0; i < keys.size(); i++) {
-			retString.append(keys.get(i).getKey()); //TODO: return letters instead
+			retString.append(keys.get(i).getKey()); //TODO?: return letters instead
 		}
 		
 		return retString.toString();
@@ -293,8 +334,8 @@ public class BNode<E> {
 	 * @param degree (t) How many keys/objects (t - 1 to 2t - 1)
 	 *               and children (t to 2t) BNodes can have
 	 */
-	static public void setDegree(int degree) {
-		DEGREE = degree;
+	static public void setDegree(int newDegree) {
+		degree = newDegree;
 	}
 	
 	/**
@@ -306,7 +347,7 @@ public class BNode<E> {
 	 * @return Max bytes a BNode will take up on the disk
 	 */
 	static public int getDiskSize() {
-		return Long.BYTES + Integer.BYTES + (((2 * DEGREE) - 1) * (Integer.BYTES + Long.BYTES)) + (2 * DEGREE * Long.BYTES);
+		return Long.BYTES + Integer.BYTES + (((2 * degree) - 1) * (Integer.BYTES + Long.BYTES)) + (2 * degree * Long.BYTES);
 	}
 }
 
