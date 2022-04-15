@@ -3,6 +3,7 @@ package cs321.btree;
 
 
 
+
 /**
  * An object that is to be stored in a BTree. Specific placement in the BTree is
  * determined by previous TreeObjects and key values. A notable method is
@@ -41,24 +42,14 @@ public class TreeObjectNoE {
     }
 
     /**
-     * Sets new key for current TreeObject. By doing so, a new object must be
-     * created to ensure correct values are maintained.
-     *
-     * @param stringTreeObjectKey the new treeObjectKey for this TreeObject
-     */
-    public void setStringKey(String stringTreeObjectKey) {
-        this.stringTreeObjectKey = stringTreeObjectKey;
-    }
-
-
-    /**
      * @return the key of the TreeObject
      */
     public long getLongKey() {
         return treeObjectKey;
     }
 
-    public void setLongKey(long treeObjectKey) {
+    public void setKeys(String stringTreeObjectKey, long treeObjectKey) {
+        this.stringTreeObjectKey = stringTreeObjectKey;
         this.treeObjectKey = treeObjectKey;
     }
 
