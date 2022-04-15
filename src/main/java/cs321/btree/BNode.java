@@ -292,13 +292,15 @@ public class BNode<E> {
 	 * @param node    BNode to write to RAF
 	 * @param address Address to write this BNode to
 	 * 
-	 * @throws IOException Writing to file may throw exception
+	 * @throws IOException Writing to RAF may throw exception
 	 */
 	static public <E> void writeBNode(BNode<E> node, long address) throws IOException{
 		//start at address and make buffer ready to read
 		RAF.position(address);
 		buffer.clear();
 		
+		//write parent
+		buffer.putLong(address);
 		//store and write n
 		int n = node.getN();
 		buffer.putInt(n);
@@ -317,9 +319,38 @@ public class BNode<E> {
 		RAF.write(buffer);
 	}
 	
-	
-	static public BNode readBNode() {
-		return null;
+	/**
+	 * 
+	 * @param <E>     Generic type this BTree holds
+	 * @param address Address that BNode is located
+	 * 
+	 * @return BNode stored in RAF at the given address
+	 * 
+	 * @throws IOException Reading RAF may throw exception
+	 */
+	static public <E> BNode<E> readBNode(long address) throws IOException {
+		//start at address and make buffer ready to read
+		RAF.position(address);
+		buffer.clear();
+		RAF.read(buffer);
+		buffer.flip();
+		
+		//get parent and n
+		long parent = buffer.getLong();
+		int n = buffer.getInt();
+		
+		//get first key and two children
+		long leftChild = buffer.getLong();
+		TreeObject<E> initialKey = new TreeObject<E>(null, buffer.getInt()); //TODO: additional TreeObject constructor
+		long rightChild = buffer.getLong();
+		
+		//construct the return BNode and insert the other n - 1 keys and children
+		BNode<E> retNode = new BNode<E>(initialKey, parent, leftChild, rightChild);
+		for(int i = 1; i < n; i++) {
+			retNode.insert(new TreeObject<E>(null, buffer.getInt()), buffer.getLong());
+		}
+		
+		return retNode;
 	}
 }
 
