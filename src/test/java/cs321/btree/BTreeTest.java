@@ -242,6 +242,48 @@ public class BTreeTest
 		}
 	}
 	
+	/**
+	 * 
+	 */
+	@Test
+	public void BNode_RAF_SplitWriteRead() {
+		try {
+			//                       180  59   108  14   103  46   118
+			String inputSequences = "GTCA ATGT CGTA AATG CGCT AGTG CTCG".toLowerCase();
+			BNode<String> readNode;
+			BNode<String> readParent;
+			BNode<String> readRight;
+	    	
+	    	//set RAF, degree, and byteBuffer. Important that they are done in this order
+	    	BReadWrite.setRAF(TESTS_FOLDER + "TEST_BNode_RAF_SplitWriteRead");
+	    	BNode.setDegree(4);
+	    	BReadWrite.setBuffer(BNode.getDiskSize());
+	    	
+	    	//instantiate and populate BNode with inputLetters
+	    	BNode<String> memoryNode = new BNode<String>(new TreeObject<String>(inputSequences.substring(0, 4), 1), 0);
+	    	for(int i = 5; i < inputSequences.length(); i += 5) {
+	    		memoryNode.insert(new TreeObject<String>(inputSequences.substring(i, i + 4), 1));
+	    	}
+	    	
+	    	//perform split and read the returned address (the new parent/root)
+	    	readParent = BReadWrite.readBNode(memoryNode.split());
+	    	//read the left and right children from parentNode
+	    	readNode = BReadWrite.readBNode(memoryNode.getAddress());
+	    	readRight = BReadWrite.readBNode(readParent.getChildren().get(1));
+	    	
+	    	//see if memoryNode contains sequences in order in long value,
+	    	assertEquals(memoryNode.toString(), "14 46 59");
+	    	
+	    	//then check if the read nodes contain the correct elements
+	    	assertEquals(readNode.toString(), memoryNode.toString());
+	    	assertEquals(readParent.toString(), "103");
+	    	assertEquals(readRight.toString(), "108 118 180");
+		}
+		catch(IOException e) {
+			assert(false);
+		}
+	}
+	
 	
 	
 	
