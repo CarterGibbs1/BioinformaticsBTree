@@ -63,6 +63,19 @@ public class TreeObject<E> {
             this.frequency = frequency;
         }
     }
+    
+    /**
+     * Constructor: Takes in the already 'translated to a long' key and the
+     * frequency the key has appeared. Useful for when a TreeObject is read
+     * from the RAF and needs to be constructed.
+     * 
+     * @param key       The compressed key this treeObject holds
+     * @param frequency The number of times key has been inserted
+     */
+    public TreeObject(long key, int frequency) {
+    	treeObjectKey = key;
+    	this.frequency = frequency;
+    }
 
     /**
      * Set values that will help get exact key values if key starts with a or c.
