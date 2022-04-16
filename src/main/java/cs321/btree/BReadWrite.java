@@ -155,7 +155,7 @@ public class BReadWrite {
 			// construct the return BNode and insert the other n - 1 keys and children
 			BNode<E> retNode = new BNode<E>(initialKey, address, parent, leftChild, rightChild);
 			for (int i = 1; i < n; i++) {
-				retNode.insert(new TreeObject<E>(buffer.getLong(), buffer.getInt()), buffer.getLong());
+				retNode.insertNoWrite(new TreeObject<E>(buffer.getLong(), buffer.getInt()), buffer.getLong());
 			}
 
 			return retNode;

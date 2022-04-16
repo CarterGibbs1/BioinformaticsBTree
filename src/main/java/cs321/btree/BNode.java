@@ -110,6 +110,7 @@ public class BNode<E> {
 	 * 
 	 * @param key   TreeObject containing Object to insert
 	 * @param child Child related to key to insert 
+	 * @param write Whether to write to the RAF or not
 	 * 
 	 * @throws IOException Writing to RAF may throw exception
 	 */
@@ -125,7 +126,7 @@ public class BNode<E> {
 	 * keys     -  a b c d e f
 	 * children - # # # * # # #
 	 */
-	public void insert(TreeObject<E> key, long child) throws IOException {
+	public void insert(TreeObject<E> key, long child, boolean write) throws IOException {
 		
 		//get to the index of the first k less than key
 		int i;
@@ -136,19 +137,37 @@ public class BNode<E> {
 		children.add(i + 2, child);
 		n++;
 		
-		BReadWrite.writeBNode(this);
+		if(write) {
+			BReadWrite.writeBNode(this);
+		}
 	}
 	
 	/**
 	 * Insert the given key into this BNode. Should only be used on leaf
 	 * nodes.
+	 * <p>
+	 * WRITE: This method writes this changed BNode to the RAF
 	 * 
 	 * @param key TreeObject containing Object to insert
 	 * 
 	 * @throws IOException Writing to RAF may throw exception
 	 */
 	public void insert(TreeObject<E> key) throws IOException {
-		insert(key, -1);
+		insert(key, -1, true);
+	}
+	
+	/**
+	 * Insert the given key into this BNode and insert the given child
+	 * <p>
+	 * NO WRITE: This method does not write the changed BNode to the RAF
+	 * 
+	 * @param key   TreeObject containing Object to insert
+	 * @param child Child related to key to insert 
+	 * 
+	 * @throws IOException Writing to RAF may throw exception
+	 */
+	public void insertNoWrite(TreeObject<E> key, long child) throws IOException {
+		insert(key, child, false);
 	}
 	
 	/**
@@ -177,6 +196,8 @@ public class BNode<E> {
 	 * contain everything to the left of the removed object and
 	 * the right BNode (new BNode) will be contain everything to
 	 * the right. Can only be run when the list is full.
+	 * <p>
+	 * WRITE: This method writes this changed BNodes to the RAF
 	 * 
 	 * @return the parent of the two BNodes
 	 * 
@@ -202,7 +223,7 @@ public class BNode<E> {
 		//Keys     -  a b c d  |  e f g
 		//Pointers - 0 1 2 3   | 4 5 6 7
 		while((keys.size() - 1) != originalN/2) {
-			splitRight.insert(keys.remove(originalN/2 + 1), children.remove(originalN/2 + 1));
+			splitRight.insertNoWrite(keys.remove(originalN/2 + 1), children.remove(originalN/2 + 1));
 		}
 		n = keys.size() - 1;
 		
@@ -223,7 +244,7 @@ public class BNode<E> {
 		}
 		else {
 			parentNode = BReadWrite.readBNode(parent); //TODO: see other parentNode todo, prevent read here
-			parentNode.insert(keys.removeLast(), splitRight.getAddress());
+			parentNode.insertNoWrite(keys.removeLast(), splitRight.getAddress());
 		}
 		
 		//write changed BNodes to RAF
@@ -313,15 +334,15 @@ public class BNode<E> {
 	}
 	
 	//most likely temporary toString.
-	//returns int value for each key in a single, no space, String
+	//returns long value for each key in a single String separated by spaces
 	@Override
 	public String toString() {
 		StringBuilder retString = new StringBuilder();
 		for(int i = 0; i < keys.size(); i++) {
-			retString.append(keys.get(i).getKey()); //TODO?: return letters instead
+			retString.append(keys.get(i).getKey() + " "); //TODO?: return letters instead
 		}
 		
-		return retString.toString();
+		return retString.toString().substring(0, retString.length() - 1);
 	}
 	
 	//=================================================================================================================
