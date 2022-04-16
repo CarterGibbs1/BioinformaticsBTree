@@ -218,8 +218,8 @@ public class BTreeTest
 	    	//                       57  12  8   59  7   10  44
 	    	String inputSequences = "TGC ATA AGA TGT ACT AGG GTA".toLowerCase();
 	    	
-	    	//set RAF, degree, and byteBuffer. Important that they are done in this order
-	    	BReadWrite.setRAF(TESTS_FOLDER + "TEST_BNode_RAF_InsertWriteRead");
+	    	//delete old RAF and set new RAF, degree, and byteBuffer. Important that they are done in this order
+	    	BReadWrite.setRAF(TESTS_FOLDER + "TEST_BNode_RAF_InsertWriteRead", true);
 	    	BNode.setDegree(10);
 	    	BReadWrite.setBuffer(BNode.getDiskSize());
 	    	
@@ -243,7 +243,8 @@ public class BTreeTest
 	}
 	
 	/**
-	 * 
+	 * Test that a split BNode correctly writes the new root and new child to the
+	 * RAF, maintaining the correct keys, children, and properties.
 	 */
 	@Test
 	public void BNode_RAF_SplitWriteRead() {
@@ -254,8 +255,8 @@ public class BTreeTest
 			BNode<String> readParent;
 			BNode<String> readRight;
 	    	
-	    	//set RAF, degree, and byteBuffer. Important that they are done in this order
-	    	BReadWrite.setRAF(TESTS_FOLDER + "TEST_BNode_RAF_SplitWriteRead");
+	    	//delete old RAF and set new RAF, degree, and byteBuffer. Important that they are done in this order
+	    	BReadWrite.setRAF(TESTS_FOLDER + "TEST_BNode_RAF_SplitWriteRead", true);
 	    	BNode.setDegree(4);
 	    	BReadWrite.setBuffer(BNode.getDiskSize());
 	    	
@@ -278,6 +279,12 @@ public class BTreeTest
 	    	assertEquals(readNode.toString(), memoryNode.toString());
 	    	assertEquals(readParent.toString(), "103");
 	    	assertEquals(readRight.toString(), "108 118 180");
+	    	
+	    	//check that the read nodes contain the correct properties
+	    	assert(memoryNode.isLeaf() && !memoryNode.isRoot() && !memoryNode.isFull() && memoryNode.getN() == 3);
+	    	assert(readNode.isLeaf() && !readNode.isRoot() && !readNode.isFull() && readNode.getN() == 3);
+	    	assert(readRight.isLeaf() && !readRight.isRoot() && !readRight.isFull() && readRight.getN() == 3);
+	    	assert(!readParent.isLeaf() && readParent.isRoot() && !readParent.isFull() && readParent.getN() == 1);
 		}
 		catch(IOException e) {
 			assert(false);
