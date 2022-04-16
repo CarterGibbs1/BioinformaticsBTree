@@ -6,6 +6,7 @@ package cs321.btree;
 
 
 
+
 /**
  * An object that is to be stored in a BTree. Specific placement in the BTree is
  * determined by previous TreeObjects and key values. A notable method is
@@ -18,9 +19,9 @@ package cs321.btree;
 public class TreeObjectNoE {
     // valid treeObjects: "a", "t", "c", "g" (lowercase)
     // corresponding 2-bit binary value: 00, 11, 01, 10
-    private String stringTreeObjectKey;
-    private long treeObjectKey;
+    private String treeObjectKey;
     private int frequency;
+    private long keyLongVal;
 
     /**
      * Constructor: Creates a TreeObject with the specified key. Also sets the value
@@ -33,26 +34,74 @@ public class TreeObjectNoE {
      * @param treeObjectKey the key of the object
      * @param frequency     size of each, individual sequence in possibleKey
      */
-    public TreeObjectNoE(String stringTreeObjectKey, long treeObjectKey, int frequency) {
-        this.stringTreeObjectKey = stringTreeObjectKey;
+    public TreeObjectNoE(String treeObjectKey, int frequency) {
         this.treeObjectKey = treeObjectKey;
+        this.keyLongVal = getLongKey();
         this.frequency = frequency;
     }
 
-    public String getStringKey() {
-        return stringTreeObjectKey;
+    public TreeObjectNoE(long longKey, int frequency) {
+        this.treeObjectKey = "";// needs to be set later possibly, created for compatibility with other methods
+        this.keyLongVal = longKey;
+        this.frequency = frequency;
+    }
+
+    public TreeObjectNoE() {//for testing purposes
+        this.keyLongVal = -1;
     }
 
     /**
-     * @return the key of the TreeObject
+     * @return the String key of the TreeObject
      */
-    public long getLongKey() {
+    public String getKey() {
         return treeObjectKey;
     }
 
-    public void setKeys(String stringTreeObjectKey, long treeObjectKey) {
-        this.stringTreeObjectKey = stringTreeObjectKey;
-        this.treeObjectKey = treeObjectKey;
+    public void setKey(String newKey) {
+        this.treeObjectKey = newKey;
+    }
+
+    /**
+     * Intended to be used by another class when the string length is known, but the second constructor is used.
+     *
+     * @param stringLength length of string after being scanned
+     */
+    public void setBlankKeyWithStringLength(int stringLength) {
+        String longKey = "";
+        String longKeyOG = Long.toBinaryString(keyLongVal);
+        for (int i = 0; i < stringLength * 2; i++) {
+            longKey += "0";
+        }
+        longKey += longKeyOG;
+        longKey = longKey.substring(longKey.length() - stringLength);
+        String stringKey = "";
+        for (int j = 0; j < stringLength - 2; j += 2) {
+            stringKey += numToLetter(longKey.substring(j, j + 2));
+        }
+
+        this.treeObjectKey = stringKey;
+    }
+
+    /**
+     * Coverts 2-bit binary String to it's corresponding letter.
+     *
+     * @param num the String representation of the 2-bit binary number
+     * @return the String of the corresponding letter
+     */
+    private String numToLetter(String num) {
+        if (num == "00") {
+            return "a";
+        }
+        if (num == "01") {
+            return "c";
+        }
+        if (num == "10") {
+            return "g";
+        }
+        if (num == "11") {
+            return "t";
+        }
+        return "";
     }
 
     /**
@@ -67,6 +116,47 @@ public class TreeObjectNoE {
      */
     public void setFrequency(int newFrequency) {
         this.frequency = newFrequency;
+    }
+
+    public long getLongKey() {
+        if (keyLongVal == -1) {
+            return -1;
+        }
+        return byteShift(treeObjectKey);
+    }
+
+    /**
+     * Creates a long value from a treeObjectKey in String form
+     *
+     * @param s the treeObjectKey in String form
+     * @return the corresponding long value according to 2-bit keys: a = 00, c = 01,
+     *         g = 10, t = 11
+     */
+    private long byteShift(String s) {
+        long b = 0;
+        for (int i = 0; i < s.length(); i++) {
+            b += toByteVal(s.charAt(i));
+            if (i < s.length() - 1) {
+                b = b << 2;
+            }
+        }
+        return b;
+    }
+
+    private long toByteVal(char c) {
+        if (c == 'a') {
+            return 00;
+        }
+        if (c == 'c') {
+            return 01;
+        }
+        if (c == 'g') {
+            return 10;
+        }
+        if (c == 't') {
+            return 11;
+        }
+        return -1;
     }
 
     /**
@@ -99,10 +189,13 @@ public class TreeObjectNoE {
      * @return a String representation of a TreeObject
      */
     public String toString() {
-        if (treeObjectKey == -1) {
+        if (getLongKey() == -1) {
             return "null";
         }
-        return stringTreeObjectKey + ": " + frequency;
+        if (treeObjectKey == "") {
+            return Long.toBinaryString(keyLongVal) + ": " + frequency;
+        }
+        return treeObjectKey + ": " + frequency;
     }
 
 }
