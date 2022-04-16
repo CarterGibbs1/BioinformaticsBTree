@@ -190,8 +190,9 @@ public class BReadWrite {
 
 			// write to RAF: TODO: BTree get methods & maybe more info to write
 			buffer.putLong(-1); // root address
-			buffer.putInt(-1); // degree
-			buffer.putInt(-1); // frequency
+			buffer.putInt(-1);  // degree
+			buffer.putInt(-1);  // frequency
+			buffer.putInt(-1);  //number of nodes
 			// buffer.putInt(-1); //number of nodes? Height?
 
 			// make buffer ready to write and then write to RAF

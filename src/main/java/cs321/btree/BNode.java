@@ -25,7 +25,7 @@ public class BNode<E> {
 	private long parent; //parent address
 	private int n; //TODO: Not needed?
 	
-	private int address; //not written to RAF
+	private long address; //not written to RAF
 	
 	private static int degree; //shared degree amongst all BNodes
 	
