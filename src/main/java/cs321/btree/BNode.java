@@ -71,6 +71,7 @@ public class BNode<E> {
 		children.add(rightChild);
 		n = 1;
 		
+		address = thisAddress;
 		this.parent = parent;
 	}
 	

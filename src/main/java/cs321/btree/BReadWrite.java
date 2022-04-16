@@ -24,21 +24,29 @@ public class BReadWrite {
 
 	/**
 	 * Sets this class to read and write from the given Random Access File. If the
-	 * RAF does not exist a new one will be created with the given name.
+	 * file is to be replaced then it will be deleted and if the RAF does not exist
+	 * a new one will be created with the given name. 
 	 * <p>
 	 * This method must be called at least once before using Write and Read methods.
 	 * Not doing so will result in IllegalStateExceptions being thrown.
 	 * 
-	 * @param fileName Name of file to read from and possibly create as well
+	 * @param fileName Name of file to read from and to possibly create as well
+	 * @param replace  True to delete the file and replace it with a new one if it
+	 *                 exists
 	 * 
 	 * @throws IOException Creating RAF may throw exception
 	 */
 	@SuppressWarnings("resource")
-	static public void setRAF(String fileName) throws IOException {
+	static public void setRAF(String fileName, boolean replace) throws IOException {
 		File file = new File(fileName);
 		RandomAccessFile RAFRaw = null;
 
 		try {
+			//if the file exists and is to be replaced, delete it
+			if(file.exists() && replace) {
+				file.delete();
+			}
+			
 			// if file doesn't exist, create it
 			if (!file.exists()) {
 				file.createNewFile();
