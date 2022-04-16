@@ -4,6 +4,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
+
 public class BTreeTest
 {
 	//test 1
@@ -48,6 +50,10 @@ public class BTreeTest
 //        }
     }
 	//end of BTree tests
+    
+    //=================================================================================================================
+	//                                  Testing BNodes in Memory Only
+	//=================================================================================================================
 
     /**
      * Test that a BNode correctly inserts given elements in sorted order.
@@ -170,7 +176,9 @@ public class BTreeTest
     }
     
     
-    // The following are tests for TreeObject //
+    //=================================================================================================================
+	//                               Testing TreeObjects in Memory Only
+	//=================================================================================================================
 
     
 	/**
@@ -191,4 +199,55 @@ public class BTreeTest
 		assert(tO.compare(tOTwo) > 0);
 		assertEquals(tO.toString(), "tcacgaggtc: 5");
 	}
+	
+	
+    //=================================================================================================================
+	//                                  Testing BNodes using RAF
+	//=================================================================================================================
+	
+	/**
+	 * Test that a BNode with a few keys inserted and that is then written
+	 * to the RAF is the same as the one stored in memory.
+	 */
+	@Test
+	public void BNode_RAF_InsertWriteRead() {
+		try {
+	    	//                       57  12  8   59  7   10  44
+	    	String inputSequences = "TGC ATA AGA TGT ACT AGG GTA".toLowerCase();
+	    	
+	    	//set RAF, degree, and byteBuffer. Important that they are done in this order
+	    	BReadWrite.setRAF("TEST_BNode_RAF_InsertWriteRead");
+	    	BNode.setDegree(10);
+	    	BReadWrite.setBuffer(BNode.getDiskSize());
+	    	
+	    	//instantiate and populate BNode with inputLetters
+	    	BNode<String> memoryNode = new BNode<String>(new TreeObject<String>(inputSequences.substring(0, 3), 1), 0);
+	    	for(int i = 4; i < inputSequences.length(); i += 4) {
+	    		memoryNode.insert(new TreeObject<String>(inputSequences.substring(i, i + 3), 1));
+	    	}
+	    	
+	    	//read BNode in RAF
+	    	BNode<String> readNode = BReadWrite.readBNode(0);
+	    	
+	    	//see if the BNode contains sequences in order in long value,
+	    	//then check if the read BNode from the RAF is the same as the testNode
+	    	assertEquals(memoryNode.toString(), "7 8 10 12 44 57 59");
+	    	assertEquals(readNode.toString(), memoryNode.toString());
+		}
+		catch(IOException e) {
+			assert(false);
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
