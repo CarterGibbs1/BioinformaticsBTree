@@ -73,7 +73,7 @@ public class BReadWrite {
 	/**
 	 * Write the given BNode to the RAF at the specified address. Writes the n and
 	 * then the lists: child0, key0, child1, key1, child2 ... childn, keyn, childn +
-	 * 1.
+	 * 1 (long, long int, long, long int, long ....).
 	 * 
 	 * @param <E>     Generic type this BTree holds
 	 * @param node    BNode to write to RAF
@@ -149,14 +149,13 @@ public class BReadWrite {
 
 			// get first key and two children
 			long leftChild = buffer.getLong();
-			TreeObject<E> initialKey = new TreeObject<E>(null, buffer.getInt()); // TODO: additional TreeObject
-																					// constructor
+			TreeObject<E> initialKey = new TreeObject<E>(buffer.getLong(), buffer.getInt());
 			long rightChild = buffer.getLong();
 
 			// construct the return BNode and insert the other n - 1 keys and children
 			BNode<E> retNode = new BNode<E>(initialKey, address, parent, leftChild, rightChild);
 			for (int i = 1; i < n; i++) {
-				retNode.insert(new TreeObject<E>(null, buffer.getInt()), buffer.getLong());
+				retNode.insert(new TreeObject<E>(buffer.getLong(), buffer.getInt()), buffer.getLong());
 			}
 
 			return retNode;
@@ -167,7 +166,8 @@ public class BReadWrite {
 	}
 
 	/**
-	 * Write the given BTree to the RAF. Always rights to address 0. Automatically
+	 * Write the given BTree metadata to the RAF. Writes the root, degree,
+	 * frequency, and then numNodes Always rights to address 0. Automatically
 	 * sets the buffer capacity to the BNode disk size after running.
 	 * 
 	 * @param <E>  Generic type this BTree holds
@@ -182,18 +182,18 @@ public class BReadWrite {
 	static public <E> void writeBTree(BTree<E> tree)
 			throws IOException, BufferOverflowException, IllegalStateException {
 		try {
-			// set buffer capacity to match BTree size TODO: static BTree disk size method
+			// set buffer capacity to match BTree size
+			setBuffer(BTree.getDiskSize());
 
 			// start at 0 and make buffer ready to read
 			RAF.position(0);
 			buffer.clear();
 
-			// write to RAF: TODO: BTree get methods & maybe more info to write
-			buffer.putLong(-1); // root address
-			buffer.putInt(-1);  // degree
-			buffer.putInt(-1);  // frequency
-			buffer.putInt(-1);  //number of nodes
-			// buffer.putInt(-1); //number of nodes? Height?
+			//write metadata to RAF
+			buffer.putLong(tree.getRoot()); // root address
+			buffer.putInt(tree.getDegree());  // degree
+			buffer.putInt(tree.getFrequency());  // frequency
+			buffer.putInt(tree.getNumNodes());  //number of nodes
 
 			// make buffer ready to write and then write to RAF
 			buffer.flip();
@@ -224,7 +224,8 @@ public class BReadWrite {
 	 */
 	static public <E> BTree<E> readBTree() throws IOException, BufferUnderflowException, IllegalStateException {
 		try {
-			// set buffer capacity to match BTree size TODO: static BTree disk size method
+			// set buffer capacity to match BTree size
+			setBuffer(BTree.getDiskSize());
 
 			// start at 0 and make buffer ready to read
 			RAF.position(0);
@@ -232,17 +233,17 @@ public class BReadWrite {
 			RAF.read(buffer);
 			buffer.flip();
 
-			// get root address, sequence, and degree TODO: might be in different order/more
-			// stuff
+			//get metadata
 			long root = buffer.getInt();
-			int k = buffer.getInt();
+			int k = buffer.getInt(); //TODO: variables could be shorts, save barely on storage size
 			int t = buffer.getInt();
+			int numNodes = buffer.getInt();
 
-			// initialize BTree and return TODO: no proper constructor
-			BTree<E> retTree = new BTree<E>(t);
+			// initialize BTree and return 
+			BTree<E> retTree = new BTree<E>(t, k, numNodes, root);
 
 			// set static BNode degree
-			BNode.setDegree(t);
+			BNode.setDegree(retTree.getDegree());
 
 			// reset buffer capacity to match BNode size
 			setBuffer(BNode.getDiskSize());
