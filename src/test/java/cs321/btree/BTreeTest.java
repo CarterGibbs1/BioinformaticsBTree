@@ -8,6 +8,9 @@ import java.io.IOException;
 
 public class BTreeTest
 {
+	//folder location that RAFs and dumps go to
+	static private final String TESTS_FOLDER = "./results/tests/";
+	
 	//test 1
 //	@Test
 //	public void btreeTestOne() {
@@ -206,7 +209,7 @@ public class BTreeTest
 	//=================================================================================================================
 	
 	/**
-	 * Test that a BNode with a few keys inserted and that is then written
+	 * Test that a single BNode with a few keys inserted and that is then written
 	 * to the RAF is the same as the one stored in memory.
 	 */
 	@Test
@@ -216,7 +219,7 @@ public class BTreeTest
 	    	String inputSequences = "TGC ATA AGA TGT ACT AGG GTA".toLowerCase();
 	    	
 	    	//set RAF, degree, and byteBuffer. Important that they are done in this order
-	    	BReadWrite.setRAF("TEST_BNode_RAF_InsertWriteRead");
+	    	BReadWrite.setRAF(TESTS_FOLDER + "TEST_BNode_RAF_InsertWriteRead");
 	    	BNode.setDegree(10);
 	    	BReadWrite.setBuffer(BNode.getDiskSize());
 	    	
@@ -229,9 +232,9 @@ public class BTreeTest
 	    	//read BNode in RAF
 	    	BNode<String> readNode = BReadWrite.readBNode(0);
 	    	
-	    	//see if the BNode contains sequences in order in long value,
-	    	//then check if the read BNode from the RAF is the same as the testNode
+	    	//see if memoryNode contains sequences in order in long value,
 	    	assertEquals(memoryNode.toString(), "7 8 10 12 44 57 59");
+	    	//then check if readNode from the RAF is the same as the memoryNode
 	    	assertEquals(readNode.toString(), memoryNode.toString());
 		}
 		catch(IOException e) {
