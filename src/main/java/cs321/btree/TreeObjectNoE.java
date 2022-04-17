@@ -73,7 +73,7 @@ public class TreeObjectNoE {
             longKey += "0";
         }
         longKey += longKeyOG;
-        longKey = longKey.substring(0, longKey.length() - stringLength - 1);
+        longKey = longKey.substring(0, longKeyOG.length() + stringLength - 1);
         String stringKey = "";
         for (int j = 0; j < longKey.length(); j += 2) {
             stringKey += numToLetter(longKey.substring(j, j + 2));
