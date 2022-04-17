@@ -94,6 +94,7 @@ public class BNode<E> {
 	 * Constructor: Create singular BNode with one key initialKey.
 	 * 
 	 * @param intialKey the initial object in this BNode
+	 * @param thisAddress address of this BNode
 	 * 
 	 * @throws IllegalStateException Static degree has not been set
 	 */
@@ -210,7 +211,7 @@ public class BNode<E> {
 		//Keys     -  a b c d e f g
 		//Pointers - 0 1 2 3 4 5 6 7
 		
-		int originalN = keys.size();
+		int originalN = n;
 		BNode<E> parentNode; //TODO: parent can be kept by BTree and passed in for performance increase
 		
 		
@@ -246,6 +247,12 @@ public class BNode<E> {
 		else {
 			parentNode = BReadWrite.readBNode(parent); //TODO: see other parentNode todo, prevent read here
 			parentNode.insertNoWrite(keys.removeLast(), splitRight.getAddress());
+		}
+		
+		//if the split is happening on a non-leaf, reassign splitRight's children's parents
+		//TODO: I think this is very inefficient, but it's the best I could come up with right now =====================================================
+		if(!isLeaf()) {
+			BReadWrite.reassignParents(splitRight);
 		}
 		
 		//write changed BNodes to RAF
@@ -287,6 +294,15 @@ public class BNode<E> {
 	 */
 	public long getParent() {
 		return parent;
+	}
+	
+	/**
+	 * Set the address of this BNode's parent in the RAF.
+	 * 
+	 * @param parent New parent address of this BNode
+	 */
+	public void setParent(long parent) {
+		this.parent = parent;
 	}
 	
 	/**
@@ -333,6 +349,46 @@ public class BNode<E> {
 	public boolean isFull() {
 		return ((2 * degree ) - 1) == keys.size();
 	}
+	
+	//incomplete equals method, may be needed later
+//	@SuppressWarnings("unchecked")
+//	@Override
+//	public boolean equals(Object otherObject) {
+//		//check if other object is null
+//		if(otherObject == null) {
+//			return false;
+//		}
+//		
+//		//check if other object is not the same as this class
+//		if(otherObject.getClass() != this.getClass()) {
+//			return false;
+//		}
+//		
+//		//can 'safely' cast otherObject to HashObject and do actual comparison
+//		BNode<E> other = (BNode<E>) otherObject;
+//		
+//		//check that all children are the same
+//		if(children.size() != other.children.size()) {
+//			return false;
+//		}
+//		for(int i = 0; i < children.size(); i++) {
+//			if(children.get(i) != other.children.get(i)) {
+//				return false;
+//			}
+//		}
+//		
+//		//check that all keys are the same
+//		if(keys.size() != other.keys.size()) {
+//			return false;
+//		}
+//		for(int i = 0; i < keys.size(); i++) {
+//			if(keys.get(i).compare(other.keys.get(i)) != 0) {
+//				return false;
+//			}
+//		}
+//		
+//		return address == other.address;
+//	}
 	
 	//most likely temporary toString.
 	//returns long value for each key in a single String separated by spaces

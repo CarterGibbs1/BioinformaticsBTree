@@ -423,7 +423,7 @@ public class BTreeTest
 	@Test
 	public void BNode_RAF_RAFAppropriateSize() {
 		try {
-			ArrayList<String> inputSequences = generateRandomSequences(30, 60);
+			ArrayList<String> inputSequences = generateRandomSequences(100, 300);
 			ArrayList<TreeObject<String>> insertedSequences = new ArrayList<TreeObject<String>>();
 	    	
 	    	//delete old RAF and set new RAF, degree, and byteBuffer. Important that they are done in this order
@@ -434,18 +434,21 @@ public class BTreeTest
 	    	
 	    	//create a rudimentary BTree to insert into while counting the total BNode amount
 	    	insertedSequences.add(new TreeObject<String>(inputSequences.get(0), 1));
-	    	BNode<String> root = new BNode<String>(insertedSequences.get(0), BTree.getDiskSize());
+	    	long root = BTree.getDiskSize();
 	    	
+	    	//create and write initial BNode to RAF
 	    	BNode<String> currentNode;
+	    	BReadWrite.writeBNode(new BNode<String>(insertedSequences.get(0), root));
 	    	int numNodes = 1;
 	    	
 	    	for(int i = 1; i < inputSequences.size(); i++) {
-	    		currentNode = root;
+	    		currentNode = BReadWrite.readBNode(root);
 	    		insertedSequences.add(new TreeObject<String>(inputSequences.get(i), 1));
 	    		
-	    		//if root is full, split it
-	    		if(root.isFull()) {
-		    		root = currentNode = BReadWrite.readBNode(currentNode.split());
+	    		//if currentNode(root) is full, split it
+	    		if(currentNode.isFull()) {
+	    			root = currentNode.split();
+		    		currentNode = BReadWrite.readBNode(root);
 		    		numNodes += 2;
 	    		}
 	    		
@@ -455,6 +458,9 @@ public class BTreeTest
 	
 	    			//if the currentNode is full, split it
 	    			if(currentNode.isFull()) {
+	    				if(!currentNode.isLeaf()) {
+	    					BReadWrite.getNextAddress();
+	    				}
 		    			currentNode = BReadWrite.readBNode(currentNode.split());
 		    			numNodes++;
 	    			}

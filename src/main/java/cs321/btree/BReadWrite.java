@@ -267,6 +267,42 @@ public class BReadWrite {
 	}
 	
 	/**
+	 * Rewrites all the parents of the children of the given BNode. Useful after
+	 * splitting a non-leaf BNode.
+	 * 
+	 * @param <E> Generic type this BTree holds
+	 * 
+	 * @param right The right BNode created after a split
+	 * 
+	 * @throws IOException              Reading RAF may throw exception
+	 * @throws BufferUnderflowException Indicates buffer capacity was incorrect for
+	 *                                  what is was reading
+	 * @throws IllegalStateException    If thrown, it's likely RAF or buffer have
+	 *                                  not been set
+	 */
+	static public <E> void reassignParents(BNode<E> right) throws IOException, BufferUnderflowException, IllegalStateException {
+		try {
+			//set buffer capacity to just a single long/address
+			setBuffer(8);
+			
+			//for each child in right, rewrite the parent address to point at right
+			for(Long child : right.getChildren()) {
+				RAF.position(child);
+				buffer.clear();
+				buffer.putLong(right.getAddress());
+				buffer.flip();
+				RAF.write(buffer);
+			}
+			
+			//reset the buffer to BNode
+			setBuffer(BNode.getDiskSize());
+		} catch (NullPointerException e) {
+			throw new IllegalStateException(
+					e.getClass() + " thrown, may indicate that RAF or buffer have not been set properly.");
+		}
+	}
+	
+	/**
 	 * Get the next available address in the RAF, i.e. the end of the RAF.
 	 * 
 	 * @return The next available address in the RAF.
