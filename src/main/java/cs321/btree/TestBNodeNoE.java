@@ -1,9 +1,6 @@
 
 package cs321.btree;
 
-import java.io.IOException;
-import java.util.LinkedList;
-
 /**
  * Used to create TestBNodeNoE objects that hold Generic Type (passed down by
  * the BTree they belong to) objects. Notable methods are insert(),
@@ -19,14 +16,18 @@ public class TestBNodeNoE {
     //TODO: Add cache functionality
 
     //child0 <= key0 <= child1 <= key1 <= child2 ... childn <= keyn <= childn + 1
-    private LinkedList<TreeObjectNoE> keys; //objects/keys in this node, also size() = n
-    private LinkedList<Long> children;      //addresses to the children of this node
+    private TreeObjectNoE[] keys; //objects/keys in this node, also size() = n
+    private long[] children;      //allocated addresses for each child
 
-    private long parent; //parent address
+    private long parent;//parent address
 
-    private long address; //not written to RAF
+    private long address;//not written to RAF
 
-    private static int degree; //shared degree amongst all BNodes
+    private static int degree;//shared degree amongst all BNodes
+
+    private boolean isLeaf;//needed to implement the algorithms
+
+    private int n;// it's needed to implement the algorithms
 
     //=================================================================================================================
     //                                               CONSTRUCTORS
@@ -56,20 +57,31 @@ public class TestBNodeNoE {
      *                / \
      */
     public TestBNodeNoE(TreeObjectNoE initialKey, long thisAddress, long parent, long leftChild, long rightChild) throws IllegalStateException {
+        setDegree(degree);
         //check that DEGREE has been set
         if(degree < 1) {
             throw new IllegalStateException("Degree is an invalid value. It might have not been set before BNodes are used.");
         }
 
         //initialize instance variables
-        keys = new LinkedList<TreeObjectNoE>();
-        children = new LinkedList<Long>();
-
-        keys.add(initialKey);
-        children.add(leftChild);
-        children.add(rightChild);
-
-        this.parent = parent;
+        keys = new TreeObjectNoE[2 * degree];
+        children = new long[2 * degree + 1];
+        for (int i = 0; i < children.length; i++) {
+            children[i] = -1;
+        }
+        if (initialKey != null) {
+            keys[0] = initialKey;
+        }
+        if (leftChild != -1) {
+            children[0] = leftChild;
+        }
+        if (rightChild != -1) {
+            children[1] = rightChild;
+        }
+        this.address = thisAddress;
+        this.parent = -1;
+        this.isLeaf = true;
+        this.n = 0;
     }
 
     /**
@@ -98,11 +110,18 @@ public class TestBNodeNoE {
         this(initialKey, address, -1, -1, -1);
     }
 
-    public TestBNodeNoE() {//for testing purposes, blank node
-        keys = new LinkedList<TreeObjectNoE>();
-        children = new LinkedList<Long>();
+    public TestBNodeNoE(long address) {//for testing purposes, blank node
+        this(null, address, -1, -1, -1);
+    }
+
+    public TestBNodeNoE(long address, int degree) {//for testing purposes, blank node
+        setDegree(degree);
+        keys = new TreeObjectNoE[2 * degree];
+        children = new long[2 * degree + 1];
+        this.address = address;
         this.parent = -1;
-        setDegree(2);
+        this.isLeaf = true;
+        this.n = 0;
     }
 
     //=================================================================================================================
@@ -131,20 +150,20 @@ public class TestBNodeNoE {
      * keys     -  a b c d e f
      * children - # # # * # # #
      */
-    public void insert(TreeObjectNoE key, long child, boolean write) throws IOException {
-
-        //get to the index of the first k less than key
-        int i;
-        for(i = ( keys.size() - 1); i >= 0 && key.compare(keys.get(i)) <= 0; i--){}
-
-        //add new key and child to lists
-        keys.add(i + 1, key);
-        children.add(i + 2, child);
-
-        if(write) {
-            //BReadWrite.writeBNode(this);
-        }
-    }
+//    public void insert(TreeObjectNoE key, long child, boolean write) /*throws IOException*/ {
+//
+//        //get to the index of the first k less than key
+//        int i;
+//        for(i = ( keys.size() - 1); i >= 0 && key.compare(keys.get(i)) <= 0; i--){}
+//
+//        //add new key and child to lists
+//        keys.add(i + 1, key);
+//        children.add(i + 2, child);
+//
+//        if(write) {
+//            //BReadWrite.writeBNode(this);
+//        }
+//    }
 
     /**
      * Insert the given key into this TestBNodeNoE. Should only be used on leaf
@@ -156,9 +175,9 @@ public class TestBNodeNoE {
      *
      * @throws IOException Writing to RAF may throw exception
      */
-    public void insert(TreeObjectNoE key) throws IOException {
-        insert(key, -1, true);
-    }
+//    public void insert(TreeObjectNoE key) /*throws IOException*/ {
+//        insert(key, -1, true);
+//    }
 
     /**
      * Insert the given key into this TestBNodeNoE and insert the given child
@@ -170,28 +189,28 @@ public class TestBNodeNoE {
      *
      * @throws IOException Writing to RAF may throw exception
      */
-    public void insertNoWrite(TreeObjectNoE key, long child) throws IOException {
-        insert(key, child, false);
-    }
+//    public void insertNoWrite(TreeObjectNoE key, long child) /*throws IOException*/ {
+//        insert(key, child, false);
+//    }
 
-    /**
-     * Get the child of this TestBNodeNoE where the given key should be
-     * inserted or would be located. Does NOT insert the key, only
-     * returns the subtree that it belongs to.
-     *
-     * @param  key Object to use to locate the appropriate subtree
-     *
-     * @return subtree address (child of this TestBNodeNoE) that key
-     *         belongs to
-     */
-    public long getSubtree(TreeObjectNoE key){
-
-        //get to the index of the first k less than key
-        int i;
-        for(i = ( keys.size() - 1); i >= 0 && key.compare(keys.get(i)) <= 0; i--){}
-
-        return children.get(i + 1);
-    }
+//    /**
+//     * Get the child of this TestBNodeNoE where the given key should be
+//     * inserted or would be located. Does NOT insert the key, only
+//     * returns the subtree that it belongs to.
+//     *
+//     * @param  key Object to use to locate the appropriate subtree
+//     *
+//     * @return subtree address (child of this TestBNodeNoE) that key
+//     *         belongs to
+//     */
+//    public long getSubtree(TreeObjectNoE key){
+//
+//        //get to the index of the first k less than key
+//        int i;
+//        for(i = ( keys.size() - 1); i >= 0 && key.compare(keys.get(i)) <= 0; i--){}
+//
+//        return children.get(i + 1);
+//    }
 
     /**
      * Splits the current TestBNodeNoE into two new BNodes, removing and
@@ -271,7 +290,11 @@ public class TestBNodeNoE {
      * @return Number of objects in this TestBNodeNoE
      */
     public int getN() {
-        return keys.size();
+        return n;
+    }
+
+    public void setN(int newN) {
+        this.n = newN;
     }
 
     /**
@@ -297,19 +320,16 @@ public class TestBNodeNoE {
      *
      * @return LinkedList of TreeObjects
      */
-    public LinkedList<TreeObjectNoE> getKeys(){
-        return keys;
+    public TreeObjectNoE[] getKeys(){
+        return keys;//copy maybe later for encapsulation
     }
 
     public TreeObjectNoE getKey(int index) {
-        return keys.get(index);
+        return keys[index];
     }
 
     public void setKey(int index, TreeObjectNoE newKey) {
-        if (index >= keys.size()) {
-            keys.add(index, newKey);
-        }
-        keys.set(index, newKey);
+        keys[index] = newKey;
     }
 
     /**
@@ -317,8 +337,15 @@ public class TestBNodeNoE {
      *
      * @return LinkedList of longs
      */
-    public LinkedList<Long> getChildren(){
+    public long[] getChildren(){
         return children;
+    }
+
+    public void setChild(int index, long l) {
+        if (index >= children.length) {
+            return;
+        }
+        children[index] = l;
     }
 
     /**
@@ -327,10 +354,11 @@ public class TestBNodeNoE {
      * @return true if leaf, false otherwise
      */
     public boolean isLeaf() {
-        if (children.size() == 0) {
-            return true;
-        }
-        return children.get(0) < 0;
+        return isLeaf;
+    }
+
+    public void setLeaf(boolean isLeaf) {
+        this.isLeaf = isLeaf;
     }
 
     /**
@@ -348,14 +376,26 @@ public class TestBNodeNoE {
      * @return true is full, false otherwise
      */
     public boolean isFull() {
-        return ((2 * degree ) - 1) == keys.size();
+        return ((2 * degree ) - 1) == keys.length;
     }
 
     //most likely temporary toString.
     //returns String value for each key in a single String separated by spaces
     @Override
     public String toString() {
-        return keys.toString();
+        String s = "Keys: ";
+        if (n > 0) {
+            for (int i = 0; i < n; i++) {
+                s += keys[i].toString();
+            }
+        }
+        s += "| Children: ";
+        for (long l : children) {
+            if (l != -1) {
+                s += l + " ";
+            }
+        }
+        return s;
     }
 
     //=================================================================================================================

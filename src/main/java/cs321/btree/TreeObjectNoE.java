@@ -7,6 +7,7 @@ package cs321.btree;
 
 
 
+
 /**
  * An object that is to be stored in a BTree. Specific placement in the BTree is
  * determined by previous TreeObjects and key values. A notable method is
@@ -36,7 +37,7 @@ public class TreeObjectNoE {
      */
     public TreeObjectNoE(String treeObjectKey, int frequency) {
         this.treeObjectKey = treeObjectKey;
-        this.keyLongVal = getLongKey();
+        this.keyLongVal = setLongKey();
         this.frequency = frequency;
     }
 
@@ -89,7 +90,7 @@ public class TreeObjectNoE {
      * Coverts 2-bit binary String to it's corresponding letter.
      *
      * @param num the String representation of the 2-bit binary number
-     * @return the String of the corresponding letter
+     * @return the String of the corresponding letter, blank string if num isn't listed below
      */
     private String numToLetter(String num) {
         if (num.equals("00")) {
@@ -121,11 +122,15 @@ public class TreeObjectNoE {
         this.frequency = newFrequency;
     }
 
-    public long getLongKey() {
+    public long setLongKey() {
         if (keyLongVal == -1) {
             return -1;
         }
         return byteShift(treeObjectKey);
+    }
+
+    public long getLongKey() {
+        return keyLongVal;
     }
 
     /**
@@ -192,7 +197,7 @@ public class TreeObjectNoE {
      * @return a String representation of a TreeObject
      */
     public String toString() {
-        if (getLongKey() == -1) {
+        if (getLongKey() == -1 || this.treeObjectKey.equals(null)) {
             return "null";
         }
         if (treeObjectKey == "") {
