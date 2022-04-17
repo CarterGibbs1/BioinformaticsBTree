@@ -11,15 +11,13 @@ import java.util.LinkedList;
  * 
  * @author  Mesa Greear
  * @version Spring 2022
- *
- * @param <E> Generic Type for this BNode to hold
  */
-public class BNode<E> {
+public class BNode {
 	
 	//TODO: Add cache functionality
 
 	//child0 <= key0 <= child1 <= key1 <= child2 ... childn <= keyn <= childn + 1
-	private LinkedList<TreeObject<E>> keys; //objects/keys in this node, also size() = n
+	private LinkedList<TreeObject<String>> keys; //objects/keys in this node, also size() = n
 	private LinkedList<Long> children;      //addresses to the children of this node 
 	
 	private long parent; //parent address
@@ -56,14 +54,14 @@ public class BNode<E> {
 	 *                 a
 	 *                / \
 	 */
-	public BNode(TreeObject<E> initialKey, long thisAddress, long parent, long leftChild, long rightChild) throws IllegalStateException {
+	public BNode(TreeObject<String> initialKey, long thisAddress, long parent, long leftChild, long rightChild) throws IllegalStateException {
 		//check that DEGREE has been set
 		if(degree < 1) {
 			throw new IllegalStateException("Degree is an invalid value. It might have not been set before BNodes are used.");
 		}
 		
 		//initialize instance variables
-		keys = new LinkedList<TreeObject<E>>();
+		keys = new LinkedList<TreeObject<String>>();
 		children = new LinkedList<Long>();
 		
 		keys.add(initialKey);
@@ -86,7 +84,7 @@ public class BNode<E> {
 	 * 
 	 * @throws IllegalStateException Static degree has not been set
 	 */
-	public BNode(TreeObject<E> initialKey, long address, long parent) throws IllegalStateException {
+	public BNode(TreeObject<String> initialKey, long address, long parent) throws IllegalStateException {
 		this(initialKey, address, parent, -1, -1);
 	}
 	
@@ -98,7 +96,7 @@ public class BNode<E> {
 	 * 
 	 * @throws IllegalStateException Static degree has not been set
 	 */
-	public BNode(TreeObject<E> initialKey, long address) throws IllegalStateException {
+	public BNode(TreeObject<String> initialKey, long address) throws IllegalStateException {
 		this(initialKey, address, -1, -1, -1);
 	}
 	
@@ -128,7 +126,7 @@ public class BNode<E> {
 	 * keys     -  a b c d e f
 	 * children - # # # * # # #
 	 */
-	public void insert(TreeObject<E> key, long child, boolean write) throws IOException {
+	public void insert(TreeObject<String> key, long child, boolean write) throws IOException {
 		
 		//get to the index of the first k less than key
 		int i;
@@ -154,7 +152,7 @@ public class BNode<E> {
 	 * 
 	 * @throws IOException Writing to RAF may throw exception
 	 */
-	public void insert(TreeObject<E> key) throws IOException {
+	public void insert(TreeObject<String> key) throws IOException {
 		insert(key, -1, true);
 	}
 	
@@ -168,7 +166,7 @@ public class BNode<E> {
 	 * 
 	 * @throws IOException Writing to RAF may throw exception
 	 */
-	public void insertNoWrite(TreeObject<E> key, long child) throws IOException {
+	public void insertNoWrite(TreeObject<String> key, long child) throws IOException {
 		insert(key, child, false);
 	}
 	
@@ -182,7 +180,7 @@ public class BNode<E> {
 	 * @return subtree address (child of this BNode) that key
 	 *         belongs to
 	 */
-	public long getSubtree(TreeObject<E> key){
+	public long getSubtree(TreeObject<String> key){
 		
 		//get to the index of the first k less than key
 		int i;
@@ -212,13 +210,13 @@ public class BNode<E> {
 		//Pointers - 0 1 2 3 4 5 6 7
 		
 		int originalN = n;
-		BNode<E> parentNode; //TODO: parent can be kept by BTree and passed in for performance increase
+		BNode parentNode; //TODO: parent can be kept by BTree and passed in for performance increase
 		
 		
 		//remove key and two pointers right of middle and insert into new BNode 'splitRight':
 		//Keys     -  a b c d f g    |  e
 		//Pointers - 0 1 2 3   6 7   | 4 5
-		BNode<E> splitRight = new BNode<E>(keys.remove(keys.size()/2 + 1), BReadWrite.getNextAddress(), parent, children.remove(children.size()/2), children.remove(children.size()/2 + 1));
+		BNode splitRight = new BNode(keys.remove(keys.size()/2 + 1), BReadWrite.getNextAddress(), parent, children.remove(children.size()/2), children.remove(children.size()/2 + 1));
 		
 		//starting just to the right of the middle of this BNode, continuously remove the pointers and keys
 		//at that position and insert them into splitRight:
@@ -241,7 +239,7 @@ public class BNode<E> {
 		if(isRoot()) {
 			//                                           Already new node 'splitRight' at getNextAddress, so
 			//                                           have to compensate with additional offset getDiskSize
-			parentNode = new BNode<E>(keys.removeLast(), BReadWrite.getNextAddress() + BNode.getDiskSize(), -1, address, splitRight.getAddress());
+			parentNode = new BNode(keys.removeLast(), BReadWrite.getNextAddress() + BNode.getDiskSize(), -1, address, splitRight.getAddress());
 			this.parent = splitRight.parent = parentNode.getAddress();
 		}
 		else {
@@ -310,7 +308,7 @@ public class BNode<E> {
 	 * 
 	 * @return LinkedList of TreeObjects
 	 */
-	public LinkedList<TreeObject<E>> getKeys(){
+	public LinkedList<TreeObject<String>> getKeys(){
 		return keys;
 	}
 	

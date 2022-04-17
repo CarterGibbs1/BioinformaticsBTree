@@ -345,13 +345,13 @@ public class BTreeTest
 	    	BReadWrite.setBuffer(BNode.getDiskSize());
 	    	
 	    	//instantiate and populate BNode with inputLetters
-	    	BNode<String> memoryNode = new BNode<String>(new TreeObject<String>(inputSequences.substring(0, 3), 1), BTree.getDiskSize());
+	    	BNode memoryNode = new BNode(new TreeObject<String>(inputSequences.substring(0, 3), 1), BTree.getDiskSize());
 	    	for(int i = 4; i < inputSequences.length(); i += 4) {
 	    		memoryNode.insert(new TreeObject<String>(inputSequences.substring(i, i + 3), 1));
 	    	}
 	    	
 	    	//read BNode in RAF
-	    	BNode<String> readNode = BReadWrite.readBNode(BTree.getDiskSize());
+	    	BNode readNode = BReadWrite.readBNode(BTree.getDiskSize());
 	    	
 	    	//see if memoryNode contains sequences in order in long value,
 	    	assertEquals(memoryNode.toString(), "7 8 10 12 44 57 59");
@@ -372,9 +372,9 @@ public class BTreeTest
 		try {
 			//                       180  59   108  14   103  46   118
 			String inputSequences = "GTCA ATGT CGTA AATG CGCT AGTG CTCG".toLowerCase();
-			BNode<String> readNode;
-			BNode<String> readParent;
-			BNode<String> readRight;
+			BNode readNode;
+			BNode readParent;
+			BNode readRight;
 	    	
 	    	//delete old RAF and set new RAF, degree, and byteBuffer. Important that they are done in this order
 	    	BReadWrite.setRAF(TESTS_FOLDER + "BNode_RAF_SplitWriteRead", true);
@@ -382,7 +382,7 @@ public class BTreeTest
 	    	BReadWrite.setBuffer(BNode.getDiskSize());
 	    	
 	    	//instantiate and populate BNode with inputLetters
-	    	BNode<String> memoryNode = new BNode<String>(new TreeObject<String>(inputSequences.substring(0, 4), 1), BTree.getDiskSize());
+	    	BNode memoryNode = new BNode(new TreeObject<String>(inputSequences.substring(0, 4), 1), BTree.getDiskSize());
 	    	for(int i = 5; i < inputSequences.length(); i += 5) {
 	    		memoryNode.insert(new TreeObject<String>(inputSequences.substring(i, i + 4), 1));
 	    	}
@@ -437,8 +437,8 @@ public class BTreeTest
 	    	long root = BTree.getDiskSize();
 	    	
 	    	//create and write initial BNode to RAF
-	    	BNode<String> currentNode;
-	    	BReadWrite.writeBNode(new BNode<String>(insertedSequences.get(0), root));
+	    	BNode currentNode;
+	    	BReadWrite.writeBNode(new BNode(insertedSequences.get(0), root));
 	    	int numNodes = 1;
 	    	
 	    	for(int i = 1; i < inputSequences.size(); i++) {

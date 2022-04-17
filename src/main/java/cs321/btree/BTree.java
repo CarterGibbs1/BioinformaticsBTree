@@ -9,10 +9,8 @@ import java.io.IOException;
  *
  * @author  Carter Gibbs, Mesa Greear
  * @version Spring 2022
- *
- * @param <E> Generic Type for this BNode to hold
  */
-public class BTree<E>
+public class BTree
 {
 
     private long root;
@@ -53,7 +51,7 @@ public class BTree<E>
      * 
      * @throws IOException
      */
-    public BTree(int degree, int k, BNode<E> initialNode) throws IOException {
+    public BTree(int degree, int k, BNode initialNode) throws IOException {
     	this(degree, k, 1, getDiskSize()); //FIXME: should write new root to just after BTree Metadata, but idk
     	BReadWrite.writeBNode(initialNode);
     }

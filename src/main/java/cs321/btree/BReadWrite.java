@@ -86,7 +86,6 @@ public class BReadWrite {
 	 * then the lists: child0, key0, child1, key1, child2 ... childn, keyn, childn +
 	 * 1 (long, long int, long, long int, long ....).
 	 * 
-	 * @param <E>     Generic type this BTree holds
 	 * @param node    BNode to write to RAF
 	 * @param address Address to write this BNode to
 	 * 
@@ -96,7 +95,7 @@ public class BReadWrite {
 	 * @throws IllegalStateException   If thrown, it's likely RAF or buffer have not
 	 *                                 been set
 	 */
-	static public <E> void writeBNode(BNode<E> node)
+	static public void writeBNode(BNode node)
 			throws IOException, BufferOverflowException, IllegalStateException {
 		try {
 			// start at address and make buffer ready to read
@@ -111,7 +110,7 @@ public class BReadWrite {
 
 			// get children and keys
 			LinkedList<Long> children = node.getChildren();
-			LinkedList<TreeObject<E>> keys = node.getKeys();
+			LinkedList<TreeObject<String>> keys = node.getKeys();
 
 			// write the children and keys in alternating order
 			buffer.putLong(children.get(0));
@@ -134,7 +133,6 @@ public class BReadWrite {
 	/**
 	 * Reads and returns the BNode stored at the given address.
 	 * 
-	 * @param <E>     Generic type this BTree holds
 	 * @param address Address that BNode is located
 	 * 
 	 * @return BNode stored in RAF at the given address
@@ -145,7 +143,7 @@ public class BReadWrite {
 	 * @throws IllegalStateException    If thrown, it's likely RAF or buffer have
 	 *                                  not been set
 	 */
-	static public <E> BNode<E> readBNode(long address)
+	static public BNode readBNode(long address)
 			throws IOException, BufferUnderflowException, IllegalStateException {
 		try {
 			// start at address and make buffer ready to read
@@ -160,13 +158,13 @@ public class BReadWrite {
 
 			// get first key and two children
 			long leftChild = buffer.getLong();
-			TreeObject<E> initialKey = new TreeObject<E>(buffer.getLong(), buffer.getInt());
+			TreeObject<String> initialKey = new TreeObject<String>(buffer.getLong(), buffer.getInt());
 			long rightChild = buffer.getLong();
 
 			// construct the return BNode and insert the other n - 1 keys and children
-			BNode<E> retNode = new BNode<E>(initialKey, address, parent, leftChild, rightChild);
+			BNode retNode = new BNode(initialKey, address, parent, leftChild, rightChild);
 			for (int i = 1; i < n; i++) {
-				retNode.insertNoWrite(new TreeObject<E>(buffer.getLong(), buffer.getInt()), buffer.getLong());
+				retNode.insertNoWrite(new TreeObject<String>(buffer.getLong(), buffer.getInt()), buffer.getLong());
 			}
 
 			return retNode;
@@ -181,7 +179,6 @@ public class BReadWrite {
 	 * frequency, and then numNodes Always rights to address 0. Automatically
 	 * sets the buffer capacity to the BNode disk size after running.
 	 * 
-	 * @param <E>  Generic type this BTree holds
 	 * @param tree BTree to write to RAF
 	 * 
 	 * @throws IOException             Writing to RAF may throw exception
@@ -190,7 +187,7 @@ public class BReadWrite {
 	 * @throws IllegalStateException   If thrown, it's likely RAF or buffer have not
 	 *                                 been set
 	 */
-	static public <E> void writeBTree(BTree<E> tree)
+	static public void writeBTree(BTree tree)
 			throws IOException, BufferOverflowException, IllegalStateException {
 		try {
 			// set buffer capacity to match BTree size
@@ -223,8 +220,6 @@ public class BReadWrite {
 	 * degree to match the BTree degree. Automatically sets the buffer capacity to
 	 * the BNode disk size after running.
 	 * 
-	 * @param <E> Generic type this BTree holds
-	 * 
 	 * @return BTree at beginning of RAF
 	 * 
 	 * @throws IOException              Reading RAF may throw exception
@@ -233,7 +228,7 @@ public class BReadWrite {
 	 * @throws IllegalStateException    If thrown, it's likely RAF or buffer have
 	 *                                  not been set
 	 */
-	static public <E> BTree<E> readBTree() throws IOException, BufferUnderflowException, IllegalStateException {
+	static public BTree readBTree() throws IOException, BufferUnderflowException, IllegalStateException {
 		try {
 			// set buffer capacity to match BTree size
 			setBuffer(BTree.getDiskSize());
@@ -251,7 +246,7 @@ public class BReadWrite {
 			int numNodes = buffer.getInt();
 
 			// initialize BTree and return 
-			BTree<E> retTree = new BTree<E>(t, k, numNodes, root);
+			BTree retTree = new BTree(t, k, numNodes, root);
 
 			// set static BNode degree
 			BNode.setDegree(retTree.getDegree());
@@ -270,8 +265,6 @@ public class BReadWrite {
 	 * Rewrites all the parents of the children of the given BNode. Useful after
 	 * splitting a non-leaf BNode.
 	 * 
-	 * @param <E> Generic type this BTree holds
-	 * 
 	 * @param right The right BNode created after a split
 	 * 
 	 * @throws IOException              Reading RAF may throw exception
@@ -280,7 +273,7 @@ public class BReadWrite {
 	 * @throws IllegalStateException    If thrown, it's likely RAF or buffer have
 	 *                                  not been set
 	 */
-	static public <E> void reassignParents(BNode<E> right) throws IOException, BufferUnderflowException, IllegalStateException {
+	static public void reassignParents(BNode right) throws IOException, BufferUnderflowException, IllegalStateException {
 		try {
 			//set buffer capacity to just a single long/address
 			setBuffer(8);
