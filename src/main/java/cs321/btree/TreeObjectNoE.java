@@ -73,9 +73,9 @@ public class TreeObjectNoE {
             longKey += "0";
         }
         longKey += longKeyOG;
-        longKey = longKey.substring(longKey.length() - stringLength);
+        longKey = longKey.substring(0, longKey.length() - stringLength - 1);
         String stringKey = "";
-        for (int j = 0; j < stringLength - 2; j += 2) {
+        for (int j = 0; j < longKey.length(); j += 2) {
             stringKey += numToLetter(longKey.substring(j, j + 2));
         }
 
@@ -89,16 +89,16 @@ public class TreeObjectNoE {
      * @return the String of the corresponding letter
      */
     private String numToLetter(String num) {
-        if (num == "00") {
+        if (num.equals("00")) {
             return "a";
         }
-        if (num == "01") {
+        if (num.equals("01")) {
             return "c";
         }
-        if (num == "10") {
+        if (num.equals("10")) {
             return "g";
         }
-        if (num == "11") {
+        if (num.equals("11")) {
             return "t";
         }
         return "";
