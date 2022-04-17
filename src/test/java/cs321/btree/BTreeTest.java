@@ -6,12 +6,13 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Random;
 
 public class BTreeTest
 {
 	//folder location that RAFs and dumps go to
-	static private final String TESTS_FOLDER = "./results/tests/";
+	static private final String TESTS_FOLDER = "./results/tests/TEST_";
 	static private final Random random = new Random();
 	static private final String VALID_LETTERS = "atcg";
 	
@@ -339,18 +340,18 @@ public class BTreeTest
 	    	String inputSequences = "TGC ATA AGA TGT ACT AGG GTA".toLowerCase();
 	    	
 	    	//delete old RAF and set new RAF, degree, and byteBuffer. Important that they are done in this order
-	    	BReadWrite.setRAF(TESTS_FOLDER + "TEST_BNode_RAF_InsertWriteRead", true);
+	    	BReadWrite.setRAF(TESTS_FOLDER + "BNode_RAF_InsertWriteRead", true);
 	    	BNode.setDegree(10);
 	    	BReadWrite.setBuffer(BNode.getDiskSize());
 	    	
 	    	//instantiate and populate BNode with inputLetters
-	    	BNode<String> memoryNode = new BNode<String>(new TreeObject<String>(inputSequences.substring(0, 3), 1), 0);
+	    	BNode<String> memoryNode = new BNode<String>(new TreeObject<String>(inputSequences.substring(0, 3), 1), BTree.getDiskSize());
 	    	for(int i = 4; i < inputSequences.length(); i += 4) {
 	    		memoryNode.insert(new TreeObject<String>(inputSequences.substring(i, i + 3), 1));
 	    	}
 	    	
 	    	//read BNode in RAF
-	    	BNode<String> readNode = BReadWrite.readBNode(0);
+	    	BNode<String> readNode = BReadWrite.readBNode(BTree.getDiskSize());
 	    	
 	    	//see if memoryNode contains sequences in order in long value,
 	    	assertEquals(memoryNode.toString(), "7 8 10 12 44 57 59");
@@ -376,12 +377,12 @@ public class BTreeTest
 			BNode<String> readRight;
 	    	
 	    	//delete old RAF and set new RAF, degree, and byteBuffer. Important that they are done in this order
-	    	BReadWrite.setRAF(TESTS_FOLDER + "TEST_BNode_RAF_SplitWriteRead", true);
+	    	BReadWrite.setRAF(TESTS_FOLDER + "BNode_RAF_SplitWriteRead", true);
 	    	BNode.setDegree(4);
 	    	BReadWrite.setBuffer(BNode.getDiskSize());
 	    	
 	    	//instantiate and populate BNode with inputLetters
-	    	BNode<String> memoryNode = new BNode<String>(new TreeObject<String>(inputSequences.substring(0, 4), 1), 0);
+	    	BNode<String> memoryNode = new BNode<String>(new TreeObject<String>(inputSequences.substring(0, 4), 1), BTree.getDiskSize());
 	    	for(int i = 5; i < inputSequences.length(); i += 5) {
 	    		memoryNode.insert(new TreeObject<String>(inputSequences.substring(i, i + 4), 1));
 	    	}
@@ -412,51 +413,65 @@ public class BTreeTest
 	}
 	
 	/**
-	 * 
+	 * Tests that after inserting a random number of sequences into a
+	 * rudimentary BTree of a random degree, the size of the RAF is
+	 * close to the number of nodes * BNode.getDiskSize. This indicates
+	 * that methods such as insert and split don't overwrite other BNodes.
+	 * <p>
+	 * RANDOM: This test is random and thus, the RAF will change every run.
 	 */
 	@Test
-	public void BNode_RAF_LevelOrderTraversal() {
-//		try {
-//			//                       180  59   108  14   103  46   118
-//			String inputSequences = "GTCA ATGT CGTA AATG CGCT AGTG CTCG".toLowerCase();
-//			BNode<String> readNode;
-//			BNode<String> readParent;
-//			BNode<String> readRight;
-//	    	
-//	    	//delete old RAF and set new RAF, degree, and byteBuffer. Important that they are done in this order
-//	    	BReadWrite.setRAF(TESTS_FOLDER + "TEST_BNode_RAF_SplitWriteRead", true);
-//	    	BNode.setDegree(4);
-//	    	BReadWrite.setBuffer(BNode.getDiskSize());
-//	    	
-//	    	//instantiate and populate BNode with inputLetters
-//	    	BNode<String> memoryNode = new BNode<String>(new TreeObject<String>(inputSequences.substring(0, 4), 1), 0);
-//	    	for(int i = 5; i < inputSequences.length(); i += 5) {
-//	    		memoryNode.insert(new TreeObject<String>(inputSequences.substring(i, i + 4), 1));
-//	    	}
-//	    	
-//	    	//perform split and read the returned address (the new parent/root)
-//	    	readParent = BReadWrite.readBNode(memoryNode.split());
-//	    	//read the left and right children from parentNode
-//	    	readNode = BReadWrite.readBNode(memoryNode.getAddress());
-//	    	readRight = BReadWrite.readBNode(readParent.getChildren().get(1));
-//	    	
-//	    	//see if memoryNode contains sequences in order in long value,
-//	    	assertEquals(memoryNode.toString(), "14 46 59");
-//	    	
-//	    	//then check if the read nodes contain the correct elements
-//	    	assertEquals(readNode.toString(), memoryNode.toString());
-//	    	assertEquals(readParent.toString(), "103");
-//	    	assertEquals(readRight.toString(), "108 118 180");
-//	    	
-//	    	//check that the read nodes contain the correct properties
-//	    	assert(memoryNode.isLeaf() && !memoryNode.isRoot() && !memoryNode.isFull() && memoryNode.getN() == 3);
-//	    	assert(readNode.isLeaf() && !readNode.isRoot() && !readNode.isFull() && readNode.getN() == 3);
-//	    	assert(readRight.isLeaf() && !readRight.isRoot() && !readRight.isFull() && readRight.getN() == 3);
-//	    	assert(!readParent.isLeaf() && readParent.isRoot() && !readParent.isFull() && readParent.getN() == 1);
-//		}
-//		catch(IOException e) {
-//			assert(false);
-//		}
+	public void BNode_RAF_RAFAppropriateSize() {
+		try {
+			ArrayList<String> inputSequences = generateRandomSequences(30, 60);
+			ArrayList<TreeObject<String>> insertedSequences = new ArrayList<TreeObject<String>>();
+	    	
+	    	//delete old RAF and set new RAF, degree, and byteBuffer. Important that they are done in this order
+	    	BReadWrite.setRAF(TESTS_FOLDER + "BNode_RAF_RAFAppropriateSize", true);
+	    	BNode.setDegree(random.nextInt(3, 7));
+	    	BReadWrite.setBuffer(BNode.getDiskSize());
+	    	
+	    	
+	    	//create a rudimentary BTree to insert into while counting the total BNode amount
+	    	insertedSequences.add(new TreeObject<String>(inputSequences.get(0), 1));
+	    	BNode<String> root = new BNode<String>(insertedSequences.get(0), BTree.getDiskSize());
+	    	
+	    	BNode<String> currentNode;
+	    	int numNodes = 1;
+	    	
+	    	for(int i = 1; i < inputSequences.size(); i++) {
+	    		currentNode = root;
+	    		insertedSequences.add(new TreeObject<String>(inputSequences.get(i), 1));
+	    		
+	    		//if root is full, split it
+	    		if(root.isFull()) {
+		    		root = currentNode = BReadWrite.readBNode(currentNode.split());
+		    		numNodes += 2;
+	    		}
+	    		
+	    		//get to appropriate leaf BNode
+	    		while(!currentNode.isLeaf()) {
+	    			currentNode = BReadWrite.readBNode(currentNode.getSubtree(insertedSequences.get(i)));
+	
+	    			//if the currentNode is full, split it
+	    			if(currentNode.isFull()) {
+		    			currentNode = BReadWrite.readBNode(currentNode.split());
+		    			numNodes++;
+	    			}
+	    		}
+	    		
+	    		//once at LEAF, insert key
+	    		currentNode.insert(insertedSequences.get(i));
+	    	}
+	    	
+	    	//the RAF size should be the DiskSize of a numNodes amount of BNodes with a MOE of 1 BNode
+	    	assert(BReadWrite.getRAFSize() > ((numNodes - 1) * BNode.getDiskSize() + BTree.getDiskSize()) && 
+	    		   BReadWrite.getRAFSize() < ((numNodes + 1) * BNode.getDiskSize() + BTree.getDiskSize()));
+		}
+		catch(IOException e) {
+			System.out.println(e);
+			assert(false);
+		}
 	}
 	
 	

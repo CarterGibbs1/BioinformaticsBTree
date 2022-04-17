@@ -44,7 +44,10 @@ public class BReadWrite {
 		try {
 			//if the file exists and is to be replaced, delete it
 			if(file.exists() && replace) {
-				file.delete();
+				if(!file.delete()) {
+					throw new IOException("File could not be deleted. Might be open"
+							+ "elsewhere like inside a debugger");
+				}
 			}
 			
 			// if file doesn't exist, create it
@@ -271,6 +274,36 @@ public class BReadWrite {
 	 * @throws IOException Reading RAF may throw exception
 	 */
 	static public long getNextAddress() throws IOException {
+		/*
+		 * I spent so long trying to figure this out. I'm so tired
+		 * Writing to the RAF size will often overwrite another BNode unless the last BNode in the RAF is full
+		 * To account for this, we 'round up' the address to return to the next correct address to write a BNode to
+		 * ----------------------------------------------
+		 * Example Demonstration: 
+		 * Say -
+		 * BTree.disk = 8 | BNode.disk = 20 | RAF.size = 450
+		 * 
+		 * (450 - 8)/20(int) * 20 + 8 = 448 | The BNode at 448 will be overwritten if we write to RAF.size/450
+		 * 
+		 * So instead -
+		 * ((450 - 8)/20(int) + 1) * 20 + 8 = 468 | Writing at 468 leaves space for the prior BNode 448 to write to
+		 * 
+		 */
+		if((RAF.size() - BTree.getDiskSize()) % BNode.getDiskSize() != 0) {
+			return (((RAF.size() - BTree.getDiskSize())/BNode.getDiskSize() + 1) * BNode.getDiskSize()) + BTree.getDiskSize();
+		}
+		
+		return RAF.size();
+	}
+	
+	/**
+	 * Get the size of the RAF in bytes.
+	 * 
+	 * @return The size of the RAF.
+	 * 
+	 * @throws IOException Reading RAF may throw exception
+	 */
+	static public long getRAFSize() throws IOException {
 		return RAF.size();
 	}
 }
