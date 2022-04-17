@@ -68,18 +68,21 @@ public class TreeObjectNoE {
      */
     public void setBlankKeyWithStringLength(int stringLength) {
         String longKey = "";
-        String longKeyOG = Long.toBinaryString(keyLongVal);
         for (int i = 0; i < stringLength * 2; i++) {
             longKey += "0";
         }
-        longKey += longKeyOG;
-        longKey = longKey.substring(0, longKeyOG.length() + stringLength - 1);
+        longKey += Long.toBinaryString(keyLongVal);
+        longKey = longKey.substring(0, Long.toBinaryString(keyLongVal).length() + stringLength - 1);
+
+        this.treeObjectKey = stringOfExactLongString(longKey);
+    }
+
+    private String stringOfExactLongString(String longKey) {
         String stringKey = "";
         for (int j = 0; j < longKey.length(); j += 2) {
             stringKey += numToLetter(longKey.substring(j, j + 2));
         }
-
-        this.treeObjectKey = stringKey;
+        return stringKey;
     }
 
     /**
