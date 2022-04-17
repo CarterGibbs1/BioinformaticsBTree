@@ -5,11 +5,131 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Random;
 
 public class BTreeTest
 {
 	//folder location that RAFs and dumps go to
 	static private final String TESTS_FOLDER = "./results/tests/";
+	static private final Random random = new Random();
+	static private final String VALID_LETTERS = "atcg";
+	
+	//=================================================================================================================
+	//                                  Utility Methods
+	//=================================================================================================================
+	
+	/**
+	 * Generate a random number of sequences of random length in the given range.
+	 * Sequences can be 5 to 15 letters long.
+	 * 
+	 * @param minNumSeq Minimum (inclusive) number of sequences
+	 * @param maxNumSeq Maximum (exclusive) number of sequences
+	 * 
+	 * @return List of randomly generated sequences
+	 */
+	static private ArrayList<String> generateRandomSequences(int minNumSeq, int maxNumSeq){
+		int numSeq = random.nextInt(minNumSeq, maxNumSeq);
+		int lengthSeq = random.nextInt(5, 16);
+		ArrayList<String> sequences = new ArrayList<String>();
+		
+		//construct numSeq amount of random sequences
+		String sequence;
+		for(int i = 0; i < numSeq; i++) {
+			sequence = "";
+			
+			for(int j = 0; j < lengthSeq; j++) {
+				sequence = sequence + VALID_LETTERS.charAt(random.nextInt(0, 4));
+			}
+			
+			sequences.add(sequence);
+		}
+		return sequences;
+	}
+	
+	/**
+	 * Recursively mergesort the given list of TreeObjects in increasing order.
+	 * 
+	 * @param list ArrayList to sort
+	 */
+	static private void mergesortTreeObject(ArrayList<TreeObject<String>> list){
+		//base case: less than 2 elements
+		if(list.size() < 2) {
+			return;
+		}
+		
+		//general case
+		ArrayList<TreeObject<String>> left = new ArrayList<TreeObject<String>>();
+		ArrayList<TreeObject<String>> right = new ArrayList<TreeObject<String>>();
+		
+		//split the list into two equally sized lists
+		while(!list.isEmpty()) {
+			if(left.size() < list.size()) {
+				left.add(list.remove(0));
+			}
+			else {
+				right.add(list.remove(0));
+			}
+		}
+		
+		//recursively sort left and right
+		mergesortTreeObject(left);
+		mergesortTreeObject(right);
+		
+		//reconstructing the list
+		/* while right has elements, "move" the first element in right to the end of the sorted list if it is greater than
+		 * the first element of left. If left is greater, move it's first element to the end of the sorted list. If either
+		 * left or right runs out of elements, move the rest of the elements of the remaining list to the sorted list.
+		 */
+		while(!right.isEmpty()) {
+			if(!left.isEmpty()) {
+				list.add(left.get(0).compare(right.get(0)) > 0 ? right.remove(0) : left.remove(0));
+			}
+			else {
+				list.add(right.remove(0));
+			}
+		}
+		while(!left.isEmpty()) {
+			list.add(left.remove(0));
+		}
+	}
+	
+	/**
+	 * Test that the methods used to randomly generate sequences and sort them
+	 * function correctly.
+	 * <p>
+	 * NOTE: Not directly related to BTree, but if this test fails then other
+	 * tests using random sequences will not function properly.
+	 */
+	@Test
+	public void randomGenerator_mergesort() {
+		ArrayList<String> randSeq = generateRandomSequences(5, 10);
+		
+		//test that there are between 5 and 9 sequences
+		assert(randSeq.size() > 4 && randSeq.size() < 10);
+		
+		
+		int seqLength = randSeq.get(0).length();
+		
+		//test that all sequences are the same length
+		for(int i = 0; i < randSeq.size(); i++) {
+			assert(seqLength == randSeq.get(i).length());
+		}
+		
+		//create ArrayList of TreeObjects from sequences
+		ArrayList<TreeObject<String>> treeObjects = new ArrayList<TreeObject<String>>();
+		for(int i = 0; i < randSeq.size(); i++) {
+			treeObjects.add(new TreeObject<String>(randSeq.get(i), 1));
+		}
+		
+		//sort TreeObjects
+		mergesortTreeObject(treeObjects);
+		
+		//test that treeObjects is sorted in increasing order
+		for(int i = 0; i < treeObjects.size() - 1; i++) {
+			assert(treeObjects.get(i).compare(treeObjects.get(i + 1)) <= 0);
+		}
+	}
 	
 	//test 1
 //	@Test
@@ -289,6 +409,54 @@ public class BTreeTest
 		catch(IOException e) {
 			assert(false);
 		}
+	}
+	
+	/**
+	 * 
+	 */
+	@Test
+	public void BNode_RAF_LevelOrderTraversal() {
+//		try {
+//			//                       180  59   108  14   103  46   118
+//			String inputSequences = "GTCA ATGT CGTA AATG CGCT AGTG CTCG".toLowerCase();
+//			BNode<String> readNode;
+//			BNode<String> readParent;
+//			BNode<String> readRight;
+//	    	
+//	    	//delete old RAF and set new RAF, degree, and byteBuffer. Important that they are done in this order
+//	    	BReadWrite.setRAF(TESTS_FOLDER + "TEST_BNode_RAF_SplitWriteRead", true);
+//	    	BNode.setDegree(4);
+//	    	BReadWrite.setBuffer(BNode.getDiskSize());
+//	    	
+//	    	//instantiate and populate BNode with inputLetters
+//	    	BNode<String> memoryNode = new BNode<String>(new TreeObject<String>(inputSequences.substring(0, 4), 1), 0);
+//	    	for(int i = 5; i < inputSequences.length(); i += 5) {
+//	    		memoryNode.insert(new TreeObject<String>(inputSequences.substring(i, i + 4), 1));
+//	    	}
+//	    	
+//	    	//perform split and read the returned address (the new parent/root)
+//	    	readParent = BReadWrite.readBNode(memoryNode.split());
+//	    	//read the left and right children from parentNode
+//	    	readNode = BReadWrite.readBNode(memoryNode.getAddress());
+//	    	readRight = BReadWrite.readBNode(readParent.getChildren().get(1));
+//	    	
+//	    	//see if memoryNode contains sequences in order in long value,
+//	    	assertEquals(memoryNode.toString(), "14 46 59");
+//	    	
+//	    	//then check if the read nodes contain the correct elements
+//	    	assertEquals(readNode.toString(), memoryNode.toString());
+//	    	assertEquals(readParent.toString(), "103");
+//	    	assertEquals(readRight.toString(), "108 118 180");
+//	    	
+//	    	//check that the read nodes contain the correct properties
+//	    	assert(memoryNode.isLeaf() && !memoryNode.isRoot() && !memoryNode.isFull() && memoryNode.getN() == 3);
+//	    	assert(readNode.isLeaf() && !readNode.isRoot() && !readNode.isFull() && readNode.getN() == 3);
+//	    	assert(readRight.isLeaf() && !readRight.isRoot() && !readRight.isFull() && readRight.getN() == 3);
+//	    	assert(!readParent.isLeaf() && readParent.isRoot() && !readParent.isFull() && readParent.getN() == 1);
+//		}
+//		catch(IOException e) {
+//			assert(false);
+//		}
 	}
 	
 	
