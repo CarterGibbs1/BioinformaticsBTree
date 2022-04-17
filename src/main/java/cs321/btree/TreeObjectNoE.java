@@ -196,7 +196,7 @@ public class TreeObjectNoE {
             return "null";
         }
         if (treeObjectKey == "") {
-            return Long.toBinaryString(keyLongVal) + ": " + frequency;
+            return keyLongVal + ": " + frequency;
         }
         return treeObjectKey + ": " + frequency;
     }
