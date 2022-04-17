@@ -423,7 +423,7 @@ public class BTreeTest
 	@Test
 	public void BNode_RAF_RAFAppropriateSize() {
 		try {
-			ArrayList<String> inputSequences = generateRandomSequences(100, 300);
+			ArrayList<String> inputSequences = generateRandomSequences(2000, 3000);
 			ArrayList<TreeObject<String>> insertedSequences = new ArrayList<TreeObject<String>>();
 	    	
 	    	//delete old RAF and set new RAF, degree, and byteBuffer. Important that they are done in this order
@@ -458,9 +458,6 @@ public class BTreeTest
 	
 	    			//if the currentNode is full, split it
 	    			if(currentNode.isFull()) {
-	    				if(!currentNode.isLeaf()) {
-	    					BReadWrite.getNextAddress();
-	    				}
 		    			currentNode = BReadWrite.readBNode(currentNode.split());
 		    			numNodes++;
 	    			}
