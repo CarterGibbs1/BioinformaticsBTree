@@ -18,7 +18,7 @@ public class BNode {
 
 	//TODO: Arrays or LinkedLists?
 	//child0 <= key0 <= child1 <= key1 <= child2 ... childn <= keyn <= childn + 1
-	private LinkedList<TreeObject<String>> keys; //objects/keys in this node, also size() = n
+	private LinkedList<TreeObject> keys; //objects/keys in this node, also size() = n
 	private LinkedList<Long> children;      //addresses to the children of this node 
 	
 //	private 
@@ -57,14 +57,14 @@ public class BNode {
 	 *                 a
 	 *                / \
 	 */
-	public BNode(TreeObject<String> initialKey, long thisAddress, long parent, long leftChild, long rightChild) throws IllegalStateException {
+	public BNode(TreeObject initialKey, long thisAddress, long parent, long leftChild, long rightChild) throws IllegalStateException {
 		//check that DEGREE has been set
 		if(degree < 1) {
 			throw new IllegalStateException("Degree is an invalid value. It might have not been set before BNodes are used.");
 		}
 		
 		//initialize instance variables
-		keys = new LinkedList<TreeObject<String>>();
+		keys = new LinkedList<TreeObject>();
 		children = new LinkedList<Long>();
 		
 		keys.add(initialKey);
@@ -87,7 +87,7 @@ public class BNode {
 	 * 
 	 * @throws IllegalStateException Static degree has not been set
 	 */
-	public BNode(TreeObject<String> initialKey, long address, long parent) throws IllegalStateException {
+	public BNode(TreeObject initialKey, long address, long parent) throws IllegalStateException {
 		this(initialKey, address, parent, -1, -1);
 	}
 	
@@ -99,7 +99,7 @@ public class BNode {
 	 * 
 	 * @throws IllegalStateException Static degree has not been set
 	 */
-	public BNode(TreeObject<String> initialKey, long address) throws IllegalStateException {
+	public BNode(TreeObject initialKey, long address) throws IllegalStateException {
 		this(initialKey, address, -1, -1, -1);
 	}
 	
@@ -130,7 +130,7 @@ public class BNode {
 	 * keys     -  a b c d e f
 	 * children - # # # * # # #
 	 */
-	public void insert(TreeObject<String> key, long child, boolean write) throws IOException {
+	public void insert(TreeObject key, long child, boolean write) throws IOException {
 		
 		//get to the index of the first k less than key
 		int i;
@@ -163,7 +163,7 @@ public class BNode {
 	 * 
 	 * @throws IOException Writing to RAF may throw exception
 	 */
-	public void insert(TreeObject<String> key) throws IOException {
+	public void insert(TreeObject key) throws IOException {
 		insert(key, -1, true);
 	}
 	
@@ -178,7 +178,7 @@ public class BNode {
 	 * 
 	 * @throws IOException Writing to RAF may throw exception
 	 */
-	public void insertNoWrite(TreeObject<String> key, long child) throws IOException {
+	public void insertNoWrite(TreeObject key, long child) throws IOException {
 		insert(key, child, false);
 	}
 	
@@ -192,7 +192,7 @@ public class BNode {
 	 * @return subtree address (child of this BNode) that key
 	 *         belongs to
 	 */
-	public long getSubtree(TreeObject<String> key){
+	public long getSubtree(TreeObject key){
 		
 		//get to the index of the first k less than key
 		int i;
@@ -320,7 +320,7 @@ public class BNode {
 	 * 
 	 * @return LinkedList of TreeObjects
 	 */
-	public LinkedList<TreeObject<String>> getKeys(){
+	public LinkedList<TreeObject> getKeys(){
 		return keys;
 	}
 	

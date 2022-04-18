@@ -53,15 +53,15 @@ public class BTreeTest
 	 * 
 	 * @param list ArrayList to sort
 	 */
-	static private void mergesortTreeObject(ArrayList<TreeObject<String>> list){
+	static private void mergesortTreeObject(ArrayList<TreeObject> list){
 		//base case: less than 2 elements
 		if(list.size() < 2) {
 			return;
 		}
 		
 		//general case
-		ArrayList<TreeObject<String>> left = new ArrayList<TreeObject<String>>();
-		ArrayList<TreeObject<String>> right = new ArrayList<TreeObject<String>>();
+		ArrayList<TreeObject> left = new ArrayList<TreeObject>();
+		ArrayList<TreeObject> right = new ArrayList<TreeObject>();
 		
 		//split the list into two equally sized lists
 		while(!list.isEmpty()) {
@@ -118,9 +118,9 @@ public class BTreeTest
 		}
 		
 		//create ArrayList of TreeObjects from sequences
-		ArrayList<TreeObject<String>> treeObjects = new ArrayList<TreeObject<String>>();
+		ArrayList<TreeObject> treeObjects = new ArrayList<TreeObject>();
 		for(int i = 0; i < randSeq.size(); i++) {
-			treeObjects.add(new TreeObject<String>(randSeq.get(i), 1));
+			treeObjects.add(new TreeObject(randSeq.get(i), 1));
 		}
 		
 		//sort TreeObjects
@@ -188,9 +188,9 @@ public class BTreeTest
     	String inputSequences = "TGC ATA AGA TGT ACT AGG GTA".toLowerCase();
     	
     	//instantiate and populate BNode with inputLetters
-    	TestBNode<String> testNode = new TestBNode<String>(new TreeObject<String>(inputSequences.substring(0, 3), 1));
+    	TestBNode<String> testNode = new TestBNode<String>(new TreeObject(inputSequences.substring(0, 3), 1));
     	for(int i = 4; i < inputSequences.length(); i += 4) {
-    		testNode.insert(new TreeObject<String>(inputSequences.substring(i, i + 3), 1));
+    		testNode.insert(new TreeObject(inputSequences.substring(i, i + 3), 1));
     	}
     	
     	//see if the BNode contains sequences in order in long value
@@ -209,14 +209,14 @@ public class BTreeTest
     	TestBNode<String> rightChild;
     	
     	//instantiate and populate BNode with inputLetters
-    	TestBNode<String> testNode = new TestBNode<String>(new TreeObject<String>(inputSequences.substring(0, 4), 1));
+    	TestBNode<String> testNode = new TestBNode<String>(new TreeObject(inputSequences.substring(0, 4), 1));
     	for(int i = 5; i < inputSequences.length(); i += 5) {
-    		testNode.insert(new TreeObject<String>(inputSequences.substring(i, i + 4), 1));
+    		testNode.insert(new TreeObject(inputSequences.substring(i, i + 4), 1));
     	}
     	
     	//split BNode and save parent and rightChild
     	parent = testNode.split();
-    	rightChild = parent.getSubtree(new TreeObject<String>("tttt", 1));
+    	rightChild = parent.getSubtree(new TreeObject("tttt", 1));
     	
     	assertEquals(parent.toString(), "59");
     	assertEquals(testNode.toString(), "14 46");
@@ -233,16 +233,16 @@ public class BTreeTest
     	int degree = 7;
     	
     	//instantiate and populate BNode with inputLetters
-    	TestBNode<String> testNode = new TestBNode<String>(new TreeObject<String>(inputSequences.substring(0, 1), 1));
+    	TestBNode<String> testNode = new TestBNode<String>(new TreeObject(inputSequences.substring(0, 1), 1));
     	for(int i = 1; i < inputSequences.length(); i++) {
-    		testNode.insert(new TreeObject<String>(inputSequences.substring(i, i + 1), 1));
+    		testNode.insert(new TreeObject(inputSequences.substring(i, i + 1), 1));
     	}
     	
     	//testNode is not full
     	assert(!testNode.isFull(degree));
     	
     	//testNode is now full
-    	testNode.insert(new TreeObject<String>("a", 1));
+    	testNode.insert(new TreeObject("a", 1));
     	assert(testNode.isFull(degree));
     }
     
@@ -257,16 +257,16 @@ public class BTreeTest
     	int degree = 2;
     	
     	//instantiate and BNode root
-    	TestBNode<String> root = new TestBNode<String>(new TreeObject<String>(inputSequences.substring(0, 1), 1));
+    	TestBNode<String> root = new TestBNode<String>(new TreeObject(inputSequences.substring(0, 1), 1));
     	TestBNode<String> currentNode;
     	
     	//create a rudimentary BTree to insert into while counting the total BNode amount and the height
     	int height = 1;
     	int totalNodes = 1;
-    	TreeObject<String> key;
+    	TreeObject key;
     	for(int i = 1; i < inputSequences.length(); i++) {
     		currentNode = root;
-    		key = new TreeObject<String>(inputSequences.substring(i, i + 1), 1);
+    		key = new TreeObject(inputSequences.substring(i, i + 1), 1);
     		
     		if(root.isFull(degree)) {
 	    		root = currentNode = currentNode.split();
@@ -310,16 +310,16 @@ public class BTreeTest
 	 */
 	@Test
 	public void TreeObject_PublicMethods() {
-		TreeObject<String> tO = new TreeObject<String>("tcacgaggtc", 5);
+		TreeObject tO = new TreeObject("tcacgaggtc", 5);
 		long key = Long.parseLong("11010001100010101101", 2);
 		assertEquals(tO.getKey(), key);
-		assertEquals(tO.withZeros(), "11010001100010101101");
+//		assertEquals(tO.withZeros(), "11010001100010101101");
 		assertEquals(tO.getFrequency(), 5);
 
 		tO.setFrequency(6);
 		assertEquals(tO.getFrequency(), 6);
 		tO.setFrequency(5);
-		TreeObject<String> tOTwo = new TreeObject<String>("tcacgaggta", 5);
+		TreeObject tOTwo = new TreeObject("tcacgaggta", 5);
 		assert(tO.compare(tOTwo) > 0);
 		assertEquals(tO.toString(), "tcacgaggtc: 5");
 	}
@@ -345,9 +345,9 @@ public class BTreeTest
 	    	BReadWrite.setBuffer(BNode.getDiskSize());
 	    	
 	    	//instantiate and populate BNode with inputLetters
-	    	BNode memoryNode = new BNode(new TreeObject<String>(inputSequences.substring(0, 3), 1), BTree.getDiskSize());
+	    	BNode memoryNode = new BNode(new TreeObject(inputSequences.substring(0, 3), 1), BTree.getDiskSize());
 	    	for(int i = 4; i < inputSequences.length(); i += 4) {
-	    		memoryNode.insert(new TreeObject<String>(inputSequences.substring(i, i + 3), 1));
+	    		memoryNode.insert(new TreeObject(inputSequences.substring(i, i + 3), 1));
 	    	}
 	    	
 	    	//read BNode in RAF
@@ -382,9 +382,9 @@ public class BTreeTest
 	    	BReadWrite.setBuffer(BNode.getDiskSize());
 	    	
 	    	//instantiate and populate BNode with inputLetters
-	    	BNode memoryNode = new BNode(new TreeObject<String>(inputSequences.substring(0, 4), 1), BTree.getDiskSize());
+	    	BNode memoryNode = new BNode(new TreeObject(inputSequences.substring(0, 4), 1), BTree.getDiskSize());
 	    	for(int i = 5; i < inputSequences.length(); i += 5) {
-	    		memoryNode.insert(new TreeObject<String>(inputSequences.substring(i, i + 4), 1));
+	    		memoryNode.insert(new TreeObject(inputSequences.substring(i, i + 4), 1));
 	    	}
 	    	
 	    	//perform split and read the returned address (the new parent/root)
@@ -424,7 +424,7 @@ public class BTreeTest
 	public void BNode_RAF_RAFAppropriateSize() {
 		try {
 			ArrayList<String> inputSequences = generateRandomSequences(20000, 30000);
-			ArrayList<TreeObject<String>> insertedSequences = new ArrayList<TreeObject<String>>();
+			ArrayList<TreeObject> insertedSequences = new ArrayList<TreeObject>();
 	    	
 	    	//delete old RAF and set new RAF, degree, and byteBuffer. Important that they are done in this order
 	    	BReadWrite.setRAF(TESTS_FOLDER + "BNode_RAF_RAFAppropriateSize", true);
@@ -433,7 +433,7 @@ public class BTreeTest
 	    	
 	    	
 	    	//create a rudimentary BTree to insert into while counting the total BNode amount
-	    	insertedSequences.add(new TreeObject<String>(inputSequences.get(0), 1));
+	    	insertedSequences.add(new TreeObject(inputSequences.get(0), 1));
 	    	long root = BTree.getDiskSize();
 	    	
 	    	//create and write initial BNode to RAF
@@ -446,7 +446,7 @@ public class BTreeTest
 	    		y = 0;
 	    		x.clear();
 	    		currentNode = BReadWrite.readBNode(root);
-	    		insertedSequences.add(new TreeObject<String>(inputSequences.get(i), 1));
+	    		insertedSequences.add(new TreeObject(inputSequences.get(i), 1));
 	    		x.add(currentNode);
 	    		
 	    		//if currentNode(root) is full, split it

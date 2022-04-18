@@ -15,7 +15,7 @@ import java.util.LinkedList;
 public class TestBNode<E> {
 
 	//child0 <= key0 <= child1 <= key1 <= child2 ... childn <= keyn <= childn + 1
-	private LinkedList<TreeObject<E>> keys; //objects/keys in this node, also size() = n
+	private LinkedList<TreeObject> keys; //objects/keys in this node, also size() = n
 	private LinkedList<TestBNode<E>> children;  //children in this node
 	
 	private TestBNode<E> parent;  //parent pointer
@@ -43,9 +43,9 @@ public class TestBNode<E> {
 	 * result     -    a
 	 *                / \
 	 */
-	public TestBNode(TreeObject<E> initialKey, TestBNode<E> parent, TestBNode<E> leftChild, TestBNode<E> rightChild) {
+	public TestBNode(TreeObject initialKey, TestBNode<E> parent, TestBNode<E> leftChild, TestBNode<E> rightChild) {
 		//initialize instance variables
-		keys = new LinkedList<TreeObject<E>>();
+		keys = new LinkedList<TreeObject>();
 		children = new LinkedList<TestBNode<E>>();
 		
 		keys.add(initialKey);
@@ -63,7 +63,7 @@ public class TestBNode<E> {
 	 * @param initialKey  the initial object in this BNode
 	 * @param parent     pointer to the parent of this BNode
 	 */
-	public TestBNode(TreeObject<E> initialKey, TestBNode<E> parent) {
+	public TestBNode(TreeObject initialKey, TestBNode<E> parent) {
 		this(initialKey, parent, null, null);
 	}
 	
@@ -73,7 +73,7 @@ public class TestBNode<E> {
 	 * 
 	 * @param initialKey the initial object in this BNode
 	 */
-	public TestBNode(TreeObject<E> initialKey) {
+	public TestBNode(TreeObject initialKey) {
 		this(initialKey, null, null, null);
 	}
 	
@@ -100,7 +100,7 @@ public class TestBNode<E> {
 	 * keys     -  a b c d e f
 	 * children - # # # * # # #
 	 */
-	public void insert(TreeObject<E> key, TestBNode<E> child) {
+	public void insert(TreeObject key, TestBNode<E> child) {
 		
 		//get to the index of the first k less than key
 		int i;
@@ -119,7 +119,7 @@ public class TestBNode<E> {
 	 * 
 	 * @param key TreeObject containing Object to insert
 	 */
-	public void insert(TreeObject<E> key) {
+	public void insert(TreeObject key) {
 		insert(key, null);
 	}
 	
@@ -132,7 +132,7 @@ public class TestBNode<E> {
 	 * 
 	 * @return subtree (child of this BNode) that key belongs to
 	 */
-	public TestBNode<E> getSubtree(TreeObject<E> key){
+	public TestBNode<E> getSubtree(TreeObject key){
 		
 		//get to the index of the first k less than key
 		int i;
@@ -203,7 +203,7 @@ public class TestBNode<E> {
 	 *
 	 * @return the key of the root
 	 */
-	public TreeObject<E> rootKey() {
+	public TreeObject rootKey() {
 		return keys.getFirst();
 	}
 

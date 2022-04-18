@@ -110,7 +110,7 @@ public class BReadWrite {
 
 			// get children and keys
 			LinkedList<Long> children = node.getChildren();
-			LinkedList<TreeObject<String>> keys = node.getKeys();
+			LinkedList<TreeObject> keys = node.getKeys();
 
 			// write the children and keys in alternating order
 			buffer.putLong(children.get(0));
@@ -160,13 +160,13 @@ public class BReadWrite {
 
 			// get first key and two children
 			long leftChild = buffer.getLong();
-			TreeObject<String> initialKey = new TreeObject<String>(buffer.getLong(), buffer.getInt());
+			TreeObject initialKey = new TreeObject(buffer.getLong(), buffer.getInt());
 			long rightChild = buffer.getLong();
 
 			// construct the return BNode and insert the other n - 1 keys and children
 			BNode retNode = new BNode(initialKey, address, parent, leftChild, rightChild);
 			for (int i = 1; i < n; i++) {
-				retNode.insertNoWrite(new TreeObject<String>(buffer.getLong(), buffer.getInt()), buffer.getLong());
+				retNode.insertNoWrite(new TreeObject(buffer.getLong(), buffer.getInt()), buffer.getLong());
 			}
 
 			return retNode;
