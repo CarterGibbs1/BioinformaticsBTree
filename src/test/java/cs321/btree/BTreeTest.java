@@ -22,7 +22,7 @@ public class BTreeTest
 	
 	/**
 	 * Generate a random number of sequences of random length in the given range.
-	 * Sequences can be 5 to 15 letters long.
+	 * Sequences can be 10 to 30 letters long.
 	 * 
 	 * @param minNumSeq Minimum (inclusive) number of sequences
 	 * @param maxNumSeq Maximum (exclusive) number of sequences
@@ -31,7 +31,7 @@ public class BTreeTest
 	 */
 	static private ArrayList<String> generateRandomSequences(int minNumSeq, int maxNumSeq){
 		int numSeq = random.nextInt(minNumSeq, maxNumSeq);
-		int lengthSeq = random.nextInt(5, 16);
+		int lengthSeq = random.nextInt(10, 31);
 		ArrayList<String> sequences = new ArrayList<String>();
 		
 		//construct numSeq amount of random sequences
@@ -423,7 +423,7 @@ public class BTreeTest
 	@Test
 	public void BNode_RAF_RAFAppropriateSize() {
 		try {
-			ArrayList<String> inputSequences = generateRandomSequences(2000, 3000);
+			ArrayList<String> inputSequences = generateRandomSequences(20000, 30000);
 			ArrayList<TreeObject<String>> insertedSequences = new ArrayList<TreeObject<String>>();
 	    	
 	    	//delete old RAF and set new RAF, degree, and byteBuffer. Important that they are done in this order
@@ -437,29 +437,40 @@ public class BTreeTest
 	    	long root = BTree.getDiskSize();
 	    	
 	    	//create and write initial BNode to RAF
-	    	BNode currentNode;
+	    	BNode currentNode = null;
 	    	BReadWrite.writeBNode(new BNode(insertedSequences.get(0), root));
-	    	int numNodes = 1;
+	    	int numNodes = 1; ArrayList<BNode> x = new ArrayList<BNode>();
+	    	int y = 0;
 	    	
 	    	for(int i = 1; i < inputSequences.size(); i++) {
+	    		y = 0;
+	    		x.clear();
 	    		currentNode = BReadWrite.readBNode(root);
 	    		insertedSequences.add(new TreeObject<String>(inputSequences.get(i), 1));
+	    		x.add(currentNode);
 	    		
 	    		//if currentNode(root) is full, split it
 	    		if(currentNode.isFull()) {
 	    			root = currentNode.split();
 		    		currentNode = BReadWrite.readBNode(root);
 		    		numNodes += 2;
+		    		y++;
 	    		}
 	    		
 	    		//get to appropriate leaf BNode
 	    		while(!currentNode.isLeaf()) {
+	    			if(currentNode.getKeys().contains(insertedSequences.get(i))) {
+	    				break;
+	    			}
+	    			
 	    			currentNode = BReadWrite.readBNode(currentNode.getSubtree(insertedSequences.get(i)));
+	    			x.add(currentNode);
 	
 	    			//if the currentNode is full, split it
 	    			if(currentNode.isFull()) {
 		    			currentNode = BReadWrite.readBNode(currentNode.split());
 		    			numNodes++;
+		    			y++;
 	    			}
 	    		}
 	    		
@@ -470,6 +481,15 @@ public class BTreeTest
 	    	//the RAF size should be the DiskSize of a numNodes amount of BNodes with a MOE of 1 BNode
 	    	assert(BReadWrite.getRAFSize() > ((numNodes - 1) * BNode.getDiskSize() + BTree.getDiskSize()) && 
 	    		   BReadWrite.getRAFSize() < ((numNodes + 1) * BNode.getDiskSize() + BTree.getDiskSize()));
+	    	
+	    	for(int i =0; i< currentNode.getN(); i++) {
+	    		System.out.println(currentNode.getKeys().get(i).toString());
+	    	}
+	    	currentNode = BReadWrite.readBNode(root);
+	    	System.out.println();
+	    	for(int i =0; i< currentNode.getN(); i++) {
+	    		System.out.println(currentNode.getKeys().get(i).toString());
+	    	}
 		}
 		catch(IOException e) {
 			System.out.println(e);
