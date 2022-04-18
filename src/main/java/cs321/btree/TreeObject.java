@@ -170,11 +170,13 @@ public class TreeObject {
      */
     private long byteShift(String s) {
         long b = 0;
-        for (int i = 0; i < s.length(); i++) {
-            b += toByteVal(s.charAt(i));
-            if (i < s.length() - 1) {
-                b = b << 2;
-            }
+        long x = 0;
+        
+        for (int i = s.length() - 1; i >= 0; i--) {
+        	//grab letters starting at end of string and work down
+            x = toByteVal(s.charAt((s.length() - 1) - i));
+            //add a shifted over x to b
+            b += x << (2 * i);
         }
         return b;
     }
@@ -187,16 +189,16 @@ public class TreeObject {
      */
     private long toByteVal(char c) {
         if (c == 'a') {
-            return 00;
+            return 0;
         }
         if (c == 'c') {
-            return 01;
+            return 1;
         }
         if (c == 'g') {
-            return 10;
+            return 2;
         }
         if (c == 't') {
-            return 11;
+            return 3;
         }
         return -1;
     }
