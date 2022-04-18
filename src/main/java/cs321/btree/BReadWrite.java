@@ -127,6 +127,8 @@ public class BReadWrite {
 		} catch (NullPointerException e) {
 			throw new IllegalStateException(
 					e.getClass() + " thrown, may indicate that RAF or buffer have not been set properly.");
+		}catch(Exception e) {
+			throw e;
 		}
 	}
 
@@ -171,6 +173,8 @@ public class BReadWrite {
 		} catch (NullPointerException e) {
 			throw new IllegalStateException(
 					e.getClass() + " thrown, may indicate that RAF or buffer have not been set properly.");
+		}catch(Exception e) {
+			throw e;
 		}
 	}
 

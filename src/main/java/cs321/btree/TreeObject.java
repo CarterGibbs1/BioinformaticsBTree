@@ -137,6 +137,13 @@ public class TreeObject {
     public void setFrequency(int newFrequency) {
         this.frequency = newFrequency;
     }
+    
+    /**
+     * Increment the frequency of this object by 1
+     */
+    public void incrementFrequency() {
+    	frequency++;
+    }
 
     public long setLongKey() {
         if (keyLongVal == -1) {

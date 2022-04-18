@@ -16,9 +16,12 @@ public class BNode {
 	
 	//TODO: Add cache functionality
 
+	//TODO: Arrays or LinkedLists?
 	//child0 <= key0 <= child1 <= key1 <= child2 ... childn <= keyn <= childn + 1
 	private LinkedList<TreeObject<String>> keys; //objects/keys in this node, also size() = n
 	private LinkedList<Long> children;      //addresses to the children of this node 
+	
+//	private 
 	
 	private long parent; //parent address
 	private int n; //TODO: Not needed?
@@ -106,7 +109,8 @@ public class BNode {
 	
 	/**
 	 * Insert the given key into this BNode and insert the given child
-	 * to the right of the inserted key.
+	 * to the right of the inserted key. If the key is in this BNode,
+	 * then increment that key's frequency.
 	 * 
 	 * @param key   TreeObject containing Object to insert
 	 * @param child Child related to key to insert 
@@ -130,12 +134,19 @@ public class BNode {
 		
 		//get to the index of the first k less than key
 		int i;
-		for(i = ( keys.size() - 1); i >= 0 && key.compare(keys.get(i)) <= 0; i--){}
+		for(i = ( keys.size() - 1); i >= 0 && key.compare(keys.get(i)) <= 0; i--);
 		
-		//add new key and child to lists
-		keys.add(i + 1, key);
-		children.add(i + 2, child);
-		n++;
+		//if this contains the key, increment the frequency
+		//else insert it as usual
+		if(i > 0 && key.compare(keys.get(i)) == 0) {
+			keys.get(i).incrementFrequency();
+		}
+		else {
+			//add new key and child to lists
+			keys.add(i + 1, key);
+			children.add(i + 2, child);
+			n++;
+		}
 		
 		if(write) {
 			BReadWrite.writeBNode(this);
@@ -143,8 +154,8 @@ public class BNode {
 	}
 	
 	/**
-	 * Insert the given key into this BNode. Should only be used on leaf
-	 * nodes.
+	 * Insert the given key into this BNode. If the key is in this
+	 * BNode, then increment that key's frequency.
 	 * <p>
 	 * WRITE: This method writes this changed BNode to the RAF
 	 * 
@@ -157,7 +168,8 @@ public class BNode {
 	}
 	
 	/**
-	 * Insert the given key into this BNode and insert the given child
+	 * Insert the given key into this BNode and insert the given child.
+	 * If the key is in this BNode, then increment that key's frequency.
 	 * <p>
 	 * NO WRITE: This method does not write the changed BNode to the RAF
 	 * 
@@ -231,7 +243,7 @@ public class BNode {
 		//a pointer to splitRight
 		//Parent   -    .. x x d x x ..
 		//                    / \
-		//Keys     -  a b c d  |  e f g
+		//Keys     -  a b c    |  e f g
 		//Pointers - 0 1 2 3   | 4 5 6 7
 		
 		//if this is the ROOT, create new parent/root to insert into
