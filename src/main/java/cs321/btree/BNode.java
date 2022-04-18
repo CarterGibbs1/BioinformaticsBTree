@@ -1,6 +1,7 @@
 package cs321.btree;
 
 import java.io.IOException;
+import java.nio.BufferOverflowException;
 import java.util.LinkedList;
 
 /**
@@ -135,19 +136,12 @@ public class BNode {
 		//get to the index of the first k less than key
 		int i;
 		for(i = ( keys.size() - 1); i >= 0 && key.compare(keys.get(i)) <= 0; i--);
-		
-		//if this contains the key, increment the frequency
-		//else insert it as usual
-		if(i > 0 && key.compare(keys.get(i)) == 0) {
-			keys.get(i).incrementFrequency();
-		}
-		else {
-			//add new key and child to lists
-			keys.add(i + 1, key);
-			children.add(i + 2, child);
-			n++;
-		}
-		
+
+		//add new key and child to lists
+		keys.add(i + 1, key);
+		children.add(i + 2, child);
+		n++;
+				
 		if(write) {
 			BReadWrite.writeBNode(this);
 		}
@@ -184,19 +178,33 @@ public class BNode {
 	
 	/**
 	 * Get the child of this BNode where the given key should be
-	 * inserted or would be located. Does NOT insert the key, only
-	 * returns the subtree that it belongs to.
+	 * inserted or would be located. Will increment the frequency
+	 * of a key and return this BNode's address if the key exists
+	 * in this BNode.
+	 * <p>
+	 * WRITE: Does NOT insert the key (except for frequency
+	 * increments where it will write the BNode), only returns
+	 * the subtree that it belongs to.
 	 * 
 	 * @param  key Object to use to locate the appropriate subtree
 	 * 
 	 * @return subtree address (child of this BNode) that key
-	 *         belongs to
+	 *         belongs to OR this BNode if it contains the key
+	 *         
+	 * @throws IOException Reading/Writing to RAF may throw exception
 	 */
-	public long getSubtree(TreeObject key){
+	public long getSubtree(TreeObject key) throws IOException{
 		
 		//get to the index of the first k less than key
 		int i;
-		for(i = ( keys.size() - 1); i >= 0 && key.compare(keys.get(i)) <= 0; i--){}
+		for(i = ( keys.size() - 1); i >= 0 && key.compare(keys.get(i)) < 0; i--){}
+		
+		//if this BNode contains the key, increment the key frequency, write this, and return this address
+		if(i >= 0 && key.compare(keys.get(i)) == 0) {
+			keys.get(i).incrementFrequency();
+			BReadWrite.writeBNode(this);
+			return address;
+		}
 		
 		return children.get(i + 1);
 	}
