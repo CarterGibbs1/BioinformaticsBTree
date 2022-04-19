@@ -110,8 +110,7 @@ public class BNode {
 	
 	/**
 	 * Insert the given key into this BNode and insert the given child
-	 * to the right of the inserted key. If the key is in this BNode,
-	 * then increment that key's frequency.
+	 * to the right of the inserted key.
 	 * 
 	 * @param key   TreeObject containing Object to insert
 	 * @param child Child related to key to insert 
@@ -145,11 +144,12 @@ public class BNode {
 		if(write) {
 			BReadWrite.writeBNode(this);
 		}
+		
 	}
 	
 	/**
 	 * Insert the given key into this BNode. If the key is in this
-	 * BNode, then increment that key's frequency.
+	 * BNode, then increment that key's frequency and always write.
 	 * <p>
 	 * WRITE: This method writes this changed BNode to the RAF
 	 * 
@@ -163,7 +163,6 @@ public class BNode {
 	
 	/**
 	 * Insert the given key into this BNode and insert the given child.
-	 * If the key is in this BNode, then increment that key's frequency.
 	 * <p>
 	 * NO WRITE: This method does not write the changed BNode to the RAF
 	 * 
@@ -193,7 +192,7 @@ public class BNode {
 	 *         
 	 * @throws IOException Reading/Writing to RAF may throw exception
 	 */
-	public long getSubtree(TreeObject key) throws IOException{
+	public long getElementLocation(TreeObject key) throws IOException{
 		
 		//get to the index of the first k less than key
 		int i;

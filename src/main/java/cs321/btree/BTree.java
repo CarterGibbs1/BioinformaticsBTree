@@ -95,7 +95,7 @@ public class BTree
 		while (!currentNode.isLeaf()) {
 			
 			// if the object to insert is in currentNode, exit
-			nextNode = currentNode.getSubtree(toInsert);
+			nextNode = currentNode.getElementLocation(toInsert);
 			if (nextNode == currentNode.getAddress()) {
 				return;
 			}
@@ -109,8 +109,10 @@ public class BTree
 			}
 		}
 
-		// once at leaf, insert key
-		currentNode.insert(toInsert);
+		// once at leaf, insert key if it's not in the lead already
+		if(currentNode.getElementLocation(toInsert) != currentNode.getAddress()) {
+			currentNode.insert(toInsert);
+		}
     }
     
     public long search(Object x) {
@@ -188,7 +190,7 @@ public class BTree
     	boolean sorted = isSorted(current.getChildren().get(0), null, current.getKeys().get(0));
     	
     	for(int i = 1; i < current.getN() - 1; i++) {
-    		sorted = sorted && isSorted(current.getChildren().get(i), current.getKeys().get(i), current.getKeys().get(i + 1)) &&
+    		sorted = sorted && isSorted(current.getChildren().get(i), current.getKeys().get(i - 1), current.getKeys().get(i)) &&
     		         current.getKeys().get(i - 1).compare(current.getKeys().get(i)) < 0;
     	}
     	
