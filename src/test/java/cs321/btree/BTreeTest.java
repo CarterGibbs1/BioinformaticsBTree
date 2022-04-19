@@ -596,7 +596,7 @@ public class BTreeTest {
 				
 				//generate random sequences and create BTree
 				ArrayList<String> inputSequences = generateRandomSequences(20000/5, 30000/5, 5, 15);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
-				BTree memoryTree = new BTree(degree, 5, new TreeObject(inputSequences.get(0), 1));
+				BTree memoryTree = new BTree(new TreeObject(inputSequences.get(0), 1), degree, 5);
 				
 				//insert all sequences
 				for(int i = 1; i < inputSequences.size(); i++) {
@@ -608,8 +608,8 @@ public class BTreeTest {
 				BTree readTree = BReadWrite.readBTree();
 				
 				//check that both BTrees are sorted
-				assert(BTree.isSorted(memoryTree.getRoot(), null, null));
-				assert(BTree.isSorted(readTree.getRoot(), null, null));
+				assert(BTree.isSorted(memoryTree.getRoot()));
+				assert(BTree.isSorted(readTree.getRoot()));
 				
 				progress.increaseProgress();
 			}

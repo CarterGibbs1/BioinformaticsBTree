@@ -252,7 +252,7 @@ public class BReadWrite {
 			short height = buffer.getShort();
 
 			// initialize BTree and return 
-			BTree retTree = new BTree(t, k, numNodes, root, height);
+			BTree retTree = new BTree(root, t, k, numNodes, height);
 
 			// set static BNode degree
 			BNode.setDegree(retTree.getDegree());
