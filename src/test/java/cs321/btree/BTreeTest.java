@@ -16,6 +16,17 @@ public class BTreeTest
 	static private final Random random = new Random();
 	static private final String VALID_LETTERS = "atcg";
 	
+	//how many times to run certain Tests, some of these drastically increase run time
+	static private int[] timesToRun = new int[] {10, 20, 50, 100, 500, 1000};
+	static private int run_BNode_RAF_RAFAppropriateSize = timesToRun[0];
+	
+	static private Exception ex = null;
+	static private int currentProgress = 0;
+	
+	//create progress bar to show things are working (doesn't really work on eclipse ;[)
+	static private final ProgressBar progress = new ProgressBar(20,
+			run_BNode_RAF_RAFAppropriateSize + BTreeTest.class.getDeclaredMethods().length - 2);
+	
 	//=================================================================================================================
 	//                                  Utility Methods
 	//=================================================================================================================
@@ -106,31 +117,42 @@ public class BTreeTest
 	 */
 	@Test
 	public void randomGenerator_mergesort() {
-		ArrayList<String> randSeq = generateRandomSequences(30, 50, 10, 20);
+		ex = null;
 		
-		//test that there are between 5 and 9 sequences
-		assert(randSeq.size() >= 30 && randSeq.size() < 50);
-		
-		
-		int seqLength = randSeq.get(0).length();
-		
-		//test that all sequences are the same length
-		for(int i = 0; i < randSeq.size(); i++) {
-			assert(seqLength == randSeq.get(i).length());
+		try {
+			ArrayList<String> randSeq = generateRandomSequences(30, 50, 10, 20);
+			
+			//test that there are between 5 and 9 sequences
+			assert(randSeq.size() >= 30 && randSeq.size() < 50);
+			
+			
+			int seqLength = randSeq.get(0).length();
+			
+			//test that all sequences are the same length
+			for(int i = 0; i < randSeq.size(); i++) {
+				assert(seqLength == randSeq.get(i).length());
+			}
+			
+			//create ArrayList of TreeObjects from sequences
+			ArrayList<TreeObject> treeObjects = new ArrayList<TreeObject>();
+			for(int i = 0; i < randSeq.size(); i++) {
+				treeObjects.add(new TreeObject(randSeq.get(i), 1));
+			}
+			
+			//sort TreeObjects
+			mergesortTreeObject(treeObjects);
+			
+			//test that treeObjects is sorted in increasing order
+			for(int i = 0; i < treeObjects.size() - 1; i++) {
+				assert(treeObjects.get(i).compare(treeObjects.get(i + 1)) <= 0);
+			}
 		}
-		
-		//create ArrayList of TreeObjects from sequences
-		ArrayList<TreeObject> treeObjects = new ArrayList<TreeObject>();
-		for(int i = 0; i < randSeq.size(); i++) {
-			treeObjects.add(new TreeObject(randSeq.get(i), 1));
+		catch(Exception e) {
+			ex = e;
 		}
-		
-		//sort TreeObjects
-		mergesortTreeObject(treeObjects);
-		
-		//test that treeObjects is sorted in increasing order
-		for(int i = 0; i < treeObjects.size() - 1; i++) {
-			assert(treeObjects.get(i).compare(treeObjects.get(i + 1)) <= 0);
+		finally {
+			progress.increaseProgress();
+			assert(ex == null);
 		}
 	}
 	
@@ -151,9 +173,9 @@ public class BTreeTest
     //  you can check the final state of the tree and
     //  assert that the constructed tree has the expected number of nodes and
     //  assert that some (or all) of the nodes have the expected values
-    @Test
-    public void btreeDegree4Test()
-    {
+//    @Test
+//    public void btreeDegree4Test()
+//    {
 //        //TODO instantiate and populate a bTree object
 //        int expectedNumberOfNodes = TBD;
 //
@@ -174,7 +196,7 @@ public class BTreeTest
 //            // second child of root has indexNode=2, and so on.
 //            assertEquals(expectedNodesContent[indexNode], bTree.getArrayOfNodeContentsForNodeIndex(indexNode).toString());
 //        }
-    }
+//    }
 	//end of BTree tests
     
     //=================================================================================================================
@@ -186,6 +208,10 @@ public class BTreeTest
      */
     @Test
     public void singleBNode_TestInsertion() {
+   		ex = null;
+		
+		try {
+    	
     	//                       57  12  8   59  7   10  44
     	String inputSequences = "TGC ATA AGA TGT ACT AGG GTA".toLowerCase();
     	
@@ -197,6 +223,15 @@ public class BTreeTest
     	
     	//see if the BNode contains sequences in order in long value
     	assertEquals(testNode.toString(), "7 8 10 12 44 57 59");
+    	
+		}
+				catch(Exception e) {
+			ex = e;
+		}
+		finally {
+			progress.increaseProgress();
+			assert(ex == null);
+		}
     }
     
     /**
@@ -205,6 +240,9 @@ public class BTreeTest
      */
     @Test
     public void BNode_TestSplit() {
+    			ex = null;
+		
+		try {
     	//                     59   108  14   103  46
     	String inputSequences = "ATGT CGTA AATG CGCT AGTG".toLowerCase();
     	TestBNode<String> parent;
@@ -223,6 +261,15 @@ public class BTreeTest
     	assertEquals(parent.toString(), "59");
     	assertEquals(testNode.toString(), "14 46");
     	assertEquals(rightChild.toString(), "103 108");
+    	
+		}
+				catch(Exception e) {
+			ex = e;
+		}
+		finally {
+			progress.increaseProgress();
+			assert(ex == null);
+		}
     }
     
     /**
@@ -231,6 +278,9 @@ public class BTreeTest
      */
     @Test
     public void BNode_TestIsFull() {
+    			ex = null;
+		
+		try {
     	String inputSequences = "ATGTCTGACCGT".toLowerCase();
     	int degree = 7;
     	
@@ -246,6 +296,15 @@ public class BTreeTest
     	//testNode is now full
     	testNode.insert(new TreeObject("a", 1));
     	assert(testNode.isFull(degree));
+    	
+		}
+				catch(Exception e) {
+			ex = e;
+		}
+		finally {
+			progress.increaseProgress();
+			assert(ex == null);
+		}
     }
     
     /**
@@ -255,6 +314,9 @@ public class BTreeTest
      */
     @Test
     public void BNode_CorrectHeightAndNodeCount() {
+    	ex = null;
+		
+		try {
     	String inputSequences = "ATGTCTGACCGTGACTTACGAAG".toLowerCase();
     	int degree = 2;
     	
@@ -299,6 +361,15 @@ public class BTreeTest
     	
     	assertEquals(totalNodes, 16); //18 if we perform a split on the leaf nodes we just inserted into
     	assertEquals(height, 4);
+    	
+		}
+				catch(Exception e) {
+			ex = e;
+		}
+		finally {
+			progress.increaseProgress();
+			assert(ex == null);
+		}
     }
     
     
@@ -312,18 +383,30 @@ public class BTreeTest
 	 */
 	@Test
 	public void TreeObject_PublicMethods() {
-		TreeObject tO = new TreeObject("tcacgaggtc", 5);
-		long key = Long.parseLong("11010001100010101101", 2);
-		assertEquals(tO.getKey(), key);
-//		assertEquals(tO.withZeros(), "11010001100010101101");
-		assertEquals(tO.getFrequency(), 5);
-
-		tO.setFrequency(6);
-		assertEquals(tO.getFrequency(), 6);
-		tO.setFrequency(5);
-		TreeObject tOTwo = new TreeObject("tcacgaggta", 5);
-		assert(tO.compare(tOTwo) > 0);
-		assertEquals(tO.toString(), "tcacgaggtc: 5");
+		ex = null;
+		try {
+			TreeObject tO = new TreeObject("tcacgaggtc", 5);
+			long key = Long.parseLong("11010001100010101101", 2);
+			assertEquals(tO.getKey(), key);
+//			assertEquals(tO.withZeros(), "11010001100010101101");
+			assertEquals(tO.getFrequency(), 5);
+	
+			tO.setFrequency(6);
+			assertEquals(tO.getFrequency(), 6);
+			tO.setFrequency(5);
+			TreeObject tOTwo = new TreeObject("tcacgaggta", 5);
+			assert(tO.compare(tOTwo) > 0);
+			assertEquals(tO.toString(), "tcacgaggtc: 5");
+			
+		}
+				catch(Exception e) {
+			ex = e;
+		}
+		finally {
+			progress.increaseProgress();
+			assert(ex == null);
+		}
+		
 	}
 	
 	
@@ -337,6 +420,7 @@ public class BTreeTest
 	 */
 	@Test
 	public void BNode_RAF_InsertWriteRead() {
+		Exception ex = null;
 		try {
 	    	//                       57  12  8   59  7   10  44
 	    	String inputSequences = "TGC ATA AGA TGT ACT AGG GTA".toLowerCase();
@@ -359,9 +443,15 @@ public class BTreeTest
 	    	assertEquals(memoryNode.toString(), "7 8 10 12 44 57 59");
 	    	//then check if readNode from the RAF is the same as the memoryNode
 	    	assertEquals(readNode.toString(), memoryNode.toString());
+	    	
+	    	progress.increaseProgress();
 		}
 		catch(IOException e) {
-			assert(false);
+			ex = e;
+		}
+		finally {
+			progress.increaseProgress();
+			assert(ex == null);
 		}
 	}
 	
@@ -371,6 +461,8 @@ public class BTreeTest
 	 */
 	@Test
 	public void BNode_RAF_SplitWriteRead() {
+		Exception ex = null;
+		
 		try {
 			//                       180  59   108  14   103  46   118
 			String inputSequences = "GTCA ATGT CGTA AATG CGCT AGTG CTCG".toLowerCase();
@@ -410,7 +502,11 @@ public class BTreeTest
 	    	assert(!readParent.isLeaf() && readParent.isRoot() && !readParent.isFull() && readParent.getN() == 1);
 		}
 		catch(IOException e) {
-			assert(false);
+			ex = e;
+		}
+		finally {
+			progress.increaseProgress();
+			assert(ex == null);
 		}
 	}
 	
@@ -424,10 +520,13 @@ public class BTreeTest
 	 */
 	@Test
 	public void BNode_RAF_RAFAppropriateSize() {
+		currentProgress = progress.getProgress();
+		ex = null;
+		
 		try {
-			for(int k = 0; k < 50; k++) {//can run this test multiple times to ensure it works                         <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+			for(int k = 0; k < run_BNode_RAF_RAFAppropriateSize; k++) {//                                                <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
 				
-				ArrayList<String> inputSequences = generateRandomSequences(20000, 30000, 2, 32);//                   <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				ArrayList<String> inputSequences = generateRandomSequences(20000/2, 30000/2, 2, 32);//                   <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
 				ArrayList<TreeObject> insertedSequences = new ArrayList<TreeObject>();
 		    	
 		    	//delete old RAF and set new RAF, degree, and byteBuffer. Important that they are done in this order
@@ -501,17 +600,59 @@ public class BTreeTest
 //		    	for(int i =0; i< currentNode.getN(); i++) {
 //		    		System.out.println(currentNode.getKeys().get(i).toString());
 //		    	}
+		    	
+		    	progress.increaseProgress();
 			}
 		}
 		catch(IOException e) {
-			System.out.println(e);
-			assert(false);
+			ex = e;
+		}
+		catch(Exception e) {
+			ex = e;
+		}
+		finally {
+			for(; progress.getProgress() < run_BNode_RAF_RAFAppropriateSize + currentProgress;) {
+				progress.increaseProgress();
+			}
+			
+			assert(ex == null);//no exception thrown
 		}
 	}
 	
 	
 	
 	
+	public void EXAMPLE_TEST() {
+		ex = null;
+		
+		try {
+			//code goes here
+		}
+				catch(Exception e) {
+			ex = e;
+		}
+		finally {
+			progress.increaseProgress();
+			assert(ex == null);
+		}
+	}
+	
+	public void EXAMPLE_LOOPED_TEST() {
+		ex = null;
+		currentProgress = progress.getProgress();
+				try {
+			//code goes here
+		}
+				catch(Exception e) {
+			ex = e;
+		}
+		finally {
+			for(; progress.getProgress() < run_BNode_RAF_RAFAppropriateSize + currentProgress;) {
+				progress.increaseProgress();
+			}
+			assert(ex == null);
+		}
+	}
 	
 	
 	
