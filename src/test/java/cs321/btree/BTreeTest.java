@@ -19,6 +19,7 @@ public class BTreeTest {
 	// time
 	static private int[] timesToRun = new int[] {10, 20, 50, 100, 500, 1000 };
 	static private int run_BNode_RAF_RAFAppropriateSize = timesToRun[0];
+	static private int run_BTree_RAF_IsSorted = timesToRun[1];
 	static private int run_EXAMPLE_LOOPED_TEST = timesToRun[3];
 
 	static private Exception ex = null;
@@ -27,7 +28,8 @@ public class BTreeTest {
 	// create progress bar to show things are working, destroy on completion (doesn't
 	//really work on eclipse)
 	static private final ProgressBar progress = new ProgressBar(15,
-			run_BNode_RAF_RAFAppropriateSize + BTreeTest.class.getDeclaredMethods().length - 4,
+			run_BNode_RAF_RAFAppropriateSize + run_BTree_RAF_IsSorted +
+			BTreeTest.class.getDeclaredMethods().length - 4,
 			true);
 
 	// =================================================================================================================
@@ -516,7 +518,7 @@ public class BTreeTest {
 					// get to appropriate leaf BNode
 					while (!currentNode.isLeaf()) {
 						// if the object to insert is in currentNode, break and insert it
-						nextNode = currentNode.getSubtree(insertedSequences.get(i));
+						nextNode = currentNode.getElementLocation(insertedSequences.get(i));
 						if (nextNode == currentNode.getAddress()) {
 							continue insertLoop;
 						}
@@ -565,7 +567,62 @@ public class BTreeTest {
 		}
 	}
 	
+	// =================================================================================================================
+	//                                           Testing BTrees using RAF
+	// =================================================================================================================
 	
+	/**
+	 * Insert a random number of sequences of random length into a BTree, then write
+	 * the BTree, and lastly check if both the memory held node and the read node are
+	 * sorted correctly.
+	 * <p>
+	 * RANDOM: This test is random and thus, the RAFs will change every run.
+	 */
+	@Test
+	public void BTree_RAF_IsSorted() {
+		ex = null;
+		currentProgress = progress.getProgress();
+		
+		try {
+			
+			for (int k = 0; k < run_BTree_RAF_IsSorted; k++) {// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				
+				// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
+				// are done in this order
+				BReadWrite.setRAF(TESTS_FOLDER + "BTree_RAF_IsSorted" + k, true);
+				int degree = random.nextInt(3, 7);
+				BNode.setDegree(degree);
+				BReadWrite.setBuffer(BNode.getDiskSize());
+				
+				//generate random sequences and create BTree
+				ArrayList<String> inputSequences = generateRandomSequences(20000/5, 30000/5, 5, 15);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				BTree memoryTree = new BTree(degree, 5, new TreeObject(inputSequences.get(0), 1));
+				
+				//insert all sequences
+				for(int i = 1; i < inputSequences.size(); i++) {
+					memoryTree.insert(new TreeObject(inputSequences.get(i), 1));
+				}
+				
+				//write BTree and then read
+				BReadWrite.writeBTree(memoryTree);
+				BTree readTree = BReadWrite.readBTree();
+				
+				//check that both BTrees are sorted
+				assert(BTree.isSorted(memoryTree.getRoot(), null, null));
+				assert(BTree.isSorted(readTree.getRoot(), null, null));
+				
+				progress.increaseProgress();
+			}
+			
+		} catch (Exception e) {
+			ex = e;
+		} finally {
+			for (; progress.getProgress() < run_BTree_RAF_IsSorted + currentProgress;) {
+				progress.increaseProgress();
+			}
+			assert (ex == null);
+		}
+	}
 	
 	
 	
