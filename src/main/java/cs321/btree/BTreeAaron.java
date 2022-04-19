@@ -6,7 +6,7 @@ import java.nio.BufferOverflowException;
  * Used to create BTree objects that hold Generic Type objects. Notable method
  * is insert() which is important in structuring the BTree.
  *
- * @author Carter Gibbs, Mesa Greear
+ * @author Carter Gibbs, Mesa Greear, Aaron Goin
  * @version Spring 2022
  *
  */
