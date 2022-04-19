@@ -28,7 +28,7 @@ public class ProgressBar {
 	 * @param barLength     The length in chars that the progress bar will be + 2
 	 *                      (> 0)
 	 * @param finalProgress What the progress bar will be counting up to, i.e. what
-	 *                      value represents 100%, complete, done, etc (> 0, >= barLength*2)
+	 *                      value represents 100%, complete, done, etc (> 0)
 	 * @param destroy       True to wipe the progress bar once complete, false to
 	 *                      keep the progress bar.
 	 * @param empty         A regular char or a non format changing escape char that
@@ -36,9 +36,8 @@ public class ProgressBar {
 	 * @param full          A regular char or a non format changing escape char that
 	 *                      will represent a loaded segment
 	 * 
-	 * @throws IllegalArgumentException When barLength or finalCount <= 0, finalCount
-	 *         < barLength*2, or full or empty are an escape character that effects
-	 *         formatting
+	 * @throws IllegalArgumentException When barLength or finalCount <= 0, finalCount,
+	 *         or full or empty are an escape character that effects formatting
 	 */
 	public ProgressBar(int barLength, int finalProgress, boolean destroy, char empty, char full) throws IllegalArgumentException{
 		//check for valid values
@@ -48,9 +47,9 @@ public class ProgressBar {
 		if(finalProgress <= 0) {
 			throw new IllegalArgumentException("parameter 'finalProgress' is less than or equal to 0");
 		}
-		if(finalProgress < (barLength* 2)) {
-			throw new IllegalArgumentException("parameter 'finalProgress' is less than parameter 'barLength' * 2");
-		}
+//		if(finalProgress < (barLength* 2)) {
+//			throw new IllegalArgumentException("parameter 'finalProgress' is less than parameter 'barLength' * 2");
+//		}
 		if(INVALID_CHARS.indexOf(empty) != -1) {
 			throw new IllegalArgumentException("parameter 'empty' is an invalid char (\\r, \\n, \\b, \\t, or \\f)");
 		}
@@ -187,25 +186,23 @@ public class ProgressBar {
 			if(!isComplete()) {
 				bar.setCharAt((int) (progress / SCALED_PROGRESS) + 1, FULL);
 				System.out.print(bar);
-			} else {
-				// if the progress/loading is complete, return true and wrap up
-				// else, visually increase bar
-				if (isComplete()) {
-					// if the bar is set to be destroyed, wipe it
-					// else keep it and add some new lines
-					if (DESTROY) {
-						for (int i = 0; i < (BAR_LENGTH + 2); i++) {
-							bar.setCharAt(i, ' ');
-						}
-						bar.append('\n');
-					} else {
-						bar.setCharAt(BAR_LENGTH + 2, '\n'); // get rid of '\r'
+			}
+			// if the progress/loading is complete, return true and wrap up
+			else {
+				// if the bar is set to be destroyed, wipe it
+				// else keep it and add some new lines
+				if (DESTROY) {
+					for (int i = 0; i < (BAR_LENGTH + 2); i++) {
+						bar.setCharAt(i, ' ');
 					}
-
-					System.out.print(bar);
+					bar.append('\n');
+				} else {
+					bar.setCharAt(BAR_LENGTH + 2, '\n'); // get rid of '\r'
 				}
 
-				return isComplete();
+				System.out.print(bar);
+
+				return true;
 			}
 		}
 		
