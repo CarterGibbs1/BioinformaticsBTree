@@ -204,8 +204,9 @@ public class BReadWrite {
 			//write metadata to RAF
 			buffer.putLong(tree.getRoot()); // root address
 			buffer.putInt(tree.getDegree());  // degree
-			buffer.putInt(tree.getFrequency());  // frequency
+			buffer.putShort(tree.getFrequency());  // frequency
 			buffer.putInt(tree.getNumNodes());  //number of nodes
+			buffer.putShort(tree.getHeight());  //height
 
 			// make buffer ready to write and then write to RAF
 			buffer.flip();
@@ -245,12 +246,13 @@ public class BReadWrite {
 
 			//get metadata
 			long root = buffer.getInt();
-			int k = buffer.getInt(); //TODO: variables could be shorts, save barely on storage size
 			int t = buffer.getInt();
+			short k = buffer.getShort();
 			int numNodes = buffer.getInt();
+			short height = buffer.getShort();
 
 			// initialize BTree and return 
-			BTree retTree = new BTree(t, k, numNodes, root);
+			BTree retTree = new BTree(t, k, numNodes, root, height);
 
 			// set static BNode degree
 			BNode.setDegree(retTree.getDegree());
