@@ -2,6 +2,7 @@ package cs321.btree;
 
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
+import java.util.LinkedList;
 
 /**
  * Used to create BTree objects that hold Generic Type objects.
@@ -165,6 +166,37 @@ public class BTree
   	//=================================================================================================================
 	//                                           STATIC METHODS
 	//================================================================================================================= 
+    
+    
+    static public boolean isSorted(long root, TreeObject left, TreeObject right) throws IOException {
+    	if(root == -1) {
+    		return true;
+    	}
+    	
+    	BNode current = BReadWrite.readBNode(root);
+    	
+//    		for(int i = 1; i < current.getKeys().size(); i++) {
+//    			if(current.getKeys().get(i - 1).compare(current.getKeys().get(i)) >= 0 ) {
+//    				return false;
+//    			}
+//    		}
+//    		
+//    		return ((right == null || (current.getKeys().get(current.getKeys().size() - 1).compare(right) <= 0)) &&
+//    				(left == null || (current.getKeys().get(0).compare(left) >= 0)));
+//    	}
+    	
+    	boolean sorted = isSorted(current.getChildren().get(0), null, current.getKeys().get(0));
+    	
+    	for(int i = 1; i < current.getN(); i++) {
+    		sorted = sorted && isSorted(current.getChildren().get(i), current.getKeys().get(i), current.getKeys().get(i + 1)) &&
+    		         current.getKeys().get(i - 1).compare(current.getKeys().get(i)) < 0;
+    	}
+    	
+    	return sorted &&
+    	       isSorted(current.getChildren().get(current.getChildren().size() - 1), current.getKeys().get(current.getKeys().size() - 1), null) &&
+    	       ((right == null || (current.getKeys().get(current.getKeys().size() - 1).compare(right) <= 0)) &&
+    	       (left == null || (current.getKeys().get(0).compare(left) >= 0)));
+    }
     
     /**
 	 * Get the max size in bytes a BTree written to disk could
