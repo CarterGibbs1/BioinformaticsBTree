@@ -245,7 +245,7 @@ public class BReadWrite {
 			buffer.flip();
 
 			//get metadata
-			long root = buffer.getInt();
+			long root = buffer.getLong();
 			int t = buffer.getInt();
 			short k = buffer.getShort();
 			int numNodes = buffer.getInt();

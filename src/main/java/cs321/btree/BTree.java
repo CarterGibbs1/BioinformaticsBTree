@@ -54,16 +54,16 @@ public class BTree
      * 
      * @param degree
      * @param k
-     * @param initialNode
+     * @param initialObject
      * 
      * @throws IOException
      */
-    public BTree(int degree, int k, BNode initialNode) throws IOException {
+    public BTree(int degree, int k, TreeObject initialObject) throws IOException {
     	this(degree, k, 1, getDiskSize(), 0);
     	
-    	//write new BTree and initialNode to RAF
+    	//write new BTree and BNode to RAF
     	BReadWrite.writeBTree(this);
-    	BReadWrite.writeBNode(initialNode);
+    	BReadWrite.writeBNode(new BNode(initialObject, getRoot()));
     }
     
     
@@ -187,7 +187,7 @@ public class BTree
     	
     	boolean sorted = isSorted(current.getChildren().get(0), null, current.getKeys().get(0));
     	
-    	for(int i = 1; i < current.getN(); i++) {
+    	for(int i = 1; i < current.getN() - 1; i++) {
     		sorted = sorted && isSorted(current.getChildren().get(i), current.getKeys().get(i), current.getKeys().get(i + 1)) &&
     		         current.getKeys().get(i - 1).compare(current.getKeys().get(i)) < 0;
     	}
