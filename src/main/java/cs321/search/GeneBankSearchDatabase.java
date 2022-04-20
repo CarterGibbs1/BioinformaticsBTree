@@ -8,6 +8,9 @@ import java.sql.Statement;
 
 public class GeneBankSearchDatabase
 {
+
+    //sqlite-jdbc-3.36.0.3.jar is needed in directory, attached it here
+
     public static void main(String[] args) throws Exception//pass in a btree probs as arg
     {
         Connection connection = null;
