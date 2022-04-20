@@ -2,6 +2,7 @@ package cs321.search;
 
 public class GeneBankSearchBTreeArguments
 {
+
     private final boolean useCache;
     private final String BTreeFileName;
     private final String queryFileName;
@@ -17,6 +18,7 @@ public class GeneBankSearchBTreeArguments
         this.debugLevel = debugLevel;
     }
 
+    // UTILITY
     @Override
     public String toString()
     {
@@ -27,5 +29,26 @@ public class GeneBankSearchBTreeArguments
                 ", cacheSize=" + cacheSize +
                 ", debugLevel=" + debugLevel +
                 '}';
+    }
+
+    // GETTERS
+    public boolean isUseCache() {
+        return useCache;
+    }
+
+    public String getBTreeFileName() {
+        return BTreeFileName;
+    }
+
+    public String getQueryFileName() {
+        return queryFileName;
+    }
+
+    public int getCacheSize() {
+        return cacheSize;
+    }
+
+    public int getDebugLevel() {
+        return debugLevel;
     }
 }

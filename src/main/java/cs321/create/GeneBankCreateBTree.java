@@ -1,10 +1,12 @@
 package cs321.create;
 
 import cs321.btree.BTree;
+import cs321.btree.TreeObject;
 import cs321.common.ParseArgumentException;
 
 import java.io.*;
 import java.util.List;
+import java.util.Scanner;
 
 public class GeneBankCreateBTree {
 
@@ -70,5 +72,32 @@ public class GeneBankCreateBTree {
         }
 
         return new GeneBankCreateBTreeArguments(withOrWithoutCache == 1, degree, gbkFileName, sequenceLength, cacheSize, debugLevel);
+    }
+
+    public static void createBTree(GeneBankCreateBTreeArguments args) {
+        try {
+            Scanner fileScan = new Scanner(new File(args.getGbkFileName()));
+            while (!fileScan.nextLine().contains("ORIGIN"));
+            String line = fileScan.nextLine();
+            Scanner lineScan = new Scanner(line);
+            String sequence = lineScan.next();
+            int index;
+            char charSeq[] = new char[args.getSubsequenceLength()];
+            for (index = 0; index < args.getSubsequenceLength(); index++) { // fills array initially
+                charSeq[index] = sequence.charAt(index); // get char at index of sequence
+            }
+            BTree tree = new BTree(args.getDegree(),args.getSubsequenceLength(), new TreeObject(new String(charSeq), args.getSubsequenceLength()));
+            while (!line.contains("//") && fileScan.hasNextLine()) { // while has another line in sequence
+                while (lineScan.hasNext()) { // while has another sequence
+                    for ()
+                }
+            }
+        } catch (FileNotFoundException fe) {
+            System.err.println("File not found\n");
+            System.exit(1);
+        } catch (IOException io) {
+            System.err.println("IO Exception thrown\n");
+            System.exit(1);
+        }
     }
 }
