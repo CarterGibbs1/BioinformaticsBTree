@@ -29,13 +29,32 @@ public class BTreeTest {
 	//really work on eclipse)
 	static private final ProgressBar progress = new ProgressBar(15,
 			run_BNode_RAF_RAFAppropriateSize + run_BTree_RAF_IsSorted +
-			BTreeTest.class.getDeclaredMethods().length - 4,
+			BTreeTest.class.getDeclaredMethods().length - 5,
 			true);
 
 	// =================================================================================================================
 	//                                                Utility Methods
 	// =================================================================================================================
-
+	
+	/**
+	 * If a test is stopped in the middle due to an exception, this method
+	 * will ensure that the exception is still thrown while updating the
+	 * progress bar to compensate for the lost tests in a for loop.
+	 * 
+	 * @param excpectedRuns Times this test is expected to run/loop
+	 * 
+	 * @throws Exception The exception thrown by the test
+	 */
+	private void progressAndExceptionCheck(int excpectedRuns) throws Exception {
+		for (; progress.getProgress() < excpectedRuns + currentProgress;) {
+			progress.increaseProgress();
+		}
+		
+		if(ex != null) {
+			throw ex;
+		}
+	}
+	
 	/**
 	 * Generate a random number of sequences of random length in the given ranges.
 	 * 
@@ -124,8 +143,6 @@ public class BTreeTest {
 	 */
 	@Test
 	public void randomGenerator_mergesort() {
-		ex = null;
-
 		try {
 			ArrayList<String> randSeq = generateRandomSequences(30, 50, 10, 20);
 
@@ -152,11 +169,10 @@ public class BTreeTest {
 			for (int i = 0; i < treeObjects.size() - 1; i++) {
 				assert (treeObjects.get(i).compare(treeObjects.get(i + 1)) <= 0);
 			}
-		} catch (Exception e) {
-			ex = e;
-		} finally {
 			progress.increaseProgress();
-			assert (ex == null);
+		} catch (Exception e) {
+			progress.increaseProgress();
+			throw e;
 		}
 	}
 	
@@ -169,8 +185,6 @@ public class BTreeTest {
 	 */
 	@Test
 	public void singleBNode_TestInsertion() {
-		ex = null;
-
 		try {
 
 			// 57 12 8 59 7 10 44
@@ -185,11 +199,10 @@ public class BTreeTest {
 			// see if the BNode contains sequences in order in long value
 			assertEquals(testNode.toString(), "7 8 10 12 44 57 59");
 
-		} catch (Exception e) {
-			ex = e;
-		} finally {
 			progress.increaseProgress();
-			assert (ex == null);
+		} catch (Exception e) {
+			progress.increaseProgress();
+			throw e;
 		}
 	}
 
@@ -199,8 +212,6 @@ public class BTreeTest {
 	 */
 	@Test
 	public void BNode_TestSplit() {
-		ex = null;
-
 		try {
 			// 59 108 14 103 46
 			String inputSequences = "ATGT CGTA AATG CGCT AGTG".toLowerCase();
@@ -221,11 +232,10 @@ public class BTreeTest {
 			assertEquals(testNode.toString(), "14 46");
 			assertEquals(rightChild.toString(), "103 108");
 
-		} catch (Exception e) {
-			ex = e;
-		} finally {
 			progress.increaseProgress();
-			assert (ex == null);
+		} catch (Exception e) {
+			progress.increaseProgress();
+			throw e;
 		}
 	}
 
@@ -235,8 +245,6 @@ public class BTreeTest {
 	 */
 	@Test
 	public void BNode_TestIsFull() {
-		ex = null;
-
 		try {
 			String inputSequences = "ATGTCTGACCGT".toLowerCase();
 			int degree = 7;
@@ -254,11 +262,10 @@ public class BTreeTest {
 			testNode.insert(new TreeObject("a", 1));
 			assert (testNode.isFull(degree));
 
-		} catch (Exception e) {
-			ex = e;
-		} finally {
 			progress.increaseProgress();
-			assert (ex == null);
+		} catch (Exception e) {
+			progress.increaseProgress();
+			throw e;
 		}
 	}
 
@@ -269,8 +276,6 @@ public class BTreeTest {
 	 */
 	@Test
 	public void BNode_CorrectHeightAndNodeCount() {
-		ex = null;
-
 		try {
 			String inputSequences = "ATGTCTGACCGTGACTTACGAAG".toLowerCase();
 			int degree = 2;
@@ -317,12 +322,11 @@ public class BTreeTest {
 
 			assertEquals(totalNodes, 16); // 18 if we perform a split on the leaf nodes we just inserted into
 			assertEquals(height, 4);
-
-		} catch (Exception e) {
-			ex = e;
-		} finally {
+			
 			progress.increaseProgress();
-			assert (ex == null);
+		} catch (Exception e) {
+			progress.increaseProgress();
+			throw e;
 		}
 	}
 
@@ -335,7 +339,6 @@ public class BTreeTest {
 	 */
 	@Test
 	public void TreeObject_PublicMethods() {
-		ex = null;
 		try {
 			TreeObject tO = new TreeObject("tcacgaggtc", 5);
 			long key = Long.parseLong("11010001100010101101", 2);
@@ -351,12 +354,9 @@ public class BTreeTest {
 			assertEquals(tO.toString(), "tcacgaggtc: 5");
 
 		} catch (Exception e) {
-			ex = e;
-		} finally {
 			progress.increaseProgress();
-			assert (ex == null);
+			throw e;
 		}
-
 	}
 
 	// =================================================================================================================
@@ -366,10 +366,11 @@ public class BTreeTest {
 	/**
 	 * Test that a single BNode with a few keys inserted and that is then written to
 	 * the RAF is the same as the one stored in memory.
+	 * 
+	 * @throws Exception 
 	 */
 	@Test
-	public void BNode_RAF_InsertWriteRead() {
-		Exception ex = null;
+	public void BNode_RAF_InsertWriteRead() throws Exception {
 		try {
 			// 57 12 8 59 7 10 44
 			String inputSequences = "TGC ATA AGA TGT ACT AGG GTA".toLowerCase();
@@ -395,22 +396,20 @@ public class BTreeTest {
 			assertEquals(readNode.toString(), memoryNode.toString());
 
 			progress.increaseProgress();
-		} catch (IOException e) {
-			ex = e;
-		} finally {
+		} catch (Exception e) {
 			progress.increaseProgress();
-			assert (ex == null);
+			throw e;
 		}
 	}
 
 	/**
 	 * Test that a split BNode correctly writes the new root and new child to the
 	 * RAF, maintaining the correct keys, children, and properties.
+	 * 
+	 * @throws Exception 
 	 */
 	@Test
-	public void BNode_RAF_SplitWriteRead() {
-		Exception ex = null;
-
+	public void BNode_RAF_SplitWriteRead() throws Exception {
 		try {
 			// 180 59 108 14 103 46 118
 			String inputSequences = "GTCA ATGT CGTA AATG CGCT AGTG CTCG".toLowerCase();
@@ -450,11 +449,11 @@ public class BTreeTest {
 			assert (readNode.isLeaf() && !readNode.isRoot() && !readNode.isFull() && readNode.getN() == 3);
 			assert (readRight.isLeaf() && !readRight.isRoot() && !readRight.isFull() && readRight.getN() == 3);
 			assert (!readParent.isLeaf() && readParent.isRoot() && !readParent.isFull() && readParent.getN() == 1);
-		} catch (IOException e) {
-			ex = e;
-		} finally {
+			
 			progress.increaseProgress();
-			assert (ex == null);
+		} catch (Exception e) {
+			progress.increaseProgress();
+			throw e;
 		}
 	}
 
@@ -465,12 +464,13 @@ public class BTreeTest {
 	 * don't overwrite other BNodes.
 	 * <p>
 	 * RANDOM: This test is random and thus, the RAFs will change every run.
+	 * 
+	 * @throws Exception 
 	 */
 	@Test
-	public void BNode_RAF_RAFAppropriateSize() {
+	public void BNode_RAF_RAFAppropriateSize() throws Exception {
 		currentProgress = progress.getProgress();
 		ex = null;
-		boolean done = false;
 
 		try {
 			for (int k = 0; k < run_BNode_RAF_RAFAppropriateSize; k++) {// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
@@ -556,17 +556,10 @@ public class BTreeTest {
 
 				progress.increaseProgress();
 			}
-			done = true;
-		} catch (IOException e) {
+		} catch (Exception e) {
 			ex = e;
-		}// catch (Exception e) {
-//			ex = e;
-//		} finally {
-//			for (; progress.getProgress() < run_BNode_RAF_RAFAppropriateSize + currentProgress;) {
-//				progress.increaseProgress();
-//			}
-//			assert(done);
-//		}
+			progressAndExceptionCheck(run_BNode_RAF_RAFAppropriateSize);
+		}
 	}
 	
 	// =================================================================================================================
@@ -579,9 +572,11 @@ public class BTreeTest {
 	 * sorted correctly.
 	 * <p>
 	 * RANDOM: This test is random and thus, the RAFs will change every run.
+	 * 
+	 * @throws Exception 
 	 */
 	@Test
-	public void BTree_RAF_IsSorted() {
+	public void BTree_RAF_IsSorted() throws Exception {
 		ex = null;
 		currentProgress = progress.getProgress();
 		
@@ -618,11 +613,7 @@ public class BTreeTest {
 			
 		} catch (Exception e) {
 			ex = e;
-		} finally {
-			for (; progress.getProgress() < run_BTree_RAF_IsSorted + currentProgress;) {
-				progress.increaseProgress();
-			}
-			assert (ex == null);
+			progressAndExceptionCheck(run_BTree_RAF_IsSorted);
 		}
 	}
 	
@@ -631,22 +622,28 @@ public class BTreeTest {
 	
 	
 	
-
-	public void EXAMPLE_TEST() {
-		ex = null;
-
+	/**
+	 * 
+	 * 
+	 * @throws Exception
+	 */
+	public void EXAMPLE_TEST() throws Exception {
 		try {
 			// code goes here
 			
-		} catch (Exception e) {
-			ex = e;
-		} finally {
 			progress.increaseProgress();
-			assert (ex == null);
+		} catch (Exception e) {
+			progress.increaseProgress();
+			throw e;
 		}
 	}
 
-	public void EXAMPLE_LOOPED_TEST() {
+	/**
+	 * 
+	 * 
+	 * @throws Exception 
+	 */
+	public void EXAMPLE_LOOPED_TEST() throws Exception {
 		ex = null;
 		currentProgress = progress.getProgress();
 		
@@ -658,11 +655,7 @@ public class BTreeTest {
 			
 		} catch (Exception e) {
 			ex = e;
-		} finally {
-			for (; progress.getProgress() < run_EXAMPLE_LOOPED_TEST + currentProgress;) {
-				progress.increaseProgress();
-			}
-			assert (ex == null);
+			progressAndExceptionCheck(run_EXAMPLE_LOOPED_TEST);
 		}
 	}
 

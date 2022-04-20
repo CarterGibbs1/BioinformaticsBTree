@@ -80,7 +80,7 @@ public class BNode {
 		
 		keys[0] = initialKey;
 		
-		for(int i = 0; i < children.length; i++) {
+		for(int i = 0; i < children.length; i++) {//TODO: inneficient, if we end up using arrays then best just to consider 0 as null
 			children[i] = -1;
 		}
 		
