@@ -109,16 +109,23 @@ public class BReadWrite {
 			buffer.putInt(n);
 
 			// get children and keys
-			LinkedList<Long> children = node.getChildren();
-			LinkedList<TreeObject> keys = node.getKeys();
+//			LinkedList<Long> children = node.getChildren();
+//			LinkedList<TreeObject> keys = node.getKeys();
 
 			// write the children and keys in alternating order
-			buffer.putLong(children.get(0));
+//			buffer.putLong(children.get(0));
+//			for (int i = 0; i < n; i++) {
+//				buffer.putLong(keys.get(i).getKey());
+//				buffer.putInt(keys.get(i).getFrequency());
+//
+//				buffer.putLong(children.get(i + 1));
+//			}
+			buffer.putLong(node.getChild(0));
 			for (int i = 0; i < n; i++) {
-				buffer.putLong(keys.get(i).getKey());
-				buffer.putInt(keys.get(i).getFrequency());
+				buffer.putLong(node.getKey(i).getKey());
+				buffer.putInt(node.getKey(i).getFrequency());
 
-				buffer.putLong(children.get(i + 1));
+				buffer.putLong(node.getChild(i + 1));
 			}
 
 			// make buffer ready to write and then write to RAF
@@ -285,8 +292,15 @@ public class BReadWrite {
 			setBuffer(8);
 			
 			//for each child in right, rewrite the parent address to point at right
-			for(Long child : right.getChildren()) {
-				RAF.position(child);
+//			for(Long child : right.getChildren()) {
+//				RAF.position(child);
+//				buffer.clear();
+//				buffer.putLong(right.getAddress());
+//				buffer.flip();
+//				RAF.write(buffer);
+//			}
+			for(int i = 0; i < right.getN() + 1; i++) {
+				RAF.position(right.getChild(i));
 				buffer.clear();
 				buffer.putLong(right.getAddress());
 				buffer.flip();

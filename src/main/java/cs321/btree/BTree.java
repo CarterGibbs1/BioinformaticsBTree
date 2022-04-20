@@ -205,6 +205,33 @@ public class BTree
      * 
 	 * @throws IOException Reading/Writing to RAF may throw exception
      */
+//    static public boolean isSorted(long root, TreeObject left, TreeObject right) throws IOException {
+//    	//base case, the given root is non-existent
+//    	if(root == -1) {
+//    		return true;
+//    	}
+//    	
+//    	//read the root from the RAF
+//    	BNode current = BReadWrite.readBNode(root);
+//    	LinkedList<Long> children = current.getChildren();
+//    	LinkedList<TreeObject> keys = current.getKeys();
+//    	
+//    	//sorted will become false if any key is out of order
+//    	//recursively check the first child of this root
+//    	boolean sorted = isSorted(children.get(0), null, keys.get(0));
+//    	
+//    	//recursively check middle children and check that all keys are in sorted order
+//    	for(int i = 1; i < current.getN() - 1; i++) {
+//    		sorted = sorted && isSorted(children.get(i), keys.get(i - 1), keys.get(i)) &&
+//    		                   keys.get(i - 1).compare(keys.get(i)) < 0;
+//    	}
+//    	
+//    	//recursively check the last child and check that the first key is greater than left and the last key is less than right
+//    	return sorted &&
+//    	       isSorted(children.get(children.size() - 1), keys.get(keys.size() - 1), null) &&
+//    	       ((right == null || (keys.get(keys.size() - 1).compare(right) <= 0)) &&
+//    	       ( left == null  || (keys.get(0)              .compare(left)  >= 0)));
+//    }
     static public boolean isSorted(long root, TreeObject left, TreeObject right) throws IOException {
     	//base case, the given root is non-existent
     	if(root == -1) {
@@ -213,24 +240,22 @@ public class BTree
     	
     	//read the root from the RAF
     	BNode current = BReadWrite.readBNode(root);
-    	LinkedList<Long> children = current.getChildren();
-    	LinkedList<TreeObject> keys = current.getKeys();
     	
     	//sorted will become false if any key is out of order
     	//recursively check the first child of this root
-    	boolean sorted = isSorted(children.get(0), null, keys.get(0));
+    	boolean sorted = isSorted(current.getChild(0), null, current.getKey(0));
     	
     	//recursively check middle children and check that all keys are in sorted order
     	for(int i = 1; i < current.getN() - 1; i++) {
-    		sorted = sorted && isSorted(children.get(i), keys.get(i - 1), keys.get(i)) &&
-    		                   keys.get(i - 1).compare(keys.get(i)) < 0;
+    		sorted = sorted && isSorted(current.getChild(i), current.getKey(i - 1), current.getKey(i)) &&
+    		                   current.getKey(i - 1).compare(current.getKey(i)) < 0;
     	}
     	
     	//recursively check the last child and check that the first key is greater than left and the last key is less than right
     	return sorted &&
-    	       isSorted(children.get(children.size() - 1), keys.get(keys.size() - 1), null) &&
-    	       ((right == null || (keys.get(keys.size() - 1).compare(right) <= 0)) &&
-    	       ( left == null  || (keys.get(0)              .compare(left)  >= 0)));
+    	       isSorted(current.getChild(current.getN()), current.getKey(current.getN() - 1), null) &&
+    	       ((right == null || (current.getKey(current.getN() - 1).compare(right) <= 0)) &&
+    	       ( left == null  || (current.getKey(0)              .compare(left)  >= 0)));
     }
     
     /**

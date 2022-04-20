@@ -18,7 +18,7 @@ public class BTreeTest {
 	// how many times to run certain Tests, some of these drastically increase run
 	// time
 	static private int[] timesToRun = new int[] {10, 20, 50, 100, 500, 1000 };
-	static private int run_BNode_RAF_RAFAppropriateSize = timesToRun[0];
+	static private int run_BNode_RAF_RAFAppropriateSize = timesToRun[1];
 	static private int run_BTree_RAF_IsSorted = timesToRun[1];
 	static private int run_EXAMPLE_LOOPED_TEST = timesToRun[3];
 
@@ -434,7 +434,8 @@ public class BTreeTest {
 			readParent = BReadWrite.readBNode(memoryNode.split());
 			// read the left and right children from parentNode
 			readNode = BReadWrite.readBNode(memoryNode.getAddress());
-			readRight = BReadWrite.readBNode(readParent.getChildren().get(1));
+//			readRight = BReadWrite.readBNode(readParent.getChildren().get(1));
+			readRight = BReadWrite.readBNode(readParent.getChild(1));
 
 			// see if memoryNode contains sequences in order in long value,
 			assertEquals(memoryNode.toString(), "14 46 59");
@@ -469,6 +470,7 @@ public class BTreeTest {
 	public void BNode_RAF_RAFAppropriateSize() {
 		currentProgress = progress.getProgress();
 		ex = null;
+		boolean done = false;
 
 		try {
 			for (int k = 0; k < run_BNode_RAF_RAFAppropriateSize; k++) {// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
@@ -554,17 +556,17 @@ public class BTreeTest {
 
 				progress.increaseProgress();
 			}
+			done = true;
 		} catch (IOException e) {
 			ex = e;
-		} catch (Exception e) {
-			ex = e;
-		} finally {
-			for (; progress.getProgress() < run_BNode_RAF_RAFAppropriateSize + currentProgress;) {
-				progress.increaseProgress();
-			}
-
-			assert (ex == null);// no exception thrown
-		}
+		}// catch (Exception e) {
+//			ex = e;
+//		} finally {
+//			for (; progress.getProgress() < run_BNode_RAF_RAFAppropriateSize + currentProgress;) {
+//				progress.increaseProgress();
+//			}
+//			assert(done);
+//		}
 	}
 	
 	// =================================================================================================================

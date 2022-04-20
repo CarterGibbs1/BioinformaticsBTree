@@ -19,13 +19,16 @@ public class BNode {
 
 	//TODO: Arrays or LinkedLists?
 	//child0 <= key0 <= child1 <= key1 <= child2 ... childn <= keyn <= childn + 1
-	private LinkedList<TreeObject> keys; //objects/keys in this node, also size() = n
-	private LinkedList<Long> children;      //addresses to the children of this node 
+//	private LinkedList<TreeObject> keys; //objects/keys in this node, also size() = n
+//	private LinkedList<Long> children;      //addresses to the children of this node 
+	
+	private TreeObject[] keys;
+	private long[] children;
 	
 //	private 
 	
 	private long parent; //parent address
-	private int n; //TODO: Not needed?
+	private int n; //TODO: Not needed in LinkedList imp
 	
 	private long address; //not written to RAF
 	
@@ -65,12 +68,26 @@ public class BNode {
 		}
 		
 		//initialize instance variables
-		keys = new LinkedList<TreeObject>();
-		children = new LinkedList<Long>();
+//		keys = new LinkedList<TreeObject>();
+//		children = new LinkedList<Long>();
 		
-		keys.add(initialKey);
-		children.add(leftChild);
-		children.add(rightChild);
+		keys = new TreeObject[degree * 2 - 1];
+		children = new long[degree * 2];
+		
+//		keys.add(initialKey);
+//		children.add(leftChild);
+//		children.add(rightChild);
+		
+		keys[0] = initialKey;
+		
+		for(int i = 0; i < children.length; i++) {
+			children[i] = -1;
+		}
+		
+		children[0] = leftChild;
+		children[1] = rightChild;
+		
+		
 		n = 1;
 		
 		address = thisAddress;
@@ -131,20 +148,26 @@ public class BNode {
 	 * children - # # # * # # #
 	 */
 	public void insert(TreeObject key, long child, boolean write) throws IOException {
-		
 		//get to the index of the first k less than key
 		int i;
-		for(i = ( keys.size() - 1); i >= 0 && key.compare(keys.get(i)) <= 0; i--);
+//		for(i = (keys.size() - 1); i >= 0 && key.compare(keys.get(i)) <= 0; i--);
+		for(i = (n - 1); i >= 0 && key.compare(keys[i]) <= 0; i--) {
+			keys[i + 1] = keys[i];
+			children[i + 2] = children[i + 1];
+		}
 
 		//add new key and child to lists
-		keys.add(i + 1, key);
-		children.add(i + 2, child);
+//		keys.add(i + 1, key);
+//		children.add(i + 2, child);
+		
+		keys[i + 1] = key;
+		children[i + 2] = child;
+		
 		n++;
 				
 		if(write) {
 			BReadWrite.writeBNode(this);
 		}
-		
 	}
 	
 	/**
@@ -196,16 +219,23 @@ public class BNode {
 		
 		//get to the index of the first k less than key
 		int i;
-		for(i = ( keys.size() - 1); i >= 0 && key.compare(keys.get(i)) < 0; i--){}
+//		for(i = ( keys.size() - 1); i >= 0 && key.compare(keys.get(i)) < 0; i--){}
+		for(i = (n - 1); i >= 0 && key.compare(keys[i]) < 0; i--);
 		
 		//if this BNode contains the key, increment the key frequency, write this, and return this address
-		if(i >= 0 && key.compare(keys.get(i)) == 0) {
-			keys.get(i).incrementFrequency();
+//		if(i >= 0 && key.compare(keys.get(i)) == 0) {
+//			keys.get(i).incrementFrequency();
+//			BReadWrite.writeBNode(this);
+//			return address;
+//		}
+		if(i >= 0 && key.compare(keys[i]) == 0) {
+			keys[i].incrementFrequency();
 			BReadWrite.writeBNode(this);
 			return address;
 		}
 		
-		return children.get(i + 1);
+//		return children.get(i + 1);
+		return children[i + 1];
 	}
 	
 	/**
@@ -228,24 +258,35 @@ public class BNode {
 		//Keys     -  a b c d e f g
 		//Pointers - 0 1 2 3 4 5 6 7
 		
-		int originalN = n;
+//		int originalN = n;
 		BNode parentNode; //TODO: parent can be kept by BTree and passed in for performance increase
 		
 		
 		//remove key and two pointers right of middle and insert into new BNode 'splitRight':
 		//Keys     -  a b c d f g    |  e
 		//Pointers - 0 1 2 3   6 7   | 4 5
-		BNode splitRight = new BNode(keys.remove(keys.size()/2 + 1), BReadWrite.getNextAddress(), parent, children.remove(children.size()/2), children.remove(children.size()/2 + 1));
+//		BNode splitRight = new BNode(keys.remove(keys.size()/2 + 1), BReadWrite.getNextAddress(), parent, children.remove(children.size()/2), children.remove(children.size()/2 + 1));
+		BNode splitRight = new BNode(keys[n/2 + 1], BReadWrite.getNextAddress(), parent, children[(n + 1)/2], children[(n + 1)/2 + 1]);
+		n--;
 		
 		//starting just to the right of the middle of this BNode, continuously remove the pointers and keys
 		//at that position and insert them into splitRight:
 		//Keys     -  a b c d  |  e f g
 		//Pointers - 0 1 2 3   | 4 5 6 7
-		while((keys.size() - 1) != originalN/2) {
-			splitRight.insertNoWrite(keys.remove(originalN/2 + 1), children.remove(originalN/2 + 1));
+//		while((keys.size() - 1) != originalN/2) {
+//			splitRight.insertNoWrite(keys.remove(originalN/2 + 1), children.remove(originalN/2 + 1));
+//		}
+//		n = keys.size() - 1;
+		for(int i = keys.length/2 + 1; i < keys.length - 1; i++) {
+			splitRight.insertNoWrite(keys[i + 1], children[i + 2]);
+			n--;
 		}
-		n = keys.size() - 1;
 		
+//		while(n - 1 != keys.length/2) {
+//			splitRight.insertNoWrite(keys[keys.length/2 + 1], children[keys.length/2 + 1]);
+//			n--;
+//		}
+//		
 		//lastly, remove last node (original middle) from this and insert into parent with
 		//a pointer to splitRight
 		//Parent   -    .. x x d x x ..
@@ -255,16 +296,27 @@ public class BNode {
 		
 		//if this is the ROOT, create new parent/root to insert into
 		//else read the parent and insert into
+//		if(isRoot()) {
+//			//                                           Already new node 'splitRight' at getNextAddress, so
+//			//                                           have to compensate with additional offset getDiskSize
+//			parentNode = new BNode(keys.removeLast(), BReadWrite.getNextAddress() + BNode.getDiskSize(), -1, address, splitRight.getAddress());
+//			this.parent = splitRight.parent = parentNode.getAddress();
+//		}
+//		else {
+//			parentNode = BReadWrite.readBNode(parent); //TODO: see other parentNode todo, prevent read here
+//			parentNode.insertNoWrite(keys.removeLast(), splitRight.getAddress());
+//		}
 		if(isRoot()) {
 			//                                           Already new node 'splitRight' at getNextAddress, so
 			//                                           have to compensate with additional offset getDiskSize
-			parentNode = new BNode(keys.removeLast(), BReadWrite.getNextAddress() + BNode.getDiskSize(), -1, address, splitRight.getAddress());
+			parentNode = new BNode(keys[n - 1], BReadWrite.getNextAddress() + BNode.getDiskSize(), -1, address, splitRight.getAddress());
 			this.parent = splitRight.parent = parentNode.getAddress();
 		}
 		else {
 			parentNode = BReadWrite.readBNode(parent); //TODO: see other parentNode todo, prevent read here
-			parentNode.insertNoWrite(keys.removeLast(), splitRight.getAddress());
+			parentNode.insertNoWrite(keys[n - 1], splitRight.getAddress());
 		}
+		n--;
 		
 		//if the split is happening on a non-leaf, reassign splitRight's children's parents
 		//TODO: I think this is very inefficient, but it's the best I could come up with right now =====================================================
@@ -322,22 +374,42 @@ public class BNode {
 		this.parent = parent;
 	}
 	
+//	/**
+//	 * Get this BNode's keys.
+//	 * 
+//	 * @return LinkedList of TreeObjects
+//	 */
+//	public LinkedList<TreeObject> getKeys(){
+//		return keys;
+//	}
+//	
+//	/**
+//	 * Get this Bnode's children.
+//	 * 
+//	 * @return LinkedList of longs
+//	 */
+//	public LinkedList<Long> getChildren(){
+//		return children;
+//	}
+	
 	/**
-	 * Get this BNode's keys.
+	 * Get this BNode's key at the given index.
 	 * 
-	 * @return LinkedList of TreeObjects
+	 * @return TreeObject at index
 	 */
-	public LinkedList<TreeObject> getKeys(){
-		return keys;
+	public TreeObject getKey(int index){
+//		return keys;
+		return keys[index];
 	}
 	
 	/**
-	 * Get this Bnode's children.
+	 * Get this Bnode's child at the given index.
 	 * 
-	 * @return LinkedList of longs
+	 * @return Address at index
 	 */
-	public LinkedList<Long> getChildren(){
-		return children;
+	public long getChild(int index){
+//		return children;
+		return children[index];
 	}
 	
 	/**
@@ -346,7 +418,13 @@ public class BNode {
 	 * @return true if leaf, false otherwise
 	 */
 	public boolean isLeaf() {
-		return children.get(0) < 0;
+//		return children.get(0) < 0;
+		for(int i = 0; i < n + 1; i++) {
+			if(children[i] < 0) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**
@@ -364,7 +442,7 @@ public class BNode {
 	 * @return true is full, false otherwise
 	 */
 	public boolean isFull() {
-		return ((2 * degree ) - 1) == keys.size();
+		return ((2 * degree ) - 1) == n;
 	}
 	
 	//incomplete equals method, may be needed later
@@ -409,11 +487,20 @@ public class BNode {
 	
 	//most likely temporary toString.
 	//returns long value for each key in a single String separated by spaces
+//	@Override
+//	public String toString() {
+//		StringBuilder retString = new StringBuilder();
+//		for(int i = 0; i < keys.size(); i++) {
+//			retString.append(keys.get(i).getKey() + " "); //TODO?: return letters instead
+//		}
+//		
+//		return retString.toString().substring(0, retString.length() - 1);
+//	}
 	@Override
 	public String toString() {
 		StringBuilder retString = new StringBuilder();
-		for(int i = 0; i < keys.size(); i++) {
-			retString.append(keys.get(i).getKey() + " "); //TODO?: return letters instead
+		for(int i = 0; i < n ; i++) {
+			retString.append(keys[i].getKey() + " "); //TODO?: return letters instead
 		}
 		
 		return retString.toString().substring(0, retString.length() - 1);
