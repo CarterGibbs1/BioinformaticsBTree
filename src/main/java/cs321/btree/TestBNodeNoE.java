@@ -1,4 +1,3 @@
-
 package cs321.btree;
 
 /**
@@ -64,19 +63,20 @@ public class TestBNodeNoE {
         }
 
         //initialize instance variables
-        keys = new TreeObjectNoE[2 * degree];
-        children = new long[2 * degree + 1];
-        for (int i = 0; i < children.length; i++) {
+        keys = new TreeObjectNoE[(2 * degree) + 1];
+        children = new long[2 * degree + 2];
+        children[0] = -2;// distinguish from other values
+        for (int i = 1; i < children.length; i++) {
             children[i] = -1;
         }
         if (initialKey != null) {
-            keys[0] = initialKey;
+            keys[1] = initialKey;
         }
         if (leftChild != -1) {
-            children[0] = leftChild;
+            children[1] = leftChild;
         }
         if (rightChild != -1) {
-            children[1] = rightChild;
+            children[2] = rightChild;
         }
         this.address = thisAddress;
         this.parent = -1;
@@ -114,15 +114,15 @@ public class TestBNodeNoE {
         this(null, address, -1, -1, -1);
     }
 
-    public TestBNodeNoE(long address, int degree) {//for testing purposes, blank node
-        setDegree(degree);
-        keys = new TreeObjectNoE[2 * degree];
-        children = new long[2 * degree + 1];
-        this.address = address;
-        this.parent = -1;
-        this.isLeaf = true;
-        this.n = 0;
-    }
+//    public TestBNodeNoE(long address, int degree) {//for testing purposes, blank node
+//    	setDegree(degree);
+//        keys = new TreeObjectNoE[2 * degree];
+//        children = new long[2 * degree + 1];
+//        this.address = address;
+//        this.parent = -1;
+//        this.isLeaf = true;
+//        this.n = 0;
+//    }
 
     //=================================================================================================================
     //                                         BTREE FUNCTIONALITY METHODS
@@ -385,13 +385,15 @@ public class TestBNodeNoE {
     public String toString() {
         String s = "Keys: ";
         if (n > 0) {
-            for (int i = 0; i < n; i++) {
-                s += keys[i].toString();
+            for (int i = 1; i <= n; i++) {
+                if (keys[i] != null) {
+                    s += keys[i].toString() + ", ";
+                }
             }
         }
-        s += "| Children: ";
+        s += "... Children: ";
         for (long l : children) {
-            if (l != -1) {
+            if (l != -1 && l != -2) {
                 s += l + " ";
             }
         }
