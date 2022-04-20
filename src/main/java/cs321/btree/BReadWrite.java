@@ -95,8 +95,7 @@ public class BReadWrite {
 	 * @throws IllegalStateException   If thrown, it's likely RAF or buffer have not
 	 *                                 been set
 	 */
-	static public void writeBNode(BNode node)
-			throws IOException, BufferOverflowException, IllegalStateException {
+	static public void writeBNode(BNode node) throws IOException {
 		try {
 			// start at address and make buffer ready to read
 			RAF.position(node.getAddress());
@@ -152,8 +151,7 @@ public class BReadWrite {
 	 * @throws IllegalStateException    If thrown, it's likely RAF or buffer have
 	 *                                  not been set
 	 */
-	static public BNode readBNode(long address)
-			throws IOException, BufferUnderflowException, IllegalStateException {
+	static public BNode readBNode(long address) throws IOException {
 		try {
 			// start at address and make buffer ready to read
 			RAF.position(address);
@@ -198,8 +196,7 @@ public class BReadWrite {
 	 * @throws IllegalStateException   If thrown, it's likely RAF or buffer have not
 	 *                                 been set
 	 */
-	static public void writeBTree(BTree tree)
-			throws IOException, BufferOverflowException, IllegalStateException {
+	static public void writeBTree(BTree tree) throws IOException {
 		try {
 			// set buffer capacity to match BTree size
 			setBuffer(BTree.getDiskSize());
@@ -240,7 +237,7 @@ public class BReadWrite {
 	 * @throws IllegalStateException    If thrown, it's likely RAF or buffer have
 	 *                                  not been set
 	 */
-	static public BTree readBTree() throws IOException, BufferUnderflowException, IllegalStateException {
+	static public BTree readBTree() throws IOException {
 		try {
 			// set buffer capacity to match BTree size
 			setBuffer(BTree.getDiskSize());
@@ -286,7 +283,7 @@ public class BReadWrite {
 	 * @throws IllegalStateException    If thrown, it's likely RAF or buffer have
 	 *                                  not been set
 	 */
-	static public void reassignParents(BNode right) throws IOException, BufferUnderflowException, IllegalStateException {
+	static public void reassignParents(BNode right) throws IOException {
 		try {
 			//set buffer capacity to just a single long/address
 			setBuffer(8);

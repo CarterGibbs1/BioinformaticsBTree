@@ -15,20 +15,24 @@ public class BTreeTest {
 	static private final Random random = new Random();
 	static private final String VALID_LETTERS = "atcg";
 
-	// how many times to run certain Tests, some of these drastically increase run
-	// time
+	// how many times to run certain Tests, some of these drastically increase run time
 	static private int[] timesToRun = new int[] {10, 20, 50, 100, 500, 1000 };
 	static private int run_BNode_RAF_RAFAppropriateSize = timesToRun[1];
 	static private int run_BTree_RAF_IsSorted = timesToRun[1];
+	static private int run_BTree_RAF_Search = timesToRun[2];
+	//example
 	static private int run_EXAMPLE_LOOPED_TEST = timesToRun[3];
 
 	static private Exception ex = null;
 	static private int currentProgress = 0;
-
+	static private String testName = "";
+	
 	// create progress bar to show things are working, destroy on completion (doesn't
 	//really work on eclipse)
 	static private final ProgressBar progress = new ProgressBar(15,
-			run_BNode_RAF_RAFAppropriateSize + run_BTree_RAF_IsSorted +
+			run_BNode_RAF_RAFAppropriateSize +
+			run_BTree_RAF_IsSorted +
+			run_BTree_RAF_Search +
 			BTreeTest.class.getDeclaredMethods().length - 5,
 			true);
 
@@ -371,13 +375,14 @@ public class BTreeTest {
 	 */
 	@Test
 	public void BNode_RAF_InsertWriteRead() throws Exception {
+		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
 		try {
 			// 57 12 8 59 7 10 44
 			String inputSequences = "TGC ATA AGA TGT ACT AGG GTA".toLowerCase();
 
 			// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
 			// are done in this order
-			BReadWrite.setRAF(TESTS_FOLDER + "BNode_RAF_InsertWriteRead", true);
+			BReadWrite.setRAF(TESTS_FOLDER + testName, true);
 			BNode.setDegree(10);
 			BReadWrite.setBuffer(BNode.getDiskSize());
 
@@ -410,6 +415,7 @@ public class BTreeTest {
 	 */
 	@Test
 	public void BNode_RAF_SplitWriteRead() throws Exception {
+		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
 		try {
 			// 180 59 108 14 103 46 118
 			String inputSequences = "GTCA ATGT CGTA AATG CGCT AGTG CTCG".toLowerCase();
@@ -419,7 +425,7 @@ public class BTreeTest {
 
 			// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
 			// are done in this order
-			BReadWrite.setRAF(TESTS_FOLDER + "BNode_RAF_SplitWriteRead", true);
+			BReadWrite.setRAF(TESTS_FOLDER + testName, true);
 			BNode.setDegree(4);
 			BReadWrite.setBuffer(BNode.getDiskSize());
 
@@ -471,6 +477,7 @@ public class BTreeTest {
 	public void BNode_RAF_RAFAppropriateSize() throws Exception {
 		currentProgress = progress.getProgress();
 		ex = null;
+		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
 
 		try {
 			for (int k = 0; k < run_BNode_RAF_RAFAppropriateSize; k++) {// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
@@ -483,7 +490,7 @@ public class BTreeTest {
 
 				// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
 				// are done in this order
-				BReadWrite.setRAF(TESTS_FOLDER + "BNode_RAF_RAFAppropriateSize" + k, true);
+				BReadWrite.setRAF(TESTS_FOLDER + testName + k, true);
 				BNode.setDegree(random.nextInt(3, 7));
 				BReadWrite.setBuffer(BNode.getDiskSize());
 
@@ -579,6 +586,7 @@ public class BTreeTest {
 	public void BTree_RAF_IsSorted() throws Exception {
 		ex = null;
 		currentProgress = progress.getProgress();
+		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
 		
 		try {
 			
@@ -586,7 +594,7 @@ public class BTreeTest {
 				
 				// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
 				// are done in this order
-				BReadWrite.setRAF(TESTS_FOLDER + "BTree_RAF_IsSorted" + k, true);
+				BReadWrite.setRAF(TESTS_FOLDER + testName + k, true);
 				int degree = random.nextInt(3, 7);
 				BNode.setDegree(degree);
 				BReadWrite.setBuffer(BNode.getDiskSize());
@@ -617,7 +625,54 @@ public class BTreeTest {
 		}
 	}
 	
-	
+	/**
+	 * 
+	 * 
+	 * @throws Exception 
+	 */
+	@Test
+	public void BTree_RAF_Search() throws Exception {
+		ex = null;
+		currentProgress = progress.getProgress();
+		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
+		
+		try {
+			
+			for (int k = 0; k < run_BTree_RAF_Search; k++) {// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				
+				// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
+				// are done in this order
+				BReadWrite.setRAF(TESTS_FOLDER + testName + k, true);
+				int degree = random.nextInt(3, 7);
+				BNode.setDegree(degree);
+				BReadWrite.setBuffer(BNode.getDiskSize());
+				
+//				//generate random sequences and create BTree
+//				ArrayList<String> inputSequences = generateRandomSequences(20000/5, 30000/5, 5, 15);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+//				BTree memoryTree = new BTree(new TreeObject(inputSequences.get(0), 1), degree, 5);
+//				
+//				//insert all sequences
+//				for(int i = 1; i < inputSequences.size(); i++) {
+//					memoryTree.insert(new TreeObject(inputSequences.get(i), 1));
+//				}
+//				
+//				//write BTree and then read
+//				BReadWrite.writeBTree(memoryTree);
+//				BTree readTree = BReadWrite.readBTree();
+//				
+//				//check that both BTrees are sorted
+//				assert(BTree.isSorted(memoryTree.getRoot()));
+//				assert(BTree.isSorted(readTree.getRoot()));
+//				
+				progress.increaseProgress();
+				
+			}
+			
+		} catch (Exception e) {
+			ex = e;
+			progressAndExceptionCheck(run_BTree_RAF_Search);
+		}
+	}
 	
 	
 	
@@ -628,7 +683,17 @@ public class BTreeTest {
 	 * @throws Exception
 	 */
 	public void EXAMPLE_TEST() throws Exception {
+		//you can thank stackoverflow for this one: https://stackoverflow.com/questions/442747/getting-the-name-of-the-currently-executing-method
+		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
 		try {
+			
+			// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
+			// are done in this order
+			BReadWrite.setRAF(TESTS_FOLDER + testName, true);
+			int degree = random.nextInt(3, 7);
+			BNode.setDegree(degree);
+			BReadWrite.setBuffer(BNode.getDiskSize());
+			
 			// code goes here
 			
 			progress.increaseProgress();
@@ -646,10 +711,19 @@ public class BTreeTest {
 	public void EXAMPLE_LOOPED_TEST() throws Exception {
 		ex = null;
 		currentProgress = progress.getProgress();
+		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
 		
 		try {
 			
 			for (int k = 0; k < run_EXAMPLE_LOOPED_TEST; k++) {// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				
+				// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
+				// are done in this order
+				BReadWrite.setRAF(TESTS_FOLDER + testName + k, true);
+				int degree = random.nextInt(3, 7);
+				BNode.setDegree(degree);
+				BReadWrite.setBuffer(BNode.getDiskSize());
+				
 				// code goes here
 			}
 			
