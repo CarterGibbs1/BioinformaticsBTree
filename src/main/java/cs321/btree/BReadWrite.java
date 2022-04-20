@@ -36,7 +36,7 @@ public class BReadWrite {
 	 * 
 	 * @throws IOException Creating RAF may throw exception
 	 */
-	@SuppressWarnings("resource")
+	@SuppressWarnings("resource") //TODO: memory leak? Talk to tutor
 	static public void setRAF(String fileName, boolean replace) throws IOException {
 		File file = new File(fileName);
 		RandomAccessFile RAFRaw = null;

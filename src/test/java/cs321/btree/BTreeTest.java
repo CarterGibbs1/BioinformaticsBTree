@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
@@ -16,10 +15,10 @@ public class BTreeTest {
 	static private final String VALID_LETTERS = "atcg";
 
 	// how many times to run certain Tests, some of these drastically increase run time
-	static private int[] timesToRun = new int[] {10, 20, 50, 100, 500, 1000 };
-	static private int run_BNode_RAF_RAFAppropriateSize = timesToRun[1];
-	static private int run_BTree_RAF_IsSorted = timesToRun[1];
-	static private int run_BTree_RAF_Search = timesToRun[2];
+	static private int[] timesToRun = new int[] {10, 20, 50, 100, 500, 1000, 5000};
+	static private int run_BNode_RAF_RAFAppropriateSize = timesToRun[0];
+	static private int run_BTree_RAF_IsSorted = timesToRun[0];
+	static private int run_BTree_RAF_Search = timesToRun[1];
 	//example
 	static private int run_EXAMPLE_LOOPED_TEST = timesToRun[3];
 
@@ -33,8 +32,8 @@ public class BTreeTest {
 			run_BNode_RAF_RAFAppropriateSize +
 			run_BTree_RAF_IsSorted +
 			run_BTree_RAF_Search +
-			BTreeTest.class.getDeclaredMethods().length - 5,
-			true);
+			BTreeTest.class.getDeclaredMethods().length - 5 //don't count methods that aren't tests i.e. utility methods
+			);
 
 	// =================================================================================================================
 	//                                                Utility Methods
@@ -357,6 +356,7 @@ public class BTreeTest {
 			assert (tO.compare(tOTwo) > 0);
 //			assertEquals(tO.toString(), "tcacgaggtc: 5");
 
+			progress.increaseProgress();
 		} catch (Exception e) {
 			progress.increaseProgress();
 			throw e;
@@ -627,7 +627,12 @@ public class BTreeTest {
 	}
 	
 	/**
-	 * 
+	 * Insert a random number of sequences of random length into a BTree, then insert
+	 * the same random sequence a random number of times at random positions. A
+	 * following search for the sequence should return a frequency equal to the number
+	 * of sequences added.
+	 * <p>
+	 * RANDOM: This test is random and thus, the RAFs will change every run.
 	 * 
 	 * @throws Throwable 
 	 */
@@ -648,17 +653,19 @@ public class BTreeTest {
 				BNode.setDegree(degree);
 				BReadWrite.setBuffer(BNode.getDiskSize());
 				
-				//generate random sequences and create BTree
+				//generate random sequences
 				ArrayList<String> inputSequences = generateRandomSequences(20000/5, 30000/5, 5, 15);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
-				BTree memoryTree = new BTree(new TreeObject(inputSequences.get(0), 1), degree, 5);
 				
 				//generate the same random sequence a random number of times and insert at random spots
-				int numNewSeq = random.nextInt(5, 10);
+				int numNewSeq = random.nextInt(20, 100);
 				String newSeq = inputSequences.get(random.nextInt(0, inputSequences.size()));
 				for(;inputSequences.remove(newSeq););//remove all instances of newSeq
 				for(int i = 0; i < numNewSeq; i++) {
 					inputSequences.add(random.nextInt(0, inputSequences.size()), newSeq);
 				}
+				
+				//create BTree
+				BTree memoryTree = new BTree(new TreeObject(inputSequences.get(0), 1), degree, 5);
 				
 				//debugging variable
 				int y = 0;
@@ -671,10 +678,9 @@ public class BTreeTest {
 					}
 				}
 				
-				if(numNewSeq != memoryTree.search(new TreeObject(newSeq, 0))) {
-					memoryTree.search(new TreeObject(newSeq, 0));
+				if(y != memoryTree.search(new TreeObject(newSeq, 0))) {
+					y = y;
 				}
-				
 				
 				//write BTree and then read
 				BReadWrite.writeBTree(memoryTree);

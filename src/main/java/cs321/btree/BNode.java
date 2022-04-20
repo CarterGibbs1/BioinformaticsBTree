@@ -1,7 +1,6 @@
 package cs321.btree;
 
 import java.io.IOException;
-import java.nio.BufferOverflowException;
 import java.util.LinkedList;
 
 /**
@@ -231,6 +230,8 @@ public class BNode {
 	
 	/**
 	 * Increments the frequency of the given key in this BNode.
+	 * <p>
+	 * WRITE: This method writes this changed BNode to the RAF
 	 * 
 	 * @param key The Object to increment the frequency of
 	 * 

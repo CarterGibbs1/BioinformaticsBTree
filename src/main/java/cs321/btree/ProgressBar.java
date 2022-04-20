@@ -6,7 +6,7 @@ package cs321.btree;
  * loading is complete. Does not work on Eclipse due to the use of a carriage
  * return '\r'.
  * 
- * @author Mesa Greear
+ * @author  Mesa Greear
  * @version Spring 2022
  */
 public class ProgressBar {

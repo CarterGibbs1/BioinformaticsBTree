@@ -286,7 +286,7 @@ public class BTree
     	return sorted &&
     	       isSorted(current.getChild(current.getN()), current.getKey(current.getN() - 1), null) &&
     	       ((right == null || (current.getKey(current.getN() - 1).compare(right) <= 0)) &&
-    	       ( left == null  || (current.getKey(0)              .compare(left)  >= 0)));
+    	       ( left == null  || (current.getKey(0)                 .compare(left)  >= 0)));
     }
     
     /**
