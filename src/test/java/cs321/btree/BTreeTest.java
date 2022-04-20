@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
@@ -15,25 +14,50 @@ public class BTreeTest {
 	static private final Random random = new Random();
 	static private final String VALID_LETTERS = "atcg";
 
-	// how many times to run certain Tests, some of these drastically increase run
-	// time
-	static private int[] timesToRun = new int[] {10, 20, 50, 100, 500, 1000 };
+	// how many times to run certain Tests, some of these drastically increase run time
+	static private int[] timesToRun = new int[] {10, 20, 50, 100, 500, 1000, 5000};
 	static private int run_BNode_RAF_RAFAppropriateSize = timesToRun[0];
+	static private int run_BTree_RAF_IsSorted = timesToRun[0];
+	static private int run_BTree_RAF_Search = timesToRun[1];
+	//example
 	static private int run_EXAMPLE_LOOPED_TEST = timesToRun[3];
 
-	static private Exception ex = null;
+	static private Throwable ex = null;
 	static private int currentProgress = 0;
-
+	static private String testName = "";
+	
 	// create progress bar to show things are working, destroy on completion (doesn't
 	//really work on eclipse)
 	static private final ProgressBar progress = new ProgressBar(15,
-			run_BNode_RAF_RAFAppropriateSize + BTreeTest.class.getDeclaredMethods().length - 4,
-			true);
+			run_BNode_RAF_RAFAppropriateSize +
+			run_BTree_RAF_IsSorted +
+			run_BTree_RAF_Search +
+			BTreeTest.class.getDeclaredMethods().length - 5 //don't count methods that aren't tests i.e. utility methods
+			);
 
 	// =================================================================================================================
 	//                                                Utility Methods
 	// =================================================================================================================
-
+	
+	/**
+	 * If a test is stopped in the middle due to an exception, this method
+	 * will ensure that the exception is still thrown while updating the
+	 * progress bar to compensate for the lost tests in a for loop.
+	 * 
+	 * @param excpectedRuns Times this test is expected to run/loop
+	 * 
+	 * @throws Throwable The exception thrown by the test
+	 */
+	private void progressAndExceptionCheck(int excpectedRuns) throws Throwable {
+		for (; progress.getProgress() < excpectedRuns + currentProgress;) {
+			progress.increaseProgress();
+		}
+		
+		if(ex != null) {
+			throw ex;
+		}
+	}
+	
 	/**
 	 * Generate a random number of sequences of random length in the given ranges.
 	 * 
@@ -122,8 +146,6 @@ public class BTreeTest {
 	 */
 	@Test
 	public void randomGenerator_mergesort() {
-		ex = null;
-
 		try {
 			ArrayList<String> randSeq = generateRandomSequences(30, 50, 10, 20);
 
@@ -150,11 +172,10 @@ public class BTreeTest {
 			for (int i = 0; i < treeObjects.size() - 1; i++) {
 				assert (treeObjects.get(i).compare(treeObjects.get(i + 1)) <= 0);
 			}
-		} catch (Exception e) {
-			ex = e;
-		} finally {
 			progress.increaseProgress();
-			assert (ex == null);
+		} catch (Exception e) {
+			progress.increaseProgress();
+			throw e;
 		}
 	}
 	
@@ -167,8 +188,6 @@ public class BTreeTest {
 	 */
 	@Test
 	public void singleBNode_TestInsertion() {
-		ex = null;
-
 		try {
 
 			// 57 12 8 59 7 10 44
@@ -183,11 +202,10 @@ public class BTreeTest {
 			// see if the BNode contains sequences in order in long value
 			assertEquals(testNode.toString(), "7 8 10 12 44 57 59");
 
-		} catch (Exception e) {
-			ex = e;
-		} finally {
 			progress.increaseProgress();
-			assert (ex == null);
+		} catch (Exception e) {
+			progress.increaseProgress();
+			throw e;
 		}
 	}
 
@@ -197,8 +215,6 @@ public class BTreeTest {
 	 */
 	@Test
 	public void BNode_TestSplit() {
-		ex = null;
-
 		try {
 			// 59 108 14 103 46
 			String inputSequences = "ATGT CGTA AATG CGCT AGTG".toLowerCase();
@@ -219,11 +235,10 @@ public class BTreeTest {
 			assertEquals(testNode.toString(), "14 46");
 			assertEquals(rightChild.toString(), "103 108");
 
-		} catch (Exception e) {
-			ex = e;
-		} finally {
 			progress.increaseProgress();
-			assert (ex == null);
+		} catch (Exception e) {
+			progress.increaseProgress();
+			throw e;
 		}
 	}
 
@@ -233,8 +248,6 @@ public class BTreeTest {
 	 */
 	@Test
 	public void BNode_TestIsFull() {
-		ex = null;
-
 		try {
 			String inputSequences = "ATGTCTGACCGT".toLowerCase();
 			int degree = 7;
@@ -252,11 +265,10 @@ public class BTreeTest {
 			testNode.insert(new TreeObject("a", 1));
 			assert (testNode.isFull(degree));
 
-		} catch (Exception e) {
-			ex = e;
-		} finally {
 			progress.increaseProgress();
-			assert (ex == null);
+		} catch (Exception e) {
+			progress.increaseProgress();
+			throw e;
 		}
 	}
 
@@ -267,8 +279,6 @@ public class BTreeTest {
 	 */
 	@Test
 	public void BNode_CorrectHeightAndNodeCount() {
-		ex = null;
-
 		try {
 			String inputSequences = "ATGTCTGACCGTGACTTACGAAG".toLowerCase();
 			int degree = 2;
@@ -315,12 +325,11 @@ public class BTreeTest {
 
 			assertEquals(totalNodes, 16); // 18 if we perform a split on the leaf nodes we just inserted into
 			assertEquals(height, 4);
-
-		} catch (Exception e) {
-			ex = e;
-		} finally {
+			
 			progress.increaseProgress();
-			assert (ex == null);
+		} catch (Exception e) {
+			progress.increaseProgress();
+			throw e;
 		}
 	}
 
@@ -333,7 +342,6 @@ public class BTreeTest {
 	 */
 	@Test
 	public void TreeObject_PublicMethods() {
-		ex = null;
 		try {
 			TreeObject tO = new TreeObject("tcacgaggtc", 5);
 			long key = Long.parseLong("11010001100010101101", 2);
@@ -346,15 +354,13 @@ public class BTreeTest {
 			tO.setFrequency(5);
 			TreeObject tOTwo = new TreeObject("tcacgaggta", 5);
 			assert (tO.compare(tOTwo) > 0);
-			assertEquals(tO.toString(), "tcacgaggtc: 5");
+//			assertEquals(tO.toString(), "tcacgaggtc: 5");
 
-		} catch (Exception e) {
-			ex = e;
-		} finally {
 			progress.increaseProgress();
-			assert (ex == null);
+		} catch (Exception e) {
+			progress.increaseProgress();
+			throw e;
 		}
-
 	}
 
 	// =================================================================================================================
@@ -364,17 +370,19 @@ public class BTreeTest {
 	/**
 	 * Test that a single BNode with a few keys inserted and that is then written to
 	 * the RAF is the same as the one stored in memory.
+	 * 
+	 * @throws Throwable 
 	 */
 	@Test
-	public void BNode_RAF_InsertWriteRead() {
-		Exception ex = null;
+	public void BNode_RAF_InsertWriteRead() throws Throwable {
+		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
 		try {
 			// 57 12 8 59 7 10 44
 			String inputSequences = "TGC ATA AGA TGT ACT AGG GTA".toLowerCase();
 
 			// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
 			// are done in this order
-			BReadWrite.setRAF(TESTS_FOLDER + "BNode_RAF_InsertWriteRead", true);
+			BReadWrite.setRAF(TESTS_FOLDER + testName, true);
 			BNode.setDegree(10);
 			BReadWrite.setBuffer(BNode.getDiskSize());
 
@@ -393,22 +401,21 @@ public class BTreeTest {
 			assertEquals(readNode.toString(), memoryNode.toString());
 
 			progress.increaseProgress();
-		} catch (IOException e) {
-			ex = e;
-		} finally {
+		} catch (Throwable e) {
 			progress.increaseProgress();
-			assert (ex == null);
+			throw e;
 		}
 	}
 
 	/**
 	 * Test that a split BNode correctly writes the new root and new child to the
 	 * RAF, maintaining the correct keys, children, and properties.
+	 * 
+	 * @throws Throwable 
 	 */
 	@Test
-	public void BNode_RAF_SplitWriteRead() {
-		Exception ex = null;
-
+	public void BNode_RAF_SplitWriteRead() throws Throwable {
+		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
 		try {
 			// 180 59 108 14 103 46 118
 			String inputSequences = "GTCA ATGT CGTA AATG CGCT AGTG CTCG".toLowerCase();
@@ -418,7 +425,7 @@ public class BTreeTest {
 
 			// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
 			// are done in this order
-			BReadWrite.setRAF(TESTS_FOLDER + "BNode_RAF_SplitWriteRead", true);
+			BReadWrite.setRAF(TESTS_FOLDER + testName, true);
 			BNode.setDegree(4);
 			BReadWrite.setBuffer(BNode.getDiskSize());
 
@@ -432,7 +439,8 @@ public class BTreeTest {
 			readParent = BReadWrite.readBNode(memoryNode.split());
 			// read the left and right children from parentNode
 			readNode = BReadWrite.readBNode(memoryNode.getAddress());
-			readRight = BReadWrite.readBNode(readParent.getChildren().get(1));
+//			readRight = BReadWrite.readBNode(readParent.getChildren().get(1));
+			readRight = BReadWrite.readBNode(readParent.getChild(1));
 
 			// see if memoryNode contains sequences in order in long value,
 			assertEquals(memoryNode.toString(), "14 46 59");
@@ -447,11 +455,11 @@ public class BTreeTest {
 			assert (readNode.isLeaf() && !readNode.isRoot() && !readNode.isFull() && readNode.getN() == 3);
 			assert (readRight.isLeaf() && !readRight.isRoot() && !readRight.isFull() && readRight.getN() == 3);
 			assert (!readParent.isLeaf() && readParent.isRoot() && !readParent.isFull() && readParent.getN() == 1);
-		} catch (IOException e) {
-			ex = e;
-		} finally {
+			
 			progress.increaseProgress();
-			assert (ex == null);
+		} catch (Throwable e) {
+			progress.increaseProgress();
+			throw e;
 		}
 	}
 
@@ -462,11 +470,14 @@ public class BTreeTest {
 	 * don't overwrite other BNodes.
 	 * <p>
 	 * RANDOM: This test is random and thus, the RAFs will change every run.
+	 * 
+	 * @throws Throwable 
 	 */
 	@Test
-	public void BNode_RAF_RAFAppropriateSize() {
+	public void BNode_RAF_RAFAppropriateSize() throws Throwable {
 		currentProgress = progress.getProgress();
 		ex = null;
+		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
 
 		try {
 			for (int k = 0; k < run_BNode_RAF_RAFAppropriateSize; k++) {// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
@@ -479,7 +490,7 @@ public class BTreeTest {
 
 				// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
 				// are done in this order
-				BReadWrite.setRAF(TESTS_FOLDER + "BNode_RAF_RAFAppropriateSize" + k, true);
+				BReadWrite.setRAF(TESTS_FOLDER + testName + k, true);
 				BNode.setDegree(random.nextInt(3, 7));
 				BReadWrite.setBuffer(BNode.getDiskSize());
 
@@ -516,7 +527,7 @@ public class BTreeTest {
 					// get to appropriate leaf BNode
 					while (!currentNode.isLeaf()) {
 						// if the object to insert is in currentNode, break and insert it
-						nextNode = currentNode.getSubtree(insertedSequences.get(i));
+						nextNode = currentNode.getElementLocation(insertedSequences.get(i));
 						if (nextNode == currentNode.getAddress()) {
 							continue insertLoop;
 						}
@@ -542,68 +553,210 @@ public class BTreeTest {
 						&& BReadWrite.getRAFSize() < ((numNodes + 1) * BNode.getDiskSize() + BTree.getDiskSize()));
 
 //		    	for(int i =0; i< currentNode.getN(); i++) {
-//		    		System.out.println(currentNode.getKeys().get(i).toString());
+//		    		System.out.println(currentNode.getKey(i).toString());
 //		    	}
 //		    	currentNode = BReadWrite.readBNode(root);
 //		    	System.out.println();
 //		    	for(int i =0; i< currentNode.getN(); i++) {
-//		    		System.out.println(currentNode.getKeys().get(i).toString());
+//		    		System.out.println(currentNode.getKey(i).toString());
 //		    	}
+//		    	System.out.println("\n\n");
 
 				progress.increaseProgress();
 			}
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			ex = e;
-		} catch (Exception e) {
-			ex = e;
-		} finally {
-			for (; progress.getProgress() < run_BNode_RAF_RAFAppropriateSize + currentProgress;) {
-				progress.increaseProgress();
-			}
-
-			assert (ex == null);// no exception thrown
+			progressAndExceptionCheck(run_BTree_RAF_Search);
 		}
 	}
 	
+	// =================================================================================================================
+	//                                           Testing BTrees using RAF
+	// =================================================================================================================
 	
-	
-	
-	
-	
-	
-	
-
-	public void EXAMPLE_TEST() {
-		ex = null;
-
-		try {
-			// code goes here
-			
-		} catch (Exception e) {
-			ex = e;
-		} finally {
-			progress.increaseProgress();
-			assert (ex == null);
-		}
-	}
-
-	public void EXAMPLE_LOOPED_TEST() {
+	/**
+	 * Insert a random number of sequences of random length into a BTree, then write
+	 * the BTree, and lastly check if both the memory held node and the read node are
+	 * sorted correctly.
+	 * <p>
+	 * RANDOM: This test is random and thus, the RAFs will change every run.
+	 * 
+	 * @throws Throwable 
+	 */
+	@Test
+	public void BTree_RAF_IsSorted() throws Throwable {
 		ex = null;
 		currentProgress = progress.getProgress();
+		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
+		
+		try {
+			
+			for (int k = 0; k < run_BTree_RAF_IsSorted; k++) {// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				
+				// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
+				// are done in this order
+				BReadWrite.setRAF(TESTS_FOLDER + testName + k, true);
+				int degree = random.nextInt(3, 7);
+				BNode.setDegree(degree);
+				BReadWrite.setBuffer(BNode.getDiskSize());
+				
+				//generate random sequences and create BTree
+				ArrayList<String> inputSequences = generateRandomSequences(20000/5, 30000/5, 5, 15);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				BTree memoryTree = new BTree(new TreeObject(inputSequences.get(0), 1), degree, 5);
+				
+				//insert all sequences
+				for(int i = 1; i < inputSequences.size(); i++) {
+					memoryTree.insert(new TreeObject(inputSequences.get(i), 1));
+				}
+				
+				//write BTree and then read
+				BReadWrite.writeBTree(memoryTree);
+				BTree readTree = BReadWrite.readBTree();
+				
+				//check that both BTrees are sorted
+				assert(BTree.isSorted(memoryTree.getRoot()));
+				assert(BTree.isSorted(readTree.getRoot()));
+				
+				progress.increaseProgress();
+			}
+			
+		} catch (Throwable e) {
+			ex = e;
+			progressAndExceptionCheck(run_BTree_RAF_IsSorted);
+		}
+	}
+	
+	/**
+	 * Insert a random number of sequences of random length into a BTree, then insert
+	 * the same random sequence a random number of times at random positions. A
+	 * following search for the sequence should return a frequency equal to the number
+	 * of sequences added.
+	 * <p>
+	 * RANDOM: This test is random and thus, the RAFs will change every run.
+	 * 
+	 * @throws Throwable 
+	 */
+	@Test
+	public void BTree_RAF_Search() throws Throwable {
+		ex = null;
+		currentProgress = progress.getProgress();
+		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
+		
+		try {
+			
+			for (int k = 0; k < run_BTree_RAF_Search; k++) {// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				
+				// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
+				// are done in this order
+				BReadWrite.setRAF(TESTS_FOLDER + testName + k, true);
+				int degree = random.nextInt(3, 7);
+				BNode.setDegree(degree);
+				BReadWrite.setBuffer(BNode.getDiskSize());
+				
+				//generate random sequences
+				ArrayList<String> inputSequences = generateRandomSequences(20000/5, 30000/5, 5, 15);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				
+				//generate the same random sequence a random number of times and insert at random spots
+				int numNewSeq = random.nextInt(20, 100);
+				String newSeq = inputSequences.get(random.nextInt(0, inputSequences.size()));
+				for(;inputSequences.remove(newSeq););//remove all instances of newSeq
+				for(int i = 0; i < numNewSeq; i++) {
+					inputSequences.add(random.nextInt(0, inputSequences.size()), newSeq);
+				}
+				
+				//create BTree
+				BTree memoryTree = new BTree(new TreeObject(inputSequences.get(0), 1), degree, 5);
+				
+				//debugging variable
+				int y = 0;
+				
+				//insert all sequences
+				for(int i = 1; i < inputSequences.size(); i++) {
+					memoryTree.insert(new TreeObject(inputSequences.get(i), 1));
+					if(inputSequences.get(i).equals(newSeq)) {
+						y++;
+					}
+				}
+				
+				if(y != memoryTree.search(new TreeObject(newSeq, 0))) {
+					y = y;
+				}
+				
+				//write BTree and then read
+				BReadWrite.writeBTree(memoryTree);
+				BTree readTree = BReadWrite.readBTree();
+				
+				//check that both BTrees are sorted
+				assert(memoryTree.search(new TreeObject(newSeq, 0)) == numNewSeq);
+				assert(readTree.search(new TreeObject(newSeq, 0)) == numNewSeq);
+				
+				progress.increaseProgress();
+				
+			}
+		} catch (Throwable e) {
+			ex = e;
+			progressAndExceptionCheck(run_BTree_RAF_Search);
+		}
+	}
+	
+	
+	
+	
+	/**
+	 * 
+	 * 
+	 * @throws Throwable
+	 */
+	public void EXAMPLE_TEST() throws Throwable {
+		//you can thank stackoverflow for this one: https://stackoverflow.com/questions/442747/getting-the-name-of-the-currently-executing-method
+		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
+		try {
+			
+			// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
+			// are done in this order
+			BReadWrite.setRAF(TESTS_FOLDER + testName, true);
+			int degree = random.nextInt(3, 7);
+			BNode.setDegree(degree);
+			BReadWrite.setBuffer(BNode.getDiskSize());
+			
+			// code goes here
+			
+			progress.increaseProgress();
+		} catch (Throwable e) {
+			progress.increaseProgress();
+			throw e;
+		}
+	}
+
+	/**
+	 * 
+	 * 
+	 * @throws Throwable 
+	 */
+	public void EXAMPLE_LOOPED_TEST() throws Throwable {
+		ex = null;
+		currentProgress = progress.getProgress();
+		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
 		
 		try {
 			
 			for (int k = 0; k < run_EXAMPLE_LOOPED_TEST; k++) {// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				
+				// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
+				// are done in this order
+				BReadWrite.setRAF(TESTS_FOLDER + testName + k, true);
+				int degree = random.nextInt(3, 7);
+				BNode.setDegree(degree);
+				BReadWrite.setBuffer(BNode.getDiskSize());
+				
 				// code goes here
-			}
-			
-		} catch (Exception e) {
-			ex = e;
-		} finally {
-			for (; progress.getProgress() < run_EXAMPLE_LOOPED_TEST + currentProgress;) {
+				
 				progress.increaseProgress();
 			}
-			assert (ex == null);
+			
+		} catch (Throwable e) {
+			ex = e;
+			progressAndExceptionCheck(run_BTree_RAF_Search);
 		}
 	}
 

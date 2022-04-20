@@ -236,10 +236,10 @@ public class TreeObject {
         if (getKey() == -1 || this.treeObjectKey.equals(null)) {
             return "null";
         }
-        if (treeObjectKey == "") {
+//        if (treeObjectKey == "") {
             return keyLongVal + ": " + frequency;
-        }
-        return treeObjectKey + ": " + frequency;
+//        }
+//        return treeObjectKey + ": " + frequency;
     }
 
 }

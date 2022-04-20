@@ -36,7 +36,7 @@ public class BReadWrite {
 	 * 
 	 * @throws IOException Creating RAF may throw exception
 	 */
-	@SuppressWarnings("resource")
+	@SuppressWarnings("resource") //TODO: memory leak? Talk to tutor
 	static public void setRAF(String fileName, boolean replace) throws IOException {
 		File file = new File(fileName);
 		RandomAccessFile RAFRaw = null;
@@ -95,8 +95,7 @@ public class BReadWrite {
 	 * @throws IllegalStateException   If thrown, it's likely RAF or buffer have not
 	 *                                 been set
 	 */
-	static public void writeBNode(BNode node)
-			throws IOException, BufferOverflowException, IllegalStateException {
+	static public void writeBNode(BNode node) throws IOException {
 		try {
 			// start at address and make buffer ready to read
 			RAF.position(node.getAddress());
@@ -109,16 +108,23 @@ public class BReadWrite {
 			buffer.putInt(n);
 
 			// get children and keys
-			LinkedList<Long> children = node.getChildren();
-			LinkedList<TreeObject> keys = node.getKeys();
+//			LinkedList<Long> children = node.getChildren();
+//			LinkedList<TreeObject> keys = node.getKeys();
 
 			// write the children and keys in alternating order
-			buffer.putLong(children.get(0));
+//			buffer.putLong(children.get(0));
+//			for (int i = 0; i < n; i++) {
+//				buffer.putLong(keys.get(i).getKey());
+//				buffer.putInt(keys.get(i).getFrequency());
+//
+//				buffer.putLong(children.get(i + 1));
+//			}
+			buffer.putLong(node.getChild(0));
 			for (int i = 0; i < n; i++) {
-				buffer.putLong(keys.get(i).getKey());
-				buffer.putInt(keys.get(i).getFrequency());
+				buffer.putLong(node.getKey(i).getKey());
+				buffer.putInt(node.getKey(i).getFrequency());
 
-				buffer.putLong(children.get(i + 1));
+				buffer.putLong(node.getChild(i + 1));
 			}
 
 			// make buffer ready to write and then write to RAF
@@ -145,8 +151,7 @@ public class BReadWrite {
 	 * @throws IllegalStateException    If thrown, it's likely RAF or buffer have
 	 *                                  not been set
 	 */
-	static public BNode readBNode(long address)
-			throws IOException, BufferUnderflowException, IllegalStateException {
+	static public BNode readBNode(long address) throws IOException {
 		try {
 			// start at address and make buffer ready to read
 			RAF.position(address);
@@ -191,8 +196,7 @@ public class BReadWrite {
 	 * @throws IllegalStateException   If thrown, it's likely RAF or buffer have not
 	 *                                 been set
 	 */
-	static public void writeBTree(BTree tree)
-			throws IOException, BufferOverflowException, IllegalStateException {
+	static public void writeBTree(BTree tree) throws IOException {
 		try {
 			// set buffer capacity to match BTree size
 			setBuffer(BTree.getDiskSize());
@@ -233,7 +237,7 @@ public class BReadWrite {
 	 * @throws IllegalStateException    If thrown, it's likely RAF or buffer have
 	 *                                  not been set
 	 */
-	static public BTree readBTree() throws IOException, BufferUnderflowException, IllegalStateException {
+	static public BTree readBTree() throws IOException {
 		try {
 			// set buffer capacity to match BTree size
 			setBuffer(BTree.getDiskSize());
@@ -245,14 +249,14 @@ public class BReadWrite {
 			buffer.flip();
 
 			//get metadata
-			long root = buffer.getInt();
+			long root = buffer.getLong();
 			int t = buffer.getInt();
 			short k = buffer.getShort();
 			int numNodes = buffer.getInt();
 			short height = buffer.getShort();
 
 			// initialize BTree and return 
-			BTree retTree = new BTree(t, k, numNodes, root, height);
+			BTree retTree = new BTree(root, t, k, numNodes, height);
 
 			// set static BNode degree
 			BNode.setDegree(retTree.getDegree());
@@ -279,14 +283,21 @@ public class BReadWrite {
 	 * @throws IllegalStateException    If thrown, it's likely RAF or buffer have
 	 *                                  not been set
 	 */
-	static public void reassignParents(BNode right) throws IOException, BufferUnderflowException, IllegalStateException {
+	static public void reassignParents(BNode right) throws IOException {
 		try {
 			//set buffer capacity to just a single long/address
 			setBuffer(8);
 			
 			//for each child in right, rewrite the parent address to point at right
-			for(Long child : right.getChildren()) {
-				RAF.position(child);
+//			for(Long child : right.getChildren()) {
+//				RAF.position(child);
+//				buffer.clear();
+//				buffer.putLong(right.getAddress());
+//				buffer.flip();
+//				RAF.write(buffer);
+//			}
+			for(int i = 0; i < right.getN() + 1; i++) {
+				RAF.position(right.getChild(i));
 				buffer.clear();
 				buffer.putLong(right.getAddress());
 				buffer.flip();
