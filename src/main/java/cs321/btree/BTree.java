@@ -6,7 +6,7 @@ import java.util.LinkedList;
 /**
  * Used to create BTree objects that hold Generic Type objects.
  * Notable method is insert() which is important in structuring the
- * BTree. TODO:
+ * BTree.
  *
  * @author  Carter Gibbs, Mesa Greear, Aaron Goin
  * @version Spring 2022
@@ -119,8 +119,45 @@ public class BTree
 		}
     }
     
-    public long search(Object x) {
-    	return -1;//TODO: temp method
+    /**
+     * Gets the frequency of the given object in BTree. If it does not
+     * exist, 0 is returned.
+     * 
+     * @param toFind The Object to look for in this BTree
+     * 
+     * @return The frequency of the object in BTree, 0 if it doesn't exist
+     * 
+	 * @throws IOException Reading/Writing to RAF may throw exception
+     */
+    //TODO: This whole method is a mess, I need to include better methods in BNode or move functionality here
+    public int search(TreeObject toFind) throws IOException {
+    	BNode currentNode = BReadWrite.readBNode(root);
+		long nextNode;
+		
+
+		// go until at lead node
+		while (!currentNode.isLeaf()) {
+			
+			// if the object to find is in currentNode, find it's location and return it's frequency
+			nextNode = currentNode.getElementLocation(toFind);
+			if (nextNode == currentNode.getAddress()) {
+				for(int i = 0; i < currentNode.getN(); i++) {
+					if(currentNode.getKey(i).compare(toFind) == 0) {
+						return currentNode.getKey(i).getFrequency();
+					}
+				}
+			}
+			//else read the child
+			currentNode = BReadWrite.readBNode(nextNode);
+		}
+
+		//check leaf node
+		for(int i = 0; i < currentNode.getN(); i++) {
+			if(currentNode.getKey(i).compare(toFind) == 0) {
+				return currentNode.getKey(i).getFrequency();
+			}
+		}
+		return 0;
     }
 
     
