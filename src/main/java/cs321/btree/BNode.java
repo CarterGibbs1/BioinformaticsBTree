@@ -200,13 +200,8 @@ public class BNode {
 	
 	/**
 	 * Get the child of this BNode where the given key should be
-	 * inserted or would be located. Will increment the frequency
-	 * of a key and return this BNode's address if the key exists
-	 * in this BNode.
-	 * <p>
-	 * WRITE: Does NOT insert the key (except for frequency
-	 * increments where it will write the BNode), only returns
-	 * the subtree that it belongs to.
+	 * inserted or would be located. Will return this BNodes address
+	 * if the object is in this BNode.
 	 * 
 	 * @param  key Object to use to locate the appropriate subtree
 	 * 
@@ -222,20 +217,35 @@ public class BNode {
 //		for(i = ( keys.size() - 1); i >= 0 && key.compare(keys.get(i)) < 0; i--){}
 		for(i = (n - 1); i >= 0 && key.compare(keys[i]) < 0; i--);
 		
-		//if this BNode contains the key, increment the key frequency, write this, and return this address
+		//if this BNode contains the key, return this address
 //		if(i >= 0 && key.compare(keys.get(i)) == 0) {
 //			keys.get(i).incrementFrequency();
-//			BReadWrite.writeBNode(this);
-//			return address;
 //		}
 		if(i >= 0 && key.compare(keys[i]) == 0) {
-			keys[i].incrementFrequency();
-			BReadWrite.writeBNode(this);
 			return address;
 		}
 		
 //		return children.get(i + 1);
 		return children[i + 1];
+	}
+	
+	/**
+	 * Increments the frequency of the given key in this BNode.
+	 * 
+	 * @param key The Object to increment the frequency of
+	 * 
+	 * @return True if element was found, false otherwise
+	 * 
+	 * @throws IOException Reading/Writing to RAF may throw exception
+	 */
+	public boolean incrementElement(TreeObject key) throws IOException {
+		int index = indexOf(key);
+		if(index != -1) {
+			keys[index].incrementFrequency();
+			BReadWrite.writeBNode(this);
+			return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -410,6 +420,23 @@ public class BNode {
 	public long getChild(int index){
 //		return children;
 		return children[index];
+	}
+	
+	/**
+	 * Return's the index of the given object.
+	 * 
+	 * @param key Object to locate index of
+	 * 
+	 * @return Index of the given Object, -1 if it's not
+	 *         in this BNode
+	 */
+	public int indexOf(TreeObject key) {
+		for(int i = 0; i < n; i++) {
+			if(keys[i].compare(key) == 0) {
+				return i;
+			}
+		}
+		return -1;
 	}
 	
 	/**

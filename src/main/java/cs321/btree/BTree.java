@@ -101,6 +101,7 @@ public class BTree
 			// if the object to insert is in currentNode, exit
 			nextNode = currentNode.getElementLocation(toInsert);
 			if (nextNode == currentNode.getAddress()) {
+				currentNode.incrementElement(toInsert);
 				return;
 			}
 			//else read the child
@@ -113,8 +114,8 @@ public class BTree
 			}
 		}
 
-		// once at leaf, insert key if it's not in the lead already
-		if(currentNode.getElementLocation(toInsert) != currentNode.getAddress()) {
+		// once at leaf, insert key if it's not in the BNode already
+		if(!currentNode.incrementElement(toInsert)) {
 			currentNode.insert(toInsert);
 		}
     }
@@ -129,7 +130,6 @@ public class BTree
      * 
 	 * @throws IOException Reading/Writing to RAF may throw exception
      */
-    //TODO: This whole method is a mess, I need to include better methods in BNode or move functionality here
     public int search(TreeObject toFind) throws IOException {
     	BNode currentNode = BReadWrite.readBNode(root);
 		long nextNode;
@@ -141,21 +141,15 @@ public class BTree
 			// if the object to find is in currentNode, find it's location and return it's frequency
 			nextNode = currentNode.getElementLocation(toFind);
 			if (nextNode == currentNode.getAddress()) {
-				for(int i = 0; i < currentNode.getN(); i++) {
-					if(currentNode.getKey(i).compare(toFind) == 0) {
-						return currentNode.getKey(i).getFrequency();
-					}
-				}
+				return currentNode.getKey(currentNode.indexOf(toFind)).getFrequency();
 			}
 			//else read the child
 			currentNode = BReadWrite.readBNode(nextNode);
 		}
 
 		//check leaf node
-		for(int i = 0; i < currentNode.getN(); i++) {
-			if(currentNode.getKey(i).compare(toFind) == 0) {
-				return currentNode.getKey(i).getFrequency();
-			}
+		if(currentNode.indexOf(toFind) != -1) {
+			return currentNode.getKey(currentNode.indexOf(toFind)).getFrequency();
 		}
 		return 0;
     }
