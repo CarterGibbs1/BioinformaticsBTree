@@ -5,6 +5,12 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.io.IOException;
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
+import java.util.LinkedList;
+import java.util.Queue;
+
 /**
  * Used to create BTree objects that hold Generic Type objects. Notable method
  * is insert() which is important in structuring the BTree.
@@ -32,14 +38,13 @@ public class BTreeAaron {
      * Constructor for read BTree...
      *
      * @param degree
-     * @param k
+     * @param k frequency
      * @param root
      * @throws IOException
      */
     public BTreeAaron(int degree, int k, TestBNodeNoE root, String filename) throws IOException {
         TestBNodeNoE.setDegree(degree);
         BReadWriteAlt.setRAF(filename, false);
-        TestBNodeNoE.setDegree(degree);
 
         // instantiate variables
         DEGREE = degree;
@@ -58,6 +63,7 @@ public class BTreeAaron {
         if (r.getN() == 2 * DEGREE - 1) {// step 2
             TestBNodeNoE s = new TestBNodeNoE(nextAddress);// part of step 3
             nextAddress += NODESIZE;//also step 3, needed
+            numNodes++;
             root = s;//step 4
             s.setLeaf(false);//step 5
             s.setN(0);//step 6
@@ -81,29 +87,28 @@ public class BTreeAaron {
             BReadWriteAlt.setBuffer(NODESIZE);
             BReadWriteAlt.writeBNode(x);
         } else {
-            /* check */
             while (i >= 1 && k.compare(x.getKey(i)) < 0) {//step 9
                 i--;// step 10
             }
             i++;//step 11
             BReadWriteAlt.setBuffer(NODESIZE);
             TestBNodeNoE xCI = BReadWriteAlt.readBNode(x.getChildren()[i]);//step 12
-            nextAddress += NODESIZE;
             if (xCI.getN() == 2 * DEGREE - 1) {//step 13
                 splitChild(x, i);//step 14
                 if (k.compare(x.getKey(i)) > 0) {//step 15
                     i++;//step 16
-                    BReadWriteAlt.setBuffer(NODESIZE);
-                    xCI = BReadWriteAlt.readBNode(x.getChildren()[i]);
                 }
+                BReadWriteAlt.setBuffer(NODESIZE);
+                xCI = BReadWriteAlt.readBNode(x.getChildren()[i]);
             }
             insertNonFull(xCI, k);//step 17
         }// end of else statement
-    }
+    }// end of insertNonFull
 
     private void splitChild(TestBNodeNoE x, int i) throws IOException {
         TestBNodeNoE z = new TestBNodeNoE(nextAddress);// step 1
         nextAddress += NODESIZE;//also step 1
+        numNodes++;
         long address = x.getChildren()[i];
         BReadWriteAlt.setBuffer(NODESIZE);//buffer
         TestBNodeNoE y = BReadWriteAlt.readBNode(address);// initialize y
@@ -169,6 +174,10 @@ public class BTreeAaron {
         this.root = root;
     }
 
+    public void finalAddressbeforeMax(int newFinal) {
+        this.finalAddressbeforeMax = newFinal;
+    }
+
     /**
      *
      * @return
@@ -185,27 +194,27 @@ public class BTreeAaron {
         return root.toString();
     }
 
-    /********CHANGE*********/
     public TestBNodeNoE getNodeAtIndex(int index) throws BufferUnderflowException, IllegalStateException, IOException {
         if (index < 1) {
             return new TestBNodeNoE(-1);
         }
+        int i = 1;
         Queue<TestBNodeNoE> queue = new LinkedList<>();
         queue.add(root);
-        int idx = 1;
         while (!queue.isEmpty()) {
             TestBNodeNoE n = queue.remove();
-            if (idx == index) {
+            if (i == index) {
                 return n;
             }
             else {
-                idx++;
+                i++;
             }
             if (!n.isLeaf()) {
-                long[] cA = n.getChildren();
-                for (int i = 1; i <= n.getChildren().length; i++) {
+                long[] c = n.getChildren();
+                int numChildren = n.getNumOfChildren();
+                for (int j = 1; j <= numChildren; j++) {
                     BReadWriteAlt.setBuffer(NODESIZE);//buffer
-                    TestBNodeNoE child = BReadWriteAlt.readBNode(cA[i]);
+                    TestBNodeNoE child = BReadWriteAlt.readBNode(c[j]);
                     queue.add(child);
                 }
             }

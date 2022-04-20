@@ -31,7 +31,7 @@ public class BReadWriteAlt {
      * Not doing so will result in IllegalStateExceptions being thrown.
      *
      * @param fileName Name of file to read from and possibly create as well
-     * @param replace to delete the file and replace it with a new one if it exists
+     * @param True to delete the file and replace it with a new one if it exists
      *
      * @throws IOException Creating RAF may throw exception
      */
@@ -86,6 +86,7 @@ public class BReadWriteAlt {
      * 1 (long, long int, long, long int, long ....).
      *
      * @param node    BNode to write to RAF
+     * @param address Address to write this BNode to
      *
      * @throws IOException             Writing to RAF may throw exception
      * @throws BufferOverflowException Indicates buffer capacity was incorrect for
@@ -96,47 +97,35 @@ public class BReadWriteAlt {
     static public void writeBNode(TestBNodeNoE node)// assumes every node is internal
             throws IOException, BufferOverflowException, IllegalStateException {
         try {
-            System.out.println("\nIn the write method:");
             // start at address and make buffer ready to read
             RAF.position(node.getAddress());
-            System.out.println("Address: " + node.getAddress());
             buffer.clear();
 
             // write parent
             buffer.putLong(node.getParent());
-            System.out.println("Parent: " + node.getParent());
             // store and write n
             int n = node.getN();
             buffer.putInt(n);
-            System.out.println("N: " + n);
             if (node.isLeaf()) {
                 buffer.putInt(1);
-                System.out.println("Is Leaf int: " + 1);
             } else {
                 buffer.putInt(-1);
-                System.out.println("Is Leaf int: " + -1);
             }
 
             // get children and keys
             long[] children = node.getChildren();
             TreeObjectNoE[] keys = node.getKeys();
-            System.out.println("Node keys: " + keys.toString());
 
             // write the children and keys in alternating order
             if (!node.isLeaf()) {// if statement before to check if its leaf
-                buffer.putLong(children[0]);
-                System.out.println("Child 0: " + children[0]);
+                buffer.putLong(children[1]);
             }
-            System.out.println("keys before for loop: " + keys.toString());
-            System.out.println("first key: " + keys[0].getLongKey());
-            for (int i = 0; i < n; i++) {
+
+            for (int i = 1; i <= n; i++) {
                 buffer.putLong(keys[i].getLongKey());
-                System.out.println("Key " + i + ": " + keys[i].getLongKey());
                 buffer.putInt(keys[i].getFrequency());
-                System.out.println("Freq: " + i + ": " + keys[i].getFrequency());
                 if (!node.isLeaf()) {
                     buffer.putLong(children[i + 1]);
-                    System.out.println("Child: " + (i + 1) + ": " + children[i + 1]);
                 }
             }
 
@@ -166,7 +155,6 @@ public class BReadWriteAlt {
     static public TestBNodeNoE readBNode(long address)
             throws IOException, BufferUnderflowException, IllegalStateException {
         try {
-            System.out.println("\nIn the read method:\nAddress: " + address);
             // start at address and make buffer ready to read
             RAF.position(address);
             buffer.clear();
@@ -175,30 +163,29 @@ public class BReadWriteAlt {
 
             // get parent and n
             long parent = buffer.getLong();
-            System.out.println("Parent: " + parent);
             int n = buffer.getInt();
-            System.out.println("N: " + n);
             int isLeafInt = buffer.getInt();
-            System.out.println("Is Leaf Int: " + isLeafInt);
 
             // get first key and two children
             long leftChild;
             if (isLeafInt == -1) {
                 leftChild = buffer.getLong();
-                System.out.println("Left Child: " + leftChild);
             } else {
                 leftChild = -1;
             }
 
-            long l = buffer.getLong();
-            int in = buffer.getInt();
-            TreeObjectNoE initialKey = new TreeObjectNoE(l, in);
-            System.out.println("Initial Key long: " + l);
-            System.out.println("Initial Key Freq: " + in);
+            TreeObjectNoE initialKey;
+            if (n > 0) {
+                long l = buffer.getLong();
+                int in = buffer.getInt();
+                initialKey = new TreeObjectNoE(l, in);
+            } else {
+                initialKey = new TreeObjectNoE();
+            }
+
             long rightChild;
             if (isLeafInt == -1) {
                 rightChild = buffer.getLong();
-                System.out.println("Right Child: " + rightChild);
             } else {
                 rightChild = -1;
             }
@@ -211,17 +198,15 @@ public class BReadWriteAlt {
             } else {
                 retNode.setLeaf(true);
             }
-            //System.out.println("retNode keys before for loop: " + retNode.toString() + ", and children: " + retNode.getChildren().toString());
-            for (int i = 1; i < n; i++) {
+            for (int i = 2; i <= n; i++) {
                 long l2 = buffer.getLong();
-                System.out.println("new child object longkey: " + l2);
                 int i2 = buffer.getInt();
-                System.out.println("new child object freq: " + i2);
-                // figure out logic here
                 TreeObjectNoE newKey = new TreeObjectNoE(l2, i2);
                 retNode.setKey(i, newKey);
-                retNode.setChild(i - 1, l2);
-                //System.out.println("Current retNode keys: " + retNode.toString() + ", And children: " + retNode.getChildren().toString());
+                if (!retNode.isLeaf()) {// change position?
+                    long lC = buffer.getLong();
+                    retNode.setChild(i + 1, lC);
+                }
             }
 
             return retNode;

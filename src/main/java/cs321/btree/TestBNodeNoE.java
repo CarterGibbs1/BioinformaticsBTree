@@ -1,5 +1,6 @@
 package cs321.btree;
 
+
 /**
  * Used to create TestBNodeNoE objects that hold Generic Type (passed down by
  * the BTree they belong to) objects. Notable methods are insert(),
@@ -341,6 +342,16 @@ public class TestBNodeNoE {
         return children;
     }
 
+    public int getNumOfChildren() {
+        int num = 0;
+        int i = 1;
+        while (this.getChildren()[i] > -1) {
+            i++;
+            num++;
+        }
+        return num;
+    }
+
     public void setChild(int index, long l) {
         if (index >= children.length) {
             return;
@@ -387,14 +398,15 @@ public class TestBNodeNoE {
         if (n > 0) {
             for (int i = 1; i <= n; i++) {
                 if (keys[i] != null) {
-                    s += keys[i].toString() + ", ";
+                    s += "|" + keys[i].toString() + "| ";
                 }
             }
         }
         s += "... Children: ";
         for (long l : children) {
-            if (l != -1 && l != -2) {
-                s += l + " ";
+            if (l > -1) {
+                s += "|" + l + "|"
+                        + " ";
             }
         }
         return s;
