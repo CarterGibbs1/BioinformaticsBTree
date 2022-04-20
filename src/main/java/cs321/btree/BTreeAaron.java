@@ -5,11 +5,6 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.io.IOException;
-import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
-import java.util.LinkedList;
-import java.util.Queue;
 
 /**
  * Used to create BTree objects that hold Generic Type objects. Notable method
