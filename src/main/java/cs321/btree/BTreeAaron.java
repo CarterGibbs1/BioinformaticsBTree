@@ -84,11 +84,13 @@ public class BTreeAaron {
             }
             x.setKey(i + 1, k);//step 6
             x.setN(x.getN() + 1);//step 7
-            BReadWriteAlt.setBuffer(NODESIZE);
-            diskWriteCheck();
-            if (cacheSize != 0) {
+            if (cacheSize == 0) {
+                BReadWriteAlt.setBuffer(NODESIZE);
                 BReadWriteAlt.writeBNode(x);
+            } else {
+                diskWriteCheck();
             }
+
         } else {
             while (i >= 1 && k.compare(x.getKey(i)) < 0) {//step 9
                 i--;// step 10
@@ -146,20 +148,25 @@ public class BTreeAaron {
         x.setN(x.getN() + 1);// step 16
         //saving x y and z
         //tests
-        BReadWriteAlt.setBuffer(NODESIZE);
-        diskWriteCheck();
-        if (cacheSize != 0) {
+        if (cacheSize == 0) {
+            BReadWriteAlt.setBuffer(NODESIZE);
             BReadWriteAlt.writeBNode(y);
+        } else {
+            diskWriteCheck();
         }
-        BReadWriteAlt.setBuffer(NODESIZE);
-        diskWriteCheck();
-        if (cacheSize != 0) {
+
+        if (cacheSize == 0) {
+            BReadWriteAlt.setBuffer(NODESIZE);
             BReadWriteAlt.writeBNode(z);
+        } else {
+            diskWriteCheck();
         }
-        BReadWriteAlt.setBuffer(NODESIZE);
-        diskWriteCheck();
-        if (cacheSize != 0) {
+
+        if (cacheSize == 0) {
+            BReadWriteAlt.setBuffer(NODESIZE);
             BReadWriteAlt.writeBNode(x);
+        } else {
+            diskWriteCheck();
         }
     }
 
