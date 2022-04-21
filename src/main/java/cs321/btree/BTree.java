@@ -20,12 +20,27 @@ public class BTree
     
     private final short FREQUENCY;
     private final int DEGREE;
+    private final BCache CACHE;
 
     
    	//=================================================================================================================
 	//                                               CONSTRUCTORS
 	//=================================================================================================================
     
+    //TODO:
+    public BTree(long root, int degree, int frequency, int numNodes, int height, int cacheSize) {
+    	//instantiate variables
+    	DEGREE = degree;
+    	FREQUENCY = (short)frequency;
+    	CACHE = new BCache(cacheSize);
+    	
+    	this.numNodes = numNodes;
+    	this.root = root;
+    	this.height = (short)height;
+    	
+    	//set statics
+    	BNode.setDegree(degree);
+    }
     
     /**
      * Constructor: Create a BTree with the address of the root of an
@@ -39,16 +54,7 @@ public class BTree
      * @param height    The height of the BTree (0, 1, 2, 3, ....)
      */
     public BTree(long root, int degree, int frequency, int numNodes, int height) {
-    	//instantiate variables
-    	DEGREE = degree;
-    	FREQUENCY = (short)frequency;
-    	
-    	this.numNodes = numNodes;
-    	this.root = root;
-    	this.height = (short)height;
-    	
-    	//set statics
-    	BNode.setDegree(degree);
+    	this(root, degree, frequency, numNodes, height, -1);
     }
     
     /**
@@ -335,13 +341,15 @@ public class BTree
     		//find BNode via loop
     		for(int i = 0; i < nodes.size(); i++) {
     			if(nodes.get(i).getAddress() == address) {
+    				//send BNode to front if found and return ===================================================
     				return nodes.get(i);
     			}
     		}
     		
-    		//if not in cache return null
+    		
+    		
+    		//if not in cache read BNode from RAF, send to front, and return that BNode==========================
     		return null;
     	}
-    	
     }
 }
