@@ -1,6 +1,8 @@
 package cs321.btree;
 
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 import static org.junit.Assert.assertEquals;
 
@@ -8,6 +10,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class BTreeTest {
 	// folder location that RAFs and dumps go to
 	static private final String TESTS_FOLDER = "./results/tests/TEST_";
@@ -32,12 +35,25 @@ public class BTreeTest {
 			run_BNode_RAF_RAFAppropriateSize +
 			run_BTree_RAF_IsSorted +
 			run_BTree_RAF_Search +
-			BTreeTest.class.getDeclaredMethods().length - 5 //don't count methods that aren't tests i.e. utility methods
+			BTreeTest.class.getDeclaredMethods().length - 6 //don't count methods that aren't tests i.e. utility methods
 			);
 
 	// =================================================================================================================
 	//                                                Utility Methods
 	// =================================================================================================================
+	
+	/**
+	 * Gets a random number between the origin (inclusive) and bound
+	 * (exclusive).
+	 * 
+	 * @param origin Minimum (inclusive) number
+	 * @param bound  Maximum (exclusive) number
+	 * 
+	 * @return Random number in given range
+	 */
+	private static int getRand(int origin, int bound) {
+		return (random.nextInt(bound - origin) + origin);
+	}
 	
 	/**
 	 * If a test is stopped in the middle due to an exception, this method
@@ -48,7 +64,7 @@ public class BTreeTest {
 	 * 
 	 * @throws Throwable The exception thrown by the test
 	 */
-	private void progressAndExceptionCheck(int excpectedRuns) throws Throwable {
+	private static void progressAndExceptionCheck(int excpectedRuns) throws Throwable {
 		for (; progress.getProgress() < excpectedRuns + currentProgress;) {
 			progress.increaseProgress();
 		}
@@ -71,8 +87,8 @@ public class BTreeTest {
 	 */
 	static private ArrayList<String> generateRandomSequences(int minNumSeq, int maxNumSeq, int minseqLength,
 			int maxSeqLength) {
-		int numSeq = random.nextInt(minNumSeq, maxNumSeq);
-		int lengthSeq = random.nextInt(minseqLength, maxSeqLength);
+		int numSeq = getRand(minNumSeq, maxNumSeq);
+		int lengthSeq = getRand(minseqLength, maxSeqLength);
 		ArrayList<String> sequences = new ArrayList<String>();
 
 		// construct numSeq amount of random sequences
@@ -81,7 +97,7 @@ public class BTreeTest {
 			sequence = "";
 
 			for (int j = 0; j < lengthSeq; j++) {
-				sequence = sequence + VALID_LETTERS.charAt(random.nextInt(0, 4));
+				sequence = sequence + VALID_LETTERS.charAt(getRand(0, 4));
 			}
 
 			sequences.add(sequence);
@@ -491,7 +507,7 @@ public class BTreeTest {
 				// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
 				// are done in this order
 				BReadWrite.setRAF(TESTS_FOLDER + testName + k, true);
-				BNode.setDegree(random.nextInt(3, 7));
+				BNode.setDegree(getRand(3, 7));
 				BReadWrite.setBuffer(BNode.getDiskSize());
 
 				// create a rudimentary BTree to insert into while counting the total BNode
@@ -596,7 +612,7 @@ public class BTreeTest {
 				// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
 				// are done in this order
 				BReadWrite.setRAF(TESTS_FOLDER + testName + k, true);
-				int degree = random.nextInt(3, 7);
+				int degree = getRand(3, 7);
 				BNode.setDegree(degree);
 				BReadWrite.setBuffer(BNode.getDiskSize());
 				
@@ -649,7 +665,7 @@ public class BTreeTest {
 				// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
 				// are done in this order
 				BReadWrite.setRAF(TESTS_FOLDER + testName + k, true);
-				int degree = random.nextInt(3, 7);
+				int degree = getRand(3, 7);
 				BNode.setDegree(degree);
 				BReadWrite.setBuffer(BNode.getDiskSize());
 				
@@ -657,11 +673,11 @@ public class BTreeTest {
 				ArrayList<String> inputSequences = generateRandomSequences(20000/5, 30000/5, 5, 15);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
 				
 				//generate the same random sequence a random number of times and insert at random spots
-				int numNewSeq = random.nextInt(20, 100);
-				String newSeq = inputSequences.get(random.nextInt(0, inputSequences.size()));
+				int numNewSeq = getRand(20, 100);
+				String newSeq = inputSequences.get(getRand(0, inputSequences.size()));
 				for(;inputSequences.remove(newSeq););//remove all instances of newSeq
 				for(int i = 0; i < numNewSeq; i++) {
-					inputSequences.add(random.nextInt(0, inputSequences.size()), newSeq);
+					inputSequences.add(getRand(0, inputSequences.size()), newSeq);
 				}
 				
 				//create BTree
@@ -715,7 +731,7 @@ public class BTreeTest {
 			// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
 			// are done in this order
 			BReadWrite.setRAF(TESTS_FOLDER + testName, true);
-			int degree = random.nextInt(3, 7);
+			int degree = getRand(3, 7);
 			BNode.setDegree(degree);
 			BReadWrite.setBuffer(BNode.getDiskSize());
 			
@@ -745,7 +761,7 @@ public class BTreeTest {
 				// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
 				// are done in this order
 				BReadWrite.setRAF(TESTS_FOLDER + testName + k, true);
-				int degree = random.nextInt(3, 7);
+				int degree = getRand(3, 7);
 				BNode.setDegree(degree);
 				BReadWrite.setBuffer(BNode.getDiskSize());
 				
