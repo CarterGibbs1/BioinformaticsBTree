@@ -20,7 +20,6 @@ package cs321.btree;
 public class TreeObject {
     // valid treeObjects: "a", "t", "c", "g" (lowercase)
     // corresponding 2-bit binary value: 00, 11, 01, 10
-    private String treeObjectKey;
     private int frequency;
     private long keyLongVal;
 
@@ -33,8 +32,7 @@ public class TreeObject {
      * @param frequency     size of each, individual sequence in possibleKey
      */
     public TreeObject(String treeObjectKey, int frequency) {
-        this.treeObjectKey = treeObjectKey;
-        this.keyLongVal = setLongKey();
+        this.keyLongVal = setLongKey(treeObjectKey);
         this.frequency = frequency;
     }
 
@@ -45,39 +43,24 @@ public class TreeObject {
      * @param frequency
      */
     public TreeObject(long longKey, int frequency) {
-        this.treeObjectKey = "";// needs to be set later possibly, created for compatibility with other methods
+//        this.treeObjectKey = "";// needs to be set later possibly, created for compatibility with other methods
         this.keyLongVal = longKey;
         this.frequency = frequency;
     }
 
     /**
-     * Blank constructor, only sets long key to -1
+     * Blank constructor, only sets long key to -1, can delete if needed.
      */
     public TreeObject() {//for testing purposes
         this.keyLongVal = -1;
     }
 
-    /**
-     * @return the String key of the TreeObject
-     */
-    public String getStringKey() {
-        return treeObjectKey;
-    }
-
-    /**
-     * Sets the String key
-     * @param newKey the String key that will replace the current one.
-     */
-    public void setKey(String newKey) {
-        this.treeObjectKey = newKey;
-    }
-
-    /**
+    /** return string
      * Intended to be used by another driver class when the string length is known, but the second constructor is used.
      *
      * @param stringLength length of string after being scanned
      */
-    public void setBlankKeyWithStringLength(int stringLength) {
+    public String keyWithStringLength(int stringLength) {
         String longKey = "";
         for (int i = 0; i < stringLength * 2; i++) {
             longKey += "0";
@@ -85,7 +68,7 @@ public class TreeObject {
         longKey += Long.toBinaryString(keyLongVal);
         longKey = longKey.substring(0, Long.toBinaryString(keyLongVal).length() + stringLength - 1);
 
-        this.treeObjectKey = stringOfExactLongString(longKey);
+        return stringOfExactLongString(longKey);
     }
 
     /**
@@ -137,15 +120,21 @@ public class TreeObject {
     public void setFrequency(int newFrequency) {
         this.frequency = newFrequency;
     }
-    
+
     /**
      * Increment the frequency of this object by 1
      */
     public void incrementFrequency() {
-    	frequency++;
+        frequency++;
     }
 
-    public long setLongKey() {
+    /**
+     * Sets long key from a dna string value.
+     *
+     * @param treeObjectKey the string, contains dna value
+     * @return the long key that will be set for this TreeObject
+     */
+    public long setLongKey(String treeObjectKey) {
         if (keyLongVal == -1) {
             return -1;
         }
@@ -171,9 +160,9 @@ public class TreeObject {
     private long byteShift(String s) {
         long b = 0;
         long x = 0;
-        
+
         for (int i = s.length() - 1; i >= 0; i--) {
-        	//grab letters starting at end of string and work down
+            //grab letters starting at end of string and work down
             x = toByteVal(s.charAt((s.length() - 1) - i));
             //add a shifted over x to b
             b += x << (2 * i);
@@ -227,19 +216,12 @@ public class TreeObject {
     }
 
     /**
-     * A String form of the TreeObject's "lettered" key and frequency, formatted for
-     * dump files.
+     * A String form of the TreeObject's long value.
      *
      * @return a String representation of a TreeObject
      */
     public String toString() {
-        if (getKey() == -1 || this.treeObjectKey.equals(null)) {
-            return "null";
-        }
-//        if (treeObjectKey == "") {
-            return keyLongVal + ": " + frequency;
-//        }
-//        return treeObjectKey + ": " + frequency;
+        return Long.toString(keyLongVal);
     }
 
-}
+}// line 245
