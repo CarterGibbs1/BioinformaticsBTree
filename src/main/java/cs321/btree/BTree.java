@@ -214,6 +214,54 @@ public class BTree
     	return height;
     }
     
+    /**
+     * 
+     * @return
+     */
+    public String dump() {
+    	return dump(root);
+    }
+    
+    /**
+     * 
+     * @param root
+     * 
+     * @return
+     */
+    public String dump(long root) {
+    	//base case, the given root is non-existent
+    	if(root == -1) {
+    		return "";
+    	}
+    	
+    	
+    	StringBuilder ret = new StringBuilder();
+    	BNode currentNodet = BReadWrite.readBNode(root);
+    	BNode nextNode;
+    	
+    	
+    	//sorted will become false if any key is out of order
+    	//recursively check the first child of this root
+    	boolean sorted = isSorted(current.getChild(0), null, current.getKey(0));
+    	
+    	//recursively check middle children and check that all keys are in sorted order
+    	for(int i = 1; i < current.getN() - 1; i++) {
+    		sorted = sorted && isSorted(current.getChild(i), current.getKey(i - 1), current.getKey(i)) &&
+    		                   current.getKey(i - 1).compare(current.getKey(i)) < 0;
+    	}
+    	
+    	//recursively check the last child and check that the first key is greater than left and the last key is less than right
+    	return sorted &&
+    	       isSorted(current.getChild(current.getN()), current.getKey(current.getN() - 1), null) &&
+    	       ((right == null || (current.getKey(current.getN() - 1).compare(right) <= 0)) &&
+    	       ( left == null  || (current.getKey(0)                 .compare(left)  >= 0)));
+    	
+    	
+    	
+    	
+    	return ret.toString();
+    }
+    
    
   	//=================================================================================================================
 	//                                           STATIC METHODS

@@ -444,6 +444,22 @@ public class BNode {
 		return ((2 * degree ) - 1) == n;
 	}
 	
+	/**
+	 * Get a String representation of this BNode in the form
+	 * of a dump.
+	 * 
+	 * @return String representation appropriate for dumps
+	 */
+	public String dump() {
+		StringBuilder ret = new StringBuilder();
+		
+		for(int i = 0; i < n; i++) {
+			ret.append(keys[i].toString() + "\n");
+		}
+		
+		return ret.toString();
+	}
+	
 	//incomplete equals method, may be needed later
 //	@SuppressWarnings("unchecked")
 //	@Override
@@ -484,22 +500,21 @@ public class BNode {
 //		return address == other.address;
 //	}
 	
-	//most likely temporary toString.
-	//returns long value for each key in a single String separated by spaces
 //	@Override
 //	public String toString() {
 //		StringBuilder retString = new StringBuilder();
 //		for(int i = 0; i < keys.size(); i++) {
-//			retString.append(keys.get(i).getKey() + " "); //TODO?: return letters instead
+//			retString.append(keys.get(i).getKey() + " ");
 //		}
 //		
 //		return retString.toString().substring(0, retString.length() - 1);
 //	}
+	//returns a single line of the long keys separated by spaces
 	@Override
 	public String toString() {
 		StringBuilder retString = new StringBuilder();
 		for(int i = 0; i < n ; i++) {
-			retString.append(keys[i].getKey() + " "); //TODO?: return letters instead
+			retString.append(keys[i].getKey() + " ");
 		}
 		
 		return retString.toString().substring(0, retString.length() - 1);

@@ -191,6 +191,44 @@ public class TreeObject {
         }
         return -1;
     }
+    
+    /**
+     * Converts the given number to a char.
+     * 
+     * @param num Number to convert
+     * 
+     * @return Corresponding letter to num, 'n' if num is invalid
+     */
+    private char numToChar(long num) {
+    	if (num == 0) {
+            return 'a';
+        }
+        if (num == 1) {
+            return 'c';
+        }
+        if (num == 2) {
+            return 'g';
+        }
+        if (num == 3) {
+            return 't';
+        }
+        return 'n';
+    }
+    
+    /**
+     * Convert this key to a string.
+     * 
+     * @return String representation of this TreeObject's key
+     */
+    public String keyToString() {
+        String ret = "";
+
+        for (int i = frequency - 1; i >= 0; i--) {
+            //read bits starting at end of key and work down
+        	ret += numToChar(keyLongVal >> (2 * i));
+        }
+        return ret;
+    }
 
     /**
      * Determines if the left TreeObject's b value is larger than the parameter
@@ -215,13 +253,9 @@ public class TreeObject {
         return 0;
     }
 
-    /**
-     * A String form of the TreeObject's long value.
-     *
-     * @return a String representation of a TreeObject
-     */
+    @Override
     public String toString() {
-        return Long.toString(keyLongVal);
+        return keyToString() + " : " + frequency;
     }
 
 }// line 245
