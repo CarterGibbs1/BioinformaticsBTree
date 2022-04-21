@@ -5,7 +5,6 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.util.LinkedList;
 import java.util.Queue;
-
 /**
  * Used to create BTree objects that hold Generic Type objects. Notable method
  * is insert() which is important in structuring the BTree.
@@ -22,8 +21,13 @@ public class BTreeAaron {
     private final int DEGREE;
     private final int NODESIZE = 1000;
     //private final int NODEBITSIZE = TestBNodeNoE.getDiskSize();
-    private int nextAddress = 1000;
+    private int nextAddress = 1001;
     private int finalAddressbeforeMax;
+    private int cacheSize = 0;
+
+    //lls for cache
+    LinkedList<TestBNodeNoE> cacheNodes;
+    LinkedList<Long> cacheNodeAddresses;
 
     // =================================================================================================================
     // CONSTRUCTORS
@@ -35,6 +39,7 @@ public class BTreeAaron {
      * @param degree
      * @param k frequency
      * @param root
+     * @param filename
      * @throws IOException
      */
     public BTreeAaron(int degree, int k, TestBNodeNoE root, String filename) throws IOException {
@@ -80,21 +85,30 @@ public class BTreeAaron {
             x.setKey(i + 1, k);//step 6
             x.setN(x.getN() + 1);//step 7
             BReadWriteAlt.setBuffer(NODESIZE);
-            BReadWriteAlt.writeBNode(x);
+            diskWriteCheck();
+            if (cacheSize != 0) {
+                BReadWriteAlt.writeBNode(x);
+            }
         } else {
             while (i >= 1 && k.compare(x.getKey(i)) < 0) {//step 9
                 i--;// step 10
             }
             i++;//step 11
             BReadWriteAlt.setBuffer(NODESIZE);
-            TestBNodeNoE xCI = BReadWriteAlt.readBNode(x.getChildren()[i]);//step 12
+            TestBNodeNoE xCI = diskReadCheck(x.getChildren()[i]);
+            if (xCI == null) {
+                xCI = BReadWriteAlt.readBNode(x.getChildren()[i]);//step 12
+            }
             if (xCI.getN() == 2 * DEGREE - 1) {//step 13
                 splitChild(x, i);//step 14
                 if (k.compare(x.getKey(i)) > 0) {//step 15
                     i++;//step 16
                 }
                 BReadWriteAlt.setBuffer(NODESIZE);
-                xCI = BReadWriteAlt.readBNode(x.getChildren()[i]);
+                xCI = diskReadCheck(x.getChildren()[i]);
+                if (xCI == null) {
+                    xCI = BReadWriteAlt.readBNode(x.getChildren()[i]);//step 12
+                }
             }
             insertNonFull(xCI, k);//step 17
         }// end of else statement
@@ -106,7 +120,10 @@ public class BTreeAaron {
         numNodes++;
         long address = x.getChildren()[i];
         BReadWriteAlt.setBuffer(NODESIZE);//buffer
-        TestBNodeNoE y = BReadWriteAlt.readBNode(address);// initialize y
+        TestBNodeNoE y = diskReadCheck(address);
+        if (y == null) {
+            y = BReadWriteAlt.readBNode(address);// initialize y
+        }
         z.setLeaf(y.isLeaf());//step 2
         z.setN(DEGREE - 1);//step 3
         for (int j = 1; j <= DEGREE - 1; j++) {//step 4
@@ -130,11 +147,20 @@ public class BTreeAaron {
         //saving x y and z
         //tests
         BReadWriteAlt.setBuffer(NODESIZE);
-        BReadWriteAlt.writeBNode(y);//step 17
+        diskWriteCheck();
+        if (cacheSize != 0) {
+            BReadWriteAlt.writeBNode(y);
+        }
         BReadWriteAlt.setBuffer(NODESIZE);
-        BReadWriteAlt.writeBNode(z);//step 18
+        diskWriteCheck();
+        if (cacheSize != 0) {
+            BReadWriteAlt.writeBNode(z);
+        }
         BReadWriteAlt.setBuffer(NODESIZE);
-        BReadWriteAlt.writeBNode(x);//step 19
+        diskWriteCheck();
+        if (cacheSize != 0) {
+            BReadWriteAlt.writeBNode(x);
+        }
     }
 
     // =================================================================================================================
@@ -185,6 +211,10 @@ public class BTreeAaron {
         numNodes++;
     }
 
+    public void setCacheSize(int newSize) {
+        cacheSize = newSize;
+    }
+
     public String toString() {
         return root.toString();
     }
@@ -209,13 +239,53 @@ public class BTreeAaron {
                 int numChildren = n.getNumOfChildren();
                 for (int j = 1; j <= numChildren; j++) {
                     BReadWriteAlt.setBuffer(NODESIZE);//buffer
-                    TestBNodeNoE child = BReadWriteAlt.readBNode(c[j]);
+                    TestBNodeNoE child = diskReadCheck(c[j]);
+                    if (child == null) {
+                        child = BReadWriteAlt.readBNode(c[j]);
+                    }
                     queue.add(child);
                 }
             }
         }
         return new TestBNodeNoE(-1);
 
+    }
+
+    //cache
+
+    public void createCaches() {
+        cacheNodes = new LinkedList<TestBNodeNoE>();
+        cacheNodeAddresses = new LinkedList<Long>();
+    }
+
+    public TestBNodeNoE diskReadCheck(long address) {
+        TestBNodeNoE returnNode = null;
+        if (cacheNodeAddresses.contains(address)) {
+            int idx = cacheNodeAddresses.indexOf(address);
+            returnNode = cacheNodes.get(idx);
+            cacheNodes.remove(idx);
+            cacheNodeAddresses.remove(idx);
+            cacheNodes.addFirst(returnNode);
+            cacheNodeAddresses.addFirst(returnNode.getAddress());
+            return returnNode;
+        }
+        return returnNode;
+    }
+
+    public void diskWriteCheck() throws BufferOverflowException, IllegalStateException, IOException {
+        if (cacheNodes.size() == cacheSize) {
+            TestBNodeNoE removedNode = cacheNodes.removeLast();
+            cacheNodeAddresses.removeLast();
+            BReadWriteAlt.setBuffer(NODESIZE);
+            BReadWriteAlt.writeBNode(removedNode);
+        }
+    }
+
+    public void doneWithBTree() throws BufferOverflowException, IllegalStateException, IOException {
+        for (int i = 0; i < cacheNodes.size(); i++) {
+            BReadWriteAlt.setBuffer(NODESIZE);
+            BReadWriteAlt.writeBNode(cacheNodes.get(i));
+        }
     }
 
     // =================================================================================================================

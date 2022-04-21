@@ -67,9 +67,9 @@ public class TestBNodeNoE {
         keys = new TreeObjectNoE[(2 * degree) + 1];
         children = new long[2 * degree + 2];
         children[0] = -2;// distinguish from other values
-        for (int i = 1; i < children.length; i++) {
-            children[i] = -1;
-        }
+//        for (int i = 1; i < children.length; i++) {
+//        	children[i] = -1;
+//        }
         if (initialKey != null) {
             keys[1] = initialKey;
         }
@@ -345,7 +345,7 @@ public class TestBNodeNoE {
     public int getNumOfChildren() {
         int num = 0;
         int i = 1;
-        while (this.getChildren()[i] > -1) {
+        while (this.getChildren()[i] > 0) {
             i++;
             num++;
         }
@@ -404,7 +404,7 @@ public class TestBNodeNoE {
         }
         s += "... Children: ";
         for (long l : children) {
-            if (l > -1) {
+            if (l > 0) {
                 s += "|" + l + "|"
                         + " ";
             }

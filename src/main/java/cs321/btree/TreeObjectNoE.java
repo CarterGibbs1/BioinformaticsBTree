@@ -13,54 +13,47 @@ package cs321.btree;
 public class TreeObjectNoE {
     // valid treeObjects: "a", "t", "c", "g" (lowercase)
     // corresponding 2-bit binary value: 00, 11, 01, 10
-    private String treeObjectKey;
     private int frequency;
     private long keyLongVal;
 
     /**
-     * Constructor: Creates a TreeObject with the specified key. Also sets the value
-     * of b depending on the possibleKey. The key values in treeObjectKey must all
-     * consist of "a", "c", "g", or "t" to convert to a usable long value. -1 will
-     * be the value for instance variables if treeObjectKey is too large for a long
-     * value or frequency is below 0/greater than the length of the object. If first
-     * value is a or c, it will be replaced for future method utilization.
+     * Constructor: Creates a TreeObjectNoE with the specified String key. Also sets the value
+     * of b depending on the String key. The key values in treeObjectKey must all
+     * consist of "a", "c", "g", or "t" to convert to a usable long value. Everything is set.
      *
-     * @param treeObjectKey the key of the object
+     * @param treeObjectKey the String key of the object
      * @param frequency     size of each, individual sequence in possibleKey
      */
     public TreeObjectNoE(String treeObjectKey, int frequency) {
-        this.treeObjectKey = treeObjectKey;
-        this.keyLongVal = setLongKey();
+        this.keyLongVal = setLongKey(treeObjectKey);
         this.frequency = frequency;
     }
 
+    /**
+     * Alternate constructor, long key instead of string is passed in. String key is a blank String.
+     *
+     * @param longKey
+     * @param frequency
+     */
     public TreeObjectNoE(long longKey, int frequency) {
-        this.treeObjectKey = "";// needs to be set later possibly, created for compatibility with other methods
+//        this.treeObjectKey = "";// needs to be set later possibly, created for compatibility with other methods
         this.keyLongVal = longKey;
         this.frequency = frequency;
     }
 
+    /**
+     * Blank constructor, only sets long key to -1, can delete if needed.
+     */
     public TreeObjectNoE() {//for testing purposes
         this.keyLongVal = -1;
     }
 
-    /**
-     * @return the String key of the TreeObject
-     */
-    public String getKey() {
-        return treeObjectKey;
-    }
-
-    public void setKey(String newKey) {
-        this.treeObjectKey = newKey;
-    }
-
-    /**
-     * Intended to be used by another class when the string length is known, but the second constructor is used.
+    /** return string
+     * Intended to be used by another driver class when the string length is known, but the second constructor is used.
      *
      * @param stringLength length of string after being scanned
      */
-    public void setBlankKeyWithStringLength(int stringLength) {
+    public String keyWithStringLength(int stringLength) {
         String longKey = "";
         for (int i = 0; i < stringLength * 2; i++) {
             longKey += "0";
@@ -68,9 +61,15 @@ public class TreeObjectNoE {
         longKey += Long.toBinaryString(keyLongVal);
         longKey = longKey.substring(0, Long.toBinaryString(keyLongVal).length() + stringLength - 1);
 
-        this.treeObjectKey = stringOfExactLongString(longKey);
+        return stringOfExactLongString(longKey);
     }
 
+    /**
+     * Takes the String version of a long key, and returns the lettered version of it to be set to String key.
+     *
+     * @param longKey the String version of the long value
+     * @return the String of the treeObjectKey, used as a setter
+     */
     private String stringOfExactLongString(String longKey) {
         String stringKey = "";
         for (int j = 0; j < longKey.length(); j += 2) {
@@ -102,7 +101,7 @@ public class TreeObjectNoE {
     }
 
     /**
-     * @return the frequency of the TreeObject
+     * @return the frequency of the TreeObjectNoE
      */
     public int getFrequency() {
         return frequency;
@@ -115,14 +114,32 @@ public class TreeObjectNoE {
         this.frequency = newFrequency;
     }
 
-    public long setLongKey() {
+    /**
+     * Increment the frequency of this object by 1
+     */
+    public void incrementFrequency() {
+        frequency++;
+    }
+
+    /**
+     * Sets long key from a dna string value.
+     *
+     * @param treeObjectKey the string, contains dna value
+     * @return the long key that will be set for this TreeObjectNoE
+     */
+    public long setLongKey(String treeObjectKey) {
         if (keyLongVal == -1) {
             return -1;
         }
         return byteShift(treeObjectKey);
     }
 
-    public long getLongKey() {
+    /**
+     * Gets the long key.
+     *
+     * @return the long key
+     */
+    public long getKey() {
         return keyLongVal;
     }
 
@@ -135,45 +152,53 @@ public class TreeObjectNoE {
      */
     private long byteShift(String s) {
         long b = 0;
-        for (int i = 0; i < s.length(); i++) {
-            b += toByteVal(s.charAt(i));
-            if (i < s.length() - 1) {
-                b = b << 2;
-            }
+        long x = 0;
+
+        for (int i = s.length() - 1; i >= 0; i--) {
+            //grab letters starting at end of string and work down
+            x = toByteVal(s.charAt((s.length() - 1) - i));
+            //add a shifted over x to b
+            b += x << (2 * i);
         }
         return b;
     }
 
+    /**
+     * Converts a string char to a byte val if it's legit (a, c, g, t)
+     *
+     * @param c the char
+     * @return the corresponding long val
+     */
     private long toByteVal(char c) {
         if (c == 'a') {
-            return 00;
+            return 0;
         }
         if (c == 'c') {
-            return 01;
+            return 1;
         }
         if (c == 'g') {
-            return 10;
+            return 2;
         }
         if (c == 't') {
-            return 11;
+            return 3;
         }
         return -1;
     }
 
     /**
-     * Determines if the left TreeObject's b value is larger than the parameter
-     * "right" TreeObject's key value TreeObjects that are being inserted into a
+     * Determines if the left TreeObjectNoE's b value is larger than the parameter
+     * "right" TreeObjectNoE's key value TreeObjects that are being inserted into a
      * BTree go through this method. If left is equal or less than right, then they
      * go the same direction. The return value is exact in terms of the difference
      * of the two long values.
      *
-     * @param right the TreeObject being compared to the current TreeObject
+     * @param right the TreeObjectNoE being compared to the current TreeObjectNoE
      * @return -1 if left is less than right, + 1 if left is larger than right, 0 if
      *         equal
      */
     public int compare(TreeObjectNoE right) {
-        long leftK = this.getLongKey();// for easier code explanation in documentation
-        long rightK = right.getLongKey();
+        long leftK = this.getKey();// for easier code explanation in documentation
+        long rightK = right.getKey();
         if (leftK < rightK) {
             return -1;
         }
@@ -184,19 +209,12 @@ public class TreeObjectNoE {
     }
 
     /**
-     * A String form of the TreeObject's "lettered" key and frequency, formatted for
-     * dump files.
+     * A String form of the TreeObjectNoE's long value.
      *
-     * @return a String representation of a TreeObject
+     * @return a String representation of a TreeObjectNoE
      */
     public String toString() {
-        if (getLongKey() == -1 || this.treeObjectKey.equals(null)) {
-            return "null";
-        }
-        if (treeObjectKey == "") {
-            return keyLongVal + ": " + frequency;
-        }
-        return treeObjectKey + ": " + frequency;
+        return Long.toString(keyLongVal);
     }
 
-}
+}// line 245
