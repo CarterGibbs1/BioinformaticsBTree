@@ -100,19 +100,18 @@ public class BTree
 			numNodes += 2;
 			height++;
 		}
-//		currentNode = BReadWrite.readBNode(currentNode.getElementLocation(toInsert));
 
 		// get to appropriate leaf BNode
 		while (!currentNode.isLeaf()) {
 			
-			// if the object to insert is in currentNode, exit
+			//get correct child
 			nextNode = BReadWrite.readBNode(currentNode.getElementLocation(toInsert));
+			
+			// if the object to insert is in currentNode, exit
 			if (nextNode.getAddress() == currentNode.getAddress()) {
 				currentNode.incrementElement(toInsert);
 				return;
 			}
-//			//else read the child
-//			currentNode = BReadWrite.readBNode(nextNode);
 
 			// if the nextNode is full, split it
 			if (nextNode.isFull()) {
@@ -121,7 +120,7 @@ public class BTree
 				nextNode = BReadWrite.readBNode(currentNode.getElementLocation(toInsert));
 			}
 			
-			//else move to the child
+			//move on to the child
 			currentNode = nextNode;
 		}
 

@@ -250,34 +250,25 @@ public class BNode {
 	}
 	
 	/**
+	 * Split the given node into two, or three if it's a root.
 	 * <p>
 	 * WRITE: This method writes this changed BNodes to the RAF
 	 * 
-	 * @return 
+	 * @param parent The parent of the BNode you're splitting, null if
+	 *               this is the root
+	 * 
+	 * @return The address of the parent
 	 * 
 	 * @throws IOException Reading/Writing to RAF may throw exception
 	 */
 	public long split(BNode parent) throws IOException {
-		//==== for better understanding when coming back to look at this method, I'm going to ====
-		//==== create an example split and show how it changes through comments:              ====
-		//Keys     -  a b c d e f g
-		//Pointers - 0 1 2 3 4 5 6 7
 		
-////		int originalN = n;
-//		BNode parentNode; //TODO: parent can be kept by BTree and passed in for performance increase
-//		
-		
-		//remove key and two pointers right of middle and insert into new BNode 'splitRight':
-		//Keys     -  a b c d f g    |  e
-		//Pointers - 0 1 2 3   6 7   | 4 5
+		//create the new node that'll be to the right of this node
 //		BNode splitRight = new BNode(keys.remove(keys.size()/2 + 1), BReadWrite.getNextAddress(), parent, children.remove(children.size()/2), children.remove(children.size()/2 + 1));
 		BNode splitRight = new BNode(keys[n/2 + 1], BReadWrite.getNextAddress(), this.parent, children[(n + 1)/2], children[(n + 1)/2 + 1]);
 		n--;
 		
-		//starting just to the right of the middle of this BNode, continuously remove the pointers and keys
-		//at that position and insert them into splitRight:
-		//Keys     -  a b c d  |  e f g
-		//Pointers - 0 1 2 3   | 4 5 6 7
+		//move keys over to new right node
 //		while((keys.size() - 1) != originalN/2) {
 //			splitRight.insertNoWrite(keys.remove(originalN/2 + 1), children.remove(originalN/2 + 1));
 //		}
@@ -291,16 +282,9 @@ public class BNode {
 //			splitRight.insertNoWrite(keys[keys.length/2 + 1], children[keys.length/2 + 1]);
 //			n--;
 //		}
-//		
-		//lastly, remove last node (original middle) from this and insert into parent with
-		//a pointer to splitRight
-		//Parent   -    .. x x d x x ..
-		//                    / \
-		//Keys     -  a b c    |  e f g
-		//Pointers - 0 1 2 3   | 4 5 6 7
 		
 		//if this is the ROOT, create new parent/root to insert into
-		//else read the parent and insert into
+		//insert into the parent
 //		if(isRoot()) {
 //			//                                           Already new node 'splitRight' at getNextAddress, so
 //			//                                           have to compensate with additional offset getDiskSize
@@ -312,8 +296,8 @@ public class BNode {
 //			parentNode.insertNoWrite(keys.removeLast(), splitRight.getAddress());
 //		}
 		if(isRoot()) {
-			//                                           Already new node 'splitRight' at getNextAddress, so
-			//                                           have to compensate with additional offset getDiskSize
+			//                               Already new node 'splitRight' at getNextAddress, so
+			//                               have to compensate with additional offset getDiskSize
 			parent = new BNode(keys[n - 1], BReadWrite.getNextAddress() + BNode.getDiskSize(), -1, address, splitRight.getAddress());
 			this.parent = splitRight.parent = parent.getAddress();
 		}
@@ -323,13 +307,6 @@ public class BNode {
 		}
 		n--;
 		
-		//if the split is happening on a non-leaf, reassign splitRight's children's parents
-		//TODO: I think this is very inefficient, but it's the best I could come up with right now =====================================================
-//		if(!isLeaf()) {
-//			BReadWrite.reassignParents(splitRight);
-//		}
-		
-		//write changed BNodes to RAF
 		BReadWrite.writeBNode(splitRight);
 		BReadWrite.writeBNode(this);
 		BReadWrite.writeBNode(parent);
