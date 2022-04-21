@@ -90,34 +90,39 @@ public class BTree
      */
     public void insert(TreeObject toInsert) throws IOException {
 		BNode currentNode = BReadWrite.readBNode(root);
-		long nextNode;
+		BNode nextNode;
 		
 
 		// if currentNode(root) is full, split it
 		if (currentNode.isFull()) {
-			root = currentNode.split();
+			root = currentNode.split(null);
 			currentNode = BReadWrite.readBNode(root);
 			numNodes += 2;
 			height++;
 		}
+//		currentNode = BReadWrite.readBNode(currentNode.getElementLocation(toInsert));
 
 		// get to appropriate leaf BNode
 		while (!currentNode.isLeaf()) {
 			
 			// if the object to insert is in currentNode, exit
-			nextNode = currentNode.getElementLocation(toInsert);
-			if (nextNode == currentNode.getAddress()) {
+			nextNode = BReadWrite.readBNode(currentNode.getElementLocation(toInsert));
+			if (nextNode.getAddress() == currentNode.getAddress()) {
 				currentNode.incrementElement(toInsert);
 				return;
 			}
-			//else read the child
-			currentNode = BReadWrite.readBNode(nextNode);
+//			//else read the child
+//			currentNode = BReadWrite.readBNode(nextNode);
 
-			// if the currentNode is full, split it and start again at parent
-			if (currentNode.isFull()) {
-				currentNode = BReadWrite.readBNode(currentNode.split());
+			// if the nextNode is full, split it
+			if (nextNode.isFull()) {
+				nextNode.split(currentNode);
 				numNodes++;
+				nextNode = BReadWrite.readBNode(currentNode.getElementLocation(toInsert));
 			}
+			
+			//else move to the child
+			currentNode = nextNode;
 		}
 
 		// once at leaf, insert key if it's not in the BNode already

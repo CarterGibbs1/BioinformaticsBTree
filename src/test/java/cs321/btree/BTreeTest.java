@@ -452,7 +452,7 @@ public class BTreeTest {
 			}
 
 			// perform split and read the returned address (the new parent/root)
-			readParent = BReadWrite.readBNode(memoryNode.split());
+			readParent = BReadWrite.readBNode(memoryNode.split(null));
 			// read the left and right children from parentNode
 			readNode = BReadWrite.readBNode(memoryNode.getAddress());
 //			readRight = BReadWrite.readBNode(readParent.getChildren().get(1));
@@ -519,7 +519,7 @@ public class BTreeTest {
 				BNode currentNode = null;
 				BReadWrite.writeBNode(new BNode(insertedSequences.get(0), root));
 				int numNodes = 1;
-				long nextNode;
+				BNode nextNode;
 
 				// debugging variables
 				ArrayList<BNode> x = new ArrayList<BNode>();
@@ -534,7 +534,7 @@ public class BTreeTest {
 
 					// if currentNode(root) is full, split it
 					if (currentNode.isFull()) {
-						root = currentNode.split();
+						root = currentNode.split(null);
 						currentNode = BReadWrite.readBNode(root);
 						numNodes += 2;
 						y++;
@@ -543,20 +543,22 @@ public class BTreeTest {
 					// get to appropriate leaf BNode
 					while (!currentNode.isLeaf()) {
 						// if the object to insert is in currentNode, break and insert it
-						nextNode = currentNode.getElementLocation(insertedSequences.get(i));
-						if (nextNode == currentNode.getAddress()) {
+						nextNode = BReadWrite.readBNode(currentNode.getElementLocation(insertedSequences.get(i)));
+						if (nextNode.getAddress() == currentNode.getAddress()) {
 							continue insertLoop;
 						}
-						currentNode = BReadWrite.readBNode(nextNode);
+						
 
 						x.add(currentNode);
 
 						// if the currentNode is full, split it
-						if (currentNode.isFull()) {
-							currentNode = BReadWrite.readBNode(currentNode.split());
+						if (nextNode.isFull()) {
+							currentNode = BReadWrite.readBNode(nextNode.split(currentNode));
 							numNodes++;
 							y++;
 						}
+						
+						currentNode = nextNode;
 					}
 
 					// once at LEAF, insert key

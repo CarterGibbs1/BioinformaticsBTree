@@ -250,34 +250,28 @@ public class BNode {
 	}
 	
 	/**
-	 * Splits the current BNode into two new BNodes, removing and
-	 * inserting the middle object and a pointer to the new right
-	 * BNode into the parent. The left BNode (this BNode) will
-	 * contain everything to the left of the removed object and
-	 * the right BNode (new BNode) will be contain everything to
-	 * the right. Can only be run when the list is full.
 	 * <p>
 	 * WRITE: This method writes this changed BNodes to the RAF
 	 * 
-	 * @return the parent of the two BNodes
+	 * @return 
 	 * 
 	 * @throws IOException Reading/Writing to RAF may throw exception
 	 */
-	public long split() throws IOException {
+	public long split(BNode parent) throws IOException {
 		//==== for better understanding when coming back to look at this method, I'm going to ====
 		//==== create an example split and show how it changes through comments:              ====
 		//Keys     -  a b c d e f g
 		//Pointers - 0 1 2 3 4 5 6 7
 		
-//		int originalN = n;
-		BNode parentNode; //TODO: parent can be kept by BTree and passed in for performance increase
-		
+////		int originalN = n;
+//		BNode parentNode; //TODO: parent can be kept by BTree and passed in for performance increase
+//		
 		
 		//remove key and two pointers right of middle and insert into new BNode 'splitRight':
 		//Keys     -  a b c d f g    |  e
 		//Pointers - 0 1 2 3   6 7   | 4 5
 //		BNode splitRight = new BNode(keys.remove(keys.size()/2 + 1), BReadWrite.getNextAddress(), parent, children.remove(children.size()/2), children.remove(children.size()/2 + 1));
-		BNode splitRight = new BNode(keys[n/2 + 1], BReadWrite.getNextAddress(), parent, children[(n + 1)/2], children[(n + 1)/2 + 1]);
+		BNode splitRight = new BNode(keys[n/2 + 1], BReadWrite.getNextAddress(), this.parent, children[(n + 1)/2], children[(n + 1)/2 + 1]);
 		n--;
 		
 		//starting just to the right of the middle of this BNode, continuously remove the pointers and keys
@@ -320,28 +314,28 @@ public class BNode {
 		if(isRoot()) {
 			//                                           Already new node 'splitRight' at getNextAddress, so
 			//                                           have to compensate with additional offset getDiskSize
-			parentNode = new BNode(keys[n - 1], BReadWrite.getNextAddress() + BNode.getDiskSize(), -1, address, splitRight.getAddress());
-			this.parent = splitRight.parent = parentNode.getAddress();
+			parent = new BNode(keys[n - 1], BReadWrite.getNextAddress() + BNode.getDiskSize(), -1, address, splitRight.getAddress());
+			this.parent = splitRight.parent = parent.getAddress();
 		}
 		else {
-			parentNode = BReadWrite.readBNode(parent); //TODO: see other parentNode todo, prevent read here
-			parentNode.insertNoWrite(keys[n - 1], splitRight.getAddress());
+//			parentNode = BReadWrite.readBNode(parent); //TODO: see other parentNode todo, prevent read here
+			parent.insertNoWrite(keys[n - 1], splitRight.getAddress());
 		}
 		n--;
 		
 		//if the split is happening on a non-leaf, reassign splitRight's children's parents
 		//TODO: I think this is very inefficient, but it's the best I could come up with right now =====================================================
-		if(!isLeaf()) {
-			BReadWrite.reassignParents(splitRight);
-		}
+//		if(!isLeaf()) {
+//			BReadWrite.reassignParents(splitRight);
+//		}
 		
 		//write changed BNodes to RAF
 		BReadWrite.writeBNode(splitRight);
 		BReadWrite.writeBNode(this);
-		BReadWrite.writeBNode(parentNode);
+		BReadWrite.writeBNode(parent);
 		
 		
-		return parent;
+		return parent.getAddress();
 	}
 	
 	//=================================================================================================================
