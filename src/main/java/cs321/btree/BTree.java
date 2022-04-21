@@ -299,4 +299,49 @@ public class BTree
     static public int getDiskSize() {
     	return Integer.BYTES + Short.BYTES + Long.BYTES + Integer.BYTES + Short.BYTES;
     }
+    
+    
+    /**
+     * 
+     * 
+     * @author  Mesa Greear
+     * @version Spring 2022
+     */
+    private class BCache{
+    	
+    	private int size;
+    	private LinkedList<BNode> nodes; //ArrayList?
+    	
+    	/**
+    	 * Constructor: 
+    	 * 
+    	 * @param size
+    	 */
+    	BCache(int size){
+    		this.size = size;
+    		nodes = new LinkedList<BNode>();
+    	}
+    	
+    	/**
+    	 * Get the BNode in the cache with the same address as the
+    	 * given address.
+    	 * 
+    	 * @param address The BNode location in the RAF
+    	 * 
+    	 * @return BNode with same address if it's in the Cache, null
+    	 *         otherwise.
+    	 */
+		public BNode searchBNode(long address){
+    		//find BNode via loop
+    		for(int i = 0; i < nodes.size(); i++) {
+    			if(nodes.get(i).getAddress() == address) {
+    				return nodes.get(i);
+    			}
+    		}
+    		
+    		//if not in cache return null
+    		return null;
+    	}
+    	
+    }
 }
