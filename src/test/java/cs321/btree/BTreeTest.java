@@ -6,6 +6,8 @@ import org.junit.runners.MethodSorters;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
@@ -507,7 +509,7 @@ public class BTreeTest {
 				// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
 				// are done in this order
 				BReadWrite.setRAF(TESTS_FOLDER + testName + k, true);
-				BNode.setDegree(getRand(3, 7));
+				BNode.setDegree(getRand(2, 25));
 				BReadWrite.setBuffer(BNode.getDiskSize());
 
 				// create a rudimentary BTree to insert into while counting the total BNode
@@ -614,7 +616,7 @@ public class BTreeTest {
 				// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
 				// are done in this order
 				BReadWrite.setRAF(TESTS_FOLDER + testName + k, true);
-				int degree = getRand(3, 7);
+				int degree = getRand(3, 30);
 				BNode.setDegree(degree);
 				BReadWrite.setBuffer(BNode.getDiskSize());
 				
@@ -663,11 +665,11 @@ public class BTreeTest {
 		try {
 			
 			for (int k = 0; k < run_BTree_RAF_Search; k++) {// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
-				
+//				System.out.println(k);
 				// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
 				// are done in this order
 				BReadWrite.setRAF(TESTS_FOLDER + testName + k, true);
-				int degree = getRand(3, 7);
+				int degree = getRand(5, 70);
 				BNode.setDegree(degree);
 				BReadWrite.setBuffer(BNode.getDiskSize());
 				
@@ -714,6 +716,67 @@ public class BTreeTest {
 		} catch (Throwable e) {
 			ex = e;
 			progressAndExceptionCheck(run_BTree_RAF_Search);
+		}
+	}
+	
+	/**
+	 * Insert a random number of sequences into a BTree and then print it's dump to
+	 * a file.
+	 * <p>
+	 * NOTE: This test will always pass if no exception is thrown. The user must inspect
+	 * the dump file to ensure accuracy.
+	 * 
+	 * @throws Throwable
+	 */
+	@Test
+	public void BTree_RAF_Dump() throws Throwable {
+		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
+		try {
+			
+			// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
+			// are done in this order
+			BReadWrite.setRAF(TESTS_FOLDER + testName, true);
+			int degree = getRand(2, 50);
+			BNode.setDegree(degree);
+			BReadWrite.setBuffer(BNode.getDiskSize());
+			
+			// generate random sequences
+			ArrayList<String> inputSequences = generateRandomSequences(20000 / 5, 30000 / 5, 5, 30);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+			TreeObject.setSequenceLength(inputSequences.get(0).length());
+			
+			//debugging loop
+			int x = 0;
+			for (int i = 1; i < inputSequences.size(); i++) {
+				if(new TreeObject(inputSequences.get(x), 1).compare(new TreeObject(inputSequences.get(i), 1)) > 0) {
+					x = i;
+				}
+			}
+			String y = inputSequences.get(x);
+
+			// create BTree
+			BTree memoryTree = new BTree(new TreeObject(inputSequences.get(0), 1), degree, 5);
+
+			// insert all sequences
+			for (int i = 1; i < inputSequences.size(); i++) {
+				memoryTree.insert(new TreeObject(inputSequences.get(i), 1));
+			}
+			
+			//write dump to file
+			PrintStream console = System.out;
+			PrintStream file = new PrintStream( new File(TESTS_FOLDER + testName + "_dump"));
+			
+			System.setOut(file);
+			System.out.print("Not in the dump, just here for debugging\n"
+					+ "Smallest key should be:\n" + y + "   | SeqLength is " + inputSequences.get(0).length()
+					+ "\n=====================================\n");
+			System.out.println(memoryTree.dump());
+			System.setOut(console);
+			
+			
+			progress.increaseProgress();
+		} catch (Throwable e) {
+			progress.increaseProgress();
+			throw e;
 		}
 	}
 	
