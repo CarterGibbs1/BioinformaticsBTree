@@ -1,6 +1,5 @@
 package cs321.btree;
 
-
 /**
  * Used to create TestBNodeNoE objects that hold Generic Type (passed down by
  * the BTree they belong to) objects. Notable methods are insert(),
@@ -410,6 +409,22 @@ public class TestBNodeNoE {
             }
         }
         return s;
+    }
+
+    /**
+     * Get a String representation of this BNode in the form
+     * of a dump.
+     *
+     * @return String representation appropriate for dumps
+     */
+    public String dump() {
+        StringBuilder ret = new StringBuilder();
+
+        for(int i = 0; i < n; i++) {
+            ret.append(keys[i].toString() + "\n");
+        }
+
+        return ret.toString();
     }
 
     //=================================================================================================================

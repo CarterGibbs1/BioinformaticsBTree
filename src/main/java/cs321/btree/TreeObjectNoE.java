@@ -1,6 +1,5 @@
 package cs321.btree;
 
-
 /**
  * An object that is to be stored in a BTree. Specific placement in the BTree is
  * determined by previous TreeObjects and key values. A notable method is
@@ -127,7 +126,7 @@ public class TreeObjectNoE {
      * @param treeObjectKey the string, contains dna value
      * @return the long key that will be set for this TreeObjectNoE
      */
-    public long setLongKey(String treeObjectKey) {
+    private long setLongKey(String treeObjectKey) {
         if (keyLongVal == -1) {
             return -1;
         }
@@ -143,46 +142,36 @@ public class TreeObjectNoE {
         return keyLongVal;
     }
 
-    /**
-     * Creates a long value from a treeObjectKey in String form
-     *
-     * @param s the treeObjectKey in String form
-     * @return the corresponding long value according to 2-bit keys: a = 00, c = 01,
-     *         g = 10, t = 11
-     */
     private long byteShift(String s) {
         long b = 0;
-        long x = 0;
+        String str = "";
 
-        for (int i = s.length() - 1; i >= 0; i--) {
-            //grab letters starting at end of string and work down
-            x = toByteVal(s.charAt((s.length() - 1) - i));
-            //add a shifted over x to b
-            b += x << (2 * i);
+        for (int i = 0; i <= s.length() - 1; i++) {
+            str += toBinVal(s.charAt(i));
         }
-        return b;
+        return Long.parseLong(str, 2);
     }
 
     /**
-     * Converts a string char to a byte val if it's legit (a, c, g, t)
+     * Converts a string char to a String val if it's legit (a, c, g, t)
      *
      * @param c the char
      * @return the corresponding long val
      */
-    private long toByteVal(char c) {
+    private String toBinVal(char c) {
         if (c == 'a') {
-            return 0;
+            return "00";
         }
         if (c == 'c') {
-            return 1;
+            return "01";
         }
         if (c == 'g') {
-            return 2;
+            return "10";
         }
         if (c == 't') {
-            return 3;
+            return "11";
         }
-        return -1;
+        return "-1";
     }
 
     /**
@@ -208,13 +197,9 @@ public class TreeObjectNoE {
         return 0;
     }
 
-    /**
-     * A String form of the TreeObjectNoE's long value.
-     *
-     * @return a String representation of a TreeObjectNoE
-     */
+    @Override
     public String toString() {
-        return Long.toString(keyLongVal);
+        return keyLongVal + " : " + frequency;// changed later, now helpful for tests
     }
 
 }// line 245
