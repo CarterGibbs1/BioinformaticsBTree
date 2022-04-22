@@ -122,7 +122,7 @@ public class BReadWriteAlt {
             }
 
             for (int i = 1; i <= n; i++) {
-                buffer.putLong(keys[i].getLongKey());
+                buffer.putLong(keys[i].getKey());
                 buffer.putInt(keys[i].getFrequency());
                 if (!node.isLeaf()) {
                     buffer.putLong(children[i + 1]);
