@@ -1,6 +1,7 @@
 package cs321.btree;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
@@ -364,8 +365,9 @@ public class BTree
      */
     private class BCache{
     	
-    	private int size;
-    	private LinkedList<BNode> nodes; //ArrayList?
+    	private final int SIZE;
+    	
+    	private ArrayList<BNode> nodes;
     	
     	/**
     	 * Constructor: 
@@ -373,8 +375,8 @@ public class BTree
     	 * @param size
     	 */
     	BCache(int size){
-    		this.size = size;
-    		nodes = new LinkedList<BNode>();
+    		SIZE = size;
+    		nodes = new ArrayList<BNode>();
     	}
     	
     	/**
@@ -390,15 +392,20 @@ public class BTree
     		//find BNode via loop
     		for(int i = 0; i < nodes.size(); i++) {
     			if(nodes.get(i).getAddress() == address) {
+    				
     				//send BNode to front if found and return ===================================================
     				return nodes.get(i);
+    				
+    				//check if the cache is too full, if it is remove last node =================================
     			}
     		}
     		
     		
     		
     		//if not in cache read BNode from RAF, send to front, and return that BNode==========================
-    		return null;
+    		BNode newNode = null;
+    		
+    		return newNode;
     	}
     }
 }
