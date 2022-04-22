@@ -9,7 +9,6 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.Random;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -780,7 +779,78 @@ public class BTreeTest {
 		}
 	}
 	
-	
+//	/**
+//	 * Special test for seeing if LinkedLists or arrays are faster
+//	 * 
+//	 * @throws Throwable 
+//	 */
+//	@Test
+//	public void z_BTree_RAF_TimeLinkedListvsArray() throws Throwable {
+//		ex = null;
+//		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
+//		
+//		int tTime = 0;
+//		
+//		try {
+//			
+//			for (int k = 0; k < 150; k++) {// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+//				int cTime = (int)System.currentTimeMillis();
+//				
+////				System.out.println(k);
+//				// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
+//				// are done in this order
+//				BReadWrite.setRAF(TESTS_FOLDER + testName + k, true);
+//				int degree = getRand(5, 70);
+//				BNode.setDegree(degree);
+//				BReadWrite.setBuffer(BNode.getDiskSize());
+//				
+//				//generate random sequences
+//				ArrayList<String> inputSequences = generateRandomSequences(200000/5, 300000/5, 5, 15);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+//				
+//				//generate the same random sequence a random number of times and insert at random spots
+//				int numNewSeq = getRand(200, 1000);
+//				String newSeq = inputSequences.get(getRand(0, inputSequences.size()));
+//				for(;inputSequences.remove(newSeq););//remove all instances of newSeq
+//				for(int i = 0; i < numNewSeq; i++) {
+//					inputSequences.add(getRand(0, inputSequences.size()), newSeq);
+//				}
+//				
+//				//create BTree
+//				BTree memoryTree = new BTree(new TreeObject(inputSequences.get(0), 1), degree, 5);
+//				
+//				//debugging variable
+//				int y = 0;
+//				
+//				//insert all sequences
+//				for(int i = 1; i < inputSequences.size(); i++) {
+//					memoryTree.insert(new TreeObject(inputSequences.get(i), 1));
+//					if(inputSequences.get(i).equals(newSeq)) {
+//						y++;
+//					}
+//				}
+//				
+//				if(y != memoryTree.search(new TreeObject(newSeq, 0))) {
+//					y = y;
+//				}
+//				
+//				//write BTree and then read
+//				BReadWrite.writeBTree(memoryTree);
+//				BTree readTree = BReadWrite.readBTree();
+//				
+//				//check that both BTrees are sorted
+//				assert(memoryTree.search(new TreeObject(newSeq, 0)) == numNewSeq);
+//				assert(readTree.search(new TreeObject(newSeq, 0)) == numNewSeq);
+//				
+//				tTime += (System.currentTimeMillis() - cTime);
+//				System.out.println(tTime/(k + 1));
+//			}
+//			
+//			System.out.println("\n" + tTime/150);
+//			
+//		} catch (Throwable e) {
+//			throw e;
+//		}
+//	}
 	
 	
 	/**
