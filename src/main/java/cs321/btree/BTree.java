@@ -215,49 +215,46 @@ public class BTree
     }
     
     /**
+     * Recursively get a String in dump format of this BTree.
+     * <p>
+     * FORMAT (for each key) - key : frequency | "agcctgc : 18"
      * 
-     * @return
+     * @return String in dump format
+     * 
+	 * @throws IOException Reading/Writing to RAF may throw exception
      */
-    public String dump() {
+    public String dump() throws IOException {
     	return dump(root);
     }
     
     /**
+     * Recursively get a String in dump format of the subtree that starts
+     * at the given root.
+     * <p>
+     * FORMAT (for each key) - key : frequency | "agcctgc : 18"
      * 
-     * @param root
+     * @param rootAddress The address of the root of this subtree
      * 
-     * @return
+     * @return String in dump format
+     * 
+	 * @throws IOException Reading/Writing to RAF may throw exception
      */
-    public String dump(long root) {
+    public String dump(long rootAddress) throws IOException {
     	//base case, the given root is non-existent
-    	if(root == -1) {
+    	if(rootAddress == -1) {
     		return "";
     	}
     	
-    	
+    	//return string and read this BNode
     	StringBuilder ret = new StringBuilder();
-    	BNode currentNodet = BReadWrite.readBNode(root);
-    	BNode nextNode;
+    	BNode root = BReadWrite.readBNode(rootAddress);
     	
-    	
-    	//sorted will become false if any key is out of order
-    	//recursively check the first child of this root
-    	boolean sorted = isSorted(current.getChild(0), null, current.getKey(0));
-    	
-    	//recursively check middle children and check that all keys are in sorted order
-    	for(int i = 1; i < current.getN() - 1; i++) {
-    		sorted = sorted && isSorted(current.getChild(i), current.getKey(i - 1), current.getKey(i)) &&
-    		                   current.getKey(i - 1).compare(current.getKey(i)) < 0;
+    	//recursively construct the string
+    	ret.append(dump(root.getChild(0)));
+    	for(int i = 0; i < root.getN(); i++) {
+    		ret.append(root.getKey(i).toString() + "\n");
+    		ret.append(dump(root.getChild(i + 1)));
     	}
-    	
-    	//recursively check the last child and check that the first key is greater than left and the last key is less than right
-    	return sorted &&
-    	       isSorted(current.getChild(current.getN()), current.getKey(current.getN() - 1), null) &&
-    	       ((right == null || (current.getKey(current.getN() - 1).compare(right) <= 0)) &&
-    	       ( left == null  || (current.getKey(0)                 .compare(left)  >= 0)));
-    	
-    	
-    	
     	
     	return ret.toString();
     }

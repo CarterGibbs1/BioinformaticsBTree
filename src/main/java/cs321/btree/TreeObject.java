@@ -22,6 +22,8 @@ public class TreeObject {
     // corresponding 2-bit binary value: 00, 11, 01, 10
     private int frequency;
     private long keyLongVal;
+    
+    private static int sequenceLength;
 
     /**
      * Constructor: Creates a TreeObject with the specified String key. Also sets the value
@@ -222,10 +224,12 @@ public class TreeObject {
      */
     public String keyToString() {
         String ret = "";
+        long reducedKey = keyLongVal;
 
-        for (int i = frequency - 1; i >= 0; i--) {
+        for (int i = sequenceLength - 1; i >= 0; i--) {
             //read bits starting at end of key and work down
-        	ret += numToChar(keyLongVal >> (2 * i));
+        	ret += numToChar(reducedKey >> (2 * i));
+        	reducedKey -= (reducedKey >> (2 * i)) << (2 * i);
         }
         return ret;
     }
@@ -256,6 +260,20 @@ public class TreeObject {
     @Override
     public String toString() {
         return keyToString() + " : " + frequency;
+    }
+    
+    /**
+     * Set the shared static sequence length of all TreeObjects.
+     * 
+     * @param k How long read sequences will be
+     * 
+     * @throws IllegalArgumentException If given k is invalid (< 1 || > 31)
+     */
+    static public void setSequenceLength(int k) throws IllegalArgumentException{
+    	if(k < 1 || k > 31) {
+    		throw new IllegalArgumentException("Invalid sequence length set: " + k);
+    	}
+    	sequenceLength = k;
     }
 
 }// line 245
