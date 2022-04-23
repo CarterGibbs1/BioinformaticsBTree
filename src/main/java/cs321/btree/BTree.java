@@ -28,12 +28,30 @@ public class BTree
 	//                                               CONSTRUCTORS
 	//=================================================================================================================
     
-    //TODO:
+    /**
+     * Constructor: Instantiate BTree that has a root BNode that starts at
+     * the given address.
+     * 
+     * @param root      Address of the root of this BTree in the RAF
+	 * @param degree    (t) How many keys/objects (t - 1 to 2t - 1)
+	 *                  and children (t to 2t) BNodes can have
+     * @param frequency (k) How many letters are stored per key (< 32)
+     * @param numNodes  How many BNodes are in this BTree
+     * @param height    The height of the BTree (0, 1, 2, 3, ....)
+     * @param cacheSize The max BNodes the cache can hold, < 0 for no
+     *                  cache
+     */
     public BTree(long root, int degree, int frequency, int numNodes, int height, int cacheSize) {
     	//instantiate variables
     	DEGREE = degree;
     	FREQUENCY = (short)frequency;
-    	CACHE = new BCache(cacheSize);
+    	
+    	if(cacheSize > 0) {
+    		CACHE = new BCache(cacheSize);
+    	}
+    	else {
+    		CACHE = null;
+    	}
     	
     	this.numNodes = numNodes;
     	this.root = root;
@@ -42,7 +60,7 @@ public class BTree
     	//set statics
     	BNode.setDegree(degree);
     }
-    
+
     /**
      * Constructor: Create a BTree with the address of the root of an
      * already existing BTree in the RAF.
@@ -56,6 +74,27 @@ public class BTree
      */
     public BTree(long root, int degree, int frequency, int numNodes, int height) {
     	this(root, degree, frequency, numNodes, height, -1);
+    }
+    
+    /**
+     * Constructor: Create a new BTree with one initial object and BNode.
+     * Written to file after instantiation.
+     * 
+     * @param initialObject The first object this BTree will hold
+	 * @param degree        (t) How many keys/objects (t - 1 to 2t - 1)
+	 *                      and children (t to 2t) BNodes can have
+     * @param frequency     (k) How many letters are stored per key (< 32)
+     * @param cacheSize     The max BNodes the cache can hold, < 0 for no
+     *                      cache
+     * 
+	 * @throws IOException Reading/Writing to RAF may throw exception
+     */
+    public BTree(TreeObject initialObject, int degree, int frequency, int cacheSize) throws IOException {
+    	this(BTree.getDiskSize(), degree, frequency, 1, 0, cacheSize);
+    	
+    	//write new BTree and BNode to RAF
+    	BReadWrite.writeBTree(this);
+    	BReadWrite.writeBNode(new BNode(initialObject, getRoot()));
     }
     
     /**
@@ -90,14 +129,14 @@ public class BTree
 	 * @throws IOException Reading/Writing to RAF may throw exception
      */
     public void insert(TreeObject toInsert) throws IOException {
-		BNode currentNode = BReadWrite.readBNode(root);
+		BNode currentNode = cacheCheck(root);
 		BNode nextNode;
 		
 
 		// if currentNode(root) is full, split it
 		if (currentNode.isFull()) {
-			root = currentNode.split(null);
-			currentNode = BReadWrite.readBNode(root);
+			root = split(null, currentNode);
+			currentNode = cacheCheck(root);
 			numNodes += 2;
 			height++;
 		}
@@ -106,29 +145,39 @@ public class BTree
 		while (!currentNode.isLeaf()) {
 			
 			//get correct child
-			nextNode = BReadWrite.readBNode(currentNode.getElementLocation(toInsert));
+			nextNode = cacheCheck(currentNode.getElementLocation(toInsert));
 			
-			// if the object to insert is in currentNode, exit
+			
+			// if the object to insert is in currentNode, break to the end
 			if (nextNode.getAddress() == currentNode.getAddress()) {
-				currentNode.incrementElement(toInsert);
-				return;
+				break;
+			}
+			
+			if(currentNode.indexOf(toInsert) != -1) {
+				numNodes = numNodes;
 			}
 
 			// if the nextNode is full, split it
 			if (nextNode.isFull()) {
-				nextNode.split(currentNode);
+				split(currentNode, nextNode);
 				numNodes++;
-				nextNode = BReadWrite.readBNode(currentNode.getElementLocation(toInsert));
+				nextNode = cacheCheck(currentNode.getElementLocation(toInsert));
 			}
 			
 			//move on to the child
 			currentNode = nextNode;
 		}
 
+			if(currentNode.indexOf(toInsert) != -1) {
+				numNodes = numNodes;
+			}
+		
 		// once at leaf, insert key if it's not in the BNode already
 		if(!currentNode.incrementElement(toInsert)) {
 			currentNode.insert(toInsert);
 		}
+		cacheCheck(currentNode);
+		
     }
     
     /**
@@ -142,20 +191,19 @@ public class BTree
 	 * @throws IOException Reading/Writing to RAF may throw exception
      */
     public int search(TreeObject toFind) throws IOException {
-    	BNode currentNode = BReadWrite.readBNode(root);
-		long nextNode;
-		
+    	BNode currentNode = cacheCheck(root);
+		BNode nextNode;
 
-		// go until at lead node
+		// go until at leaf node
 		while (!currentNode.isLeaf()) {
 			
 			// if the object to find is in currentNode, find it's location and return it's frequency
-			nextNode = currentNode.getElementLocation(toFind);
-			if (nextNode == currentNode.getAddress()) {
+			nextNode = cacheCheck(currentNode.getElementLocation(toFind));
+			if (nextNode.getAddress() == currentNode.getAddress()) {
 				return currentNode.getKey(currentNode.indexOf(toFind)).getFrequency();
 			}
 			//else read the child
-			currentNode = BReadWrite.readBNode(nextNode);
+			currentNode = nextNode;
 		}
 
 		//check leaf node
@@ -164,6 +212,64 @@ public class BTree
 		}
 		return 0;
     }
+    
+    
+	/**
+	 * Split the given node into two, or three if it's a root. Adds
+	 * the new BNodes to the given BTree's BCache.
+	 * <p>
+	 * NO WRITE: This method does not write the changed BNodes to the RAF
+	 * 
+	 * @param parent The parent of the BNode you're splitting, null if
+	 *               this is the root
+	 * @param child....
+	 * 
+	 * @return The address of the parent BNode
+	 * 
+	 * @throws IOException Reading/Writing to RAF may throw exception
+	 */
+	public long split(BNode parent, BNode child) throws IOException {
+		
+		//get useful child data
+		int n = child.getN();
+		TreeObject[] keys = child.getKeys();
+		long[] children = child.getChildren();
+		
+		//create the new node that'll be to the right of this node
+		BNode splitRight = new BNode(keys[n/2 + 1], BReadWrite.getNextAddress(), parent != null ? parent.getAddress() : -1, children[(n + 1)/2], children[(n + 1)/2 + 1]);
+		n--;
+		
+		//move keys/children over to new right node
+		for(int i = keys.length/2 + 1; i < keys.length - 1; i++) {
+			splitRight.insert(keys[i + 1], children[i + 2]);
+			n--;
+		}
+		
+		if(!child.isLeaf()) {
+			n = n;
+		}
+
+		//if the child is the ROOT, create new parent/root to insert into
+		//else just insert into the parent
+		if(child.isRoot()) {
+			//                               Already new node 'splitRight' at getNextAddress, so
+			//                               have to compensate with additional offset getDiskSize
+			parent = new BNode(keys[n - 1], BReadWrite.getNextAddress() + BNode.getDiskSize(), -1, child.getAddress(), splitRight.getAddress());
+			child.setParent(parent.getAddress());
+			splitRight.setParent(parent.getAddress());
+		}
+		else {
+			parent.insert(keys[n - 1], splitRight.getAddress());
+		}
+		n--;
+		child.setN(n);
+		
+		cacheCheck(splitRight);
+		cacheCheck(child);
+		cacheCheck(parent);
+		
+		return parent.getAddress();
+	}
 
     
    	//=================================================================================================================
@@ -216,7 +322,8 @@ public class BTree
     }
     
     /**
-     * Recursively get a String in dump format of this BTree.
+     * Recursively get a String in In-Order-Traversal format of this
+     * BTree.
      * <p>
      * FORMAT (for each key) - key : frequency | "agcctgc : 18"
      * 
@@ -229,8 +336,8 @@ public class BTree
     }
     
     /**
-     * Recursively get a String in dump format of the subtree that starts
-     * at the given root.
+     * Recursively get a String in In-Order-Traversal format of the
+     * subtree that starts at the given root.
      * <p>
      * FORMAT (for each key) - key : frequency | "agcctgc : 18"
      * 
@@ -358,54 +465,12 @@ public class BTree
     
     
     /**
-     * 
+     * Cache that holds BNodes. Useful in reducing read/write
+     * time in a BTree.
      * 
      * @author  Mesa Greear
      * @version Spring 2022
      */
     private class BCache{
-    	
-    	private final int SIZE;
-    	
-    	private ArrayList<BNode> nodes;
-    	
-    	/**
-    	 * Constructor: 
-    	 * 
-    	 * @param size
-    	 */
-    	BCache(int size){
-    		SIZE = size;
-    		nodes = new ArrayList<BNode>();
-    	}
-    	
-    	/**
-    	 * Get the BNode in the cache with the same address as the
-    	 * given address.
-    	 * 
-    	 * @param address The BNode location in the RAF
-    	 * 
-    	 * @return BNode with same address if it's in the Cache, null
-    	 *         otherwise.
-    	 */
-		public BNode searchBNode(long address){
-    		//find BNode via loop
-    		for(int i = 0; i < nodes.size(); i++) {
-    			if(nodes.get(i).getAddress() == address) {
-    				
-    				//send BNode to front if found and return ===================================================
-    				return nodes.get(i);
-    				
-    				//check if the cache is too full, if it is remove last node =================================
-    			}
-    		}
-    		
-    		
-    		
-    		//if not in cache read BNode from RAF, send to front, and return that BNode==========================
-    		BNode newNode = null;
-    		
-    		return newNode;
-    	}
     }
 }

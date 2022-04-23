@@ -117,6 +117,7 @@ public class BNode {
 	 * @param key   TreeObject containing Object to insert
 	 * @param child Child related to key to insert 
 	 * @param write Whether to write to the RAF or not
+	 * @param tree  BTree this BNode belongs to write to cache
 	 * 
 	 * @throws IOException Writing to RAF may throw exception
 	 */
@@ -132,8 +133,11 @@ public class BNode {
 	 * keys     -  a b c d e f
 	 * children - # # # * # # #
 	 */
-	public void insert(TreeObject key, long child, boolean write) throws IOException {
+	public void insert(TreeObject key, long child) throws IOException {
 		//get to the index of the first k less than key
+		if(child != -1) {
+			child = child;
+		}
 		int i;
 		for(i = (n - 1); i >= 0 && key.compare(keys[i]) <= 0; i--) {
 			keys[i + 1] = keys[i];
@@ -144,39 +148,33 @@ public class BNode {
 		keys[i + 1] = key;
 		children[i + 2] = child;
 		n++;
-				
-		if(write) {
-			BReadWrite.writeBNode(this);
-		}
 	}
 	
 	/**
 	 * Insert the given key into this BNode. If the key is in this
 	 * BNode, then increment that key's frequency and always write.
-	 * <p>
-	 * WRITE: This method writes this changed BNode to the RAF
 	 * 
 	 * @param key TreeObject containing Object to insert
 	 * 
 	 * @throws IOException Writing to RAF may throw exception
 	 */
 	public void insert(TreeObject key) throws IOException {
-		insert(key, -1, true);
+		insert(key, -1);
 	}
-	
-	/**
-	 * Insert the given key into this BNode and insert the given child.
-	 * <p>
-	 * NO WRITE: This method does not write the changed BNode to the RAF
-	 * 
-	 * @param key   TreeObject containing Object to insert
-	 * @param child Child related to key to insert 
-	 * 
-	 * @throws IOException Writing to RAF may throw exception
-	 */
-	public void insertNoWrite(TreeObject key, long child) throws IOException {
-		insert(key, child, false);
-	}
+//	
+//	/**
+//	 * Insert the given key into this BNode and insert the given child.
+//	 * <p>
+//	 * NO WRITE: This method does not write the changed BNode to the RAF
+//	 * 
+//	 * @param key   TreeObject containing Object to insert
+//	 * @param child Child related to key to insert 
+//	 * 
+//	 * @throws IOException Writing to RAF may throw exception
+//	 */
+//	public void insertNoWrite(TreeObject key, long child) throws IOException {
+//		insert(key, child, false);
+//	}
 	
 	/**
 	 * Get the child of this BNode where the given key should be
@@ -219,68 +217,102 @@ public class BNode {
 		int index = indexOf(key);
 		if(index != -1) {
 			keys[index].incrementFrequency();
-			BReadWrite.writeBNode(this);
 			return true;
 		}
 		return false;
 	}
 	
-	/**
-	 * Split the given node into two, or three if it's a root.
-	 * <p>
-	 * WRITE: This method writes this changed BNodes to the RAF
-	 * 
-	 * @param parent The parent of the BNode you're splitting, null if
-	 *               this is the root
-	 * 
-	 * @return The address of the parent
-	 * 
-	 * @throws IOException Reading/Writing to RAF may throw exception
-	 */
-	public long split(BNode parent) throws IOException {		
-		//create the new node that'll be to the right of this node
-		BNode splitRight = new BNode(keys[n/2 + 1], BReadWrite.getNextAddress(), this.parent, children[(n + 1)/2], children[(n + 1)/2 + 1]);
-		n--;
-		
-		//move keys/children over to new right node
-		for(int i = keys.length/2 + 1; i < keys.length - 1; i++) {
-			splitRight.insertNoWrite(keys[i + 1], children[i + 2]);
-			n--;
-		}
-
-		//if this is the ROOT, create new parent/root to insert into
-		//else just insert into the parent
-		if(isRoot()) {
-			//                               Already new node 'splitRight' at getNextAddress, so
-			//                               have to compensate with additional offset getDiskSize
-			parent = new BNode(keys[n - 1], BReadWrite.getNextAddress() + BNode.getDiskSize(), -1, address, splitRight.getAddress());
-			this.parent = splitRight.parent = parent.getAddress();
-		}
-		else {
-			parent.insertNoWrite(keys[n - 1], splitRight.getAddress());
-		}
-		n--;
-		
-		BReadWrite.writeBNode(splitRight);
-		BReadWrite.writeBNode(this);
-		BReadWrite.writeBNode(parent);
-		
-		
-		return parent.getAddress();
-	}
+//	/**
+//	 * Split the given node into two, or three if it's a root. Does
+//	 * not add the new BNodes to the BTree's BCache
+//	 * <p>
+//	 * WRITE: This method writes this changed BNodes to the RAF
+//	 * 
+//	 * @param parent The parent of the BNode you're splitting, null if
+//	 *               this is the root
+//	 * 
+//	 * @return The address of the parent BNode
+//	 * 
+//	 * @throws IOException Reading/Writing to RAF may throw exception
+//	 */
+//	public long split(BNode parent) throws IOException {
+//		return split(parent, null);
+//	}
+//	
+//	/**
+//	 * Split the given node into two, or three if it's a root. Adds
+//	 * the new BNodes to the given BTree's BCache.
+//	 * <p>
+//	 * NO WRITE: This method does not write the changed BNodes to the RAF
+//	 * 
+//	 * @param parent The parent of the BNode you're splitting, null if
+//	 *               this is the root
+//	 * @param tree   BTree this BNode belongs to.
+//	 * 
+//	 * @return The address of the parent BNode
+//	 * 
+//	 * @throws IOException Reading/Writing to RAF may throw exception
+//	 */
+//	public long split(BNode parent, BTree tree) throws IOException {		
+//		//create the new node that'll be to the right of this node
+//		BNode splitRight = new BNode(keys[n/2 + 1], BReadWrite.getNextAddress(), this.parent, children[(n + 1)/2], children[(n + 1)/2 + 1]);
+//		n--;
+//		
+//		//move keys/children over to new right node
+//		for(int i = keys.length/2 + 1; i < keys.length - 1; i++) {
+//			splitRight.insertNoWrite(keys[i + 1], children[i + 2]);
+//			n--;
+//		}
+//
+//		//if this is the ROOT, create new parent/root to insert into
+//		//else just insert into the parent
+//		if(isRoot()) {
+//			//                               Already new node 'splitRight' at getNextAddress, so
+//			//                               have to compensate with additional offset getDiskSize
+//			parent = new BNode(keys[n - 1], BReadWrite.getNextAddress() + BNode.getDiskSize(), -1, address, splitRight.getAddress());
+//			this.parent = splitRight.parent = parent.getAddress();
+//		}
+//		else {
+//			parent.insertNoWrite(keys[n - 1], splitRight.getAddress());
+//		}
+//		n--;
+//		
+//		//if the given BTree is null, write the BNodes
+//		if(tree == null) {
+//			BReadWrite.writeBNode(splitRight);
+//			BReadWrite.writeBNode(this);
+//			BReadWrite.writeBNode(parent);
+//		}
+//		//else add the BNodes to the BCache
+//		else {
+//			tree.addToCache(splitRight);
+//			tree.addToCache(parent);
+//		}
+//		
+//		
+//		return parent.getAddress();
+//	}
 	
 	//=================================================================================================================
 	//                                           GET/SET/UTILITY METHODS
 	//=================================================================================================================
 	
 	/**
-	 * Get the number of objects (n) in this BNode represented by
-	 * keys.size().
+	 * Get the number of objects (n) in this BNode.
 	 * 
 	 * @return Number of objects in this BNode
 	 */
 	public int getN() {
 		return n;
+	}
+	
+	/**
+	 * Set the new N (number of objects) of this BNode.
+	 * 
+	 * @param newN New N of this BNode
+	 */
+	public void setN(int newN) {
+		n = newN;
 	}
 	
 	/**
@@ -320,12 +352,30 @@ public class BNode {
 	}
 	
 	/**
+	 * Get the key array of this BNode.
+	 * 
+	 * @return Array of TreeObjects in this BNode,
+	 */
+	public TreeObject[] getKeys() {
+		return keys;
+	}
+	
+	/**
 	 * Get this Bnode's child at the given index.
 	 * 
 	 * @return Address at index
 	 */
 	public long getChild(int index){
 		return children[index];
+	}
+	
+	/**
+	 * Get the child array of this BNode.
+	 * 
+	 * @return Array of child BNode addresses.
+	 */
+	public long[] getChildren() {
+		return children;
 	}
 	
 	/**

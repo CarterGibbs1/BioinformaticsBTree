@@ -171,7 +171,7 @@ public class BReadWrite {
 			// construct the return BNode and insert the other n - 1 keys and children
 			BNode retNode = new BNode(initialKey, address, parent, leftChild, rightChild);
 			for (int i = 1; i < n; i++) {
-				retNode.insertNoWrite(new TreeObject(buffer.getLong(), buffer.getInt()), buffer.getLong());
+				retNode.insert(new TreeObject(buffer.getLong(), buffer.getInt()), buffer.getLong());
 			}
 
 			return retNode;
@@ -229,6 +229,8 @@ public class BReadWrite {
 	 * degree to match the BTree degree. Automatically sets the buffer capacity to
 	 * the BNode disk size after running.
 	 * 
+	 * @param cache The cache size of this BTree, < 0 for no cache
+	 * 
 	 * @return BTree at beginning of RAF
 	 * 
 	 * @throws IOException              Reading RAF may throw exception
@@ -237,7 +239,7 @@ public class BReadWrite {
 	 * @throws IllegalStateException    If thrown, it's likely RAF or buffer have
 	 *                                  not been set
 	 */
-	static public BTree readBTree() throws IOException {
+	static public BTree readBTree(int cache) throws IOException {
 		try {
 			// set buffer capacity to match BTree size
 			setBuffer(BTree.getDiskSize());
@@ -256,7 +258,7 @@ public class BReadWrite {
 			short height = buffer.getShort();
 
 			// initialize BTree and return 
-			BTree retTree = new BTree(root, t, k, numNodes, height);
+			BTree retTree = new BTree(root, t, k, numNodes, height, cache);
 
 			// set static BNode degree
 			BNode.setDegree(retTree.getDegree());

@@ -20,7 +20,7 @@ public class BTreeTest {
 
 	// how many times to run certain Tests, some of these drastically increase run time
 	static private int[] timesToRun = new int[] {10, 20, 50, 100, 500, 1000, 5000};
-	static private int run_BNode_RAF_RAFAppropriateSize = timesToRun[0];
+//	static private int run_BNode_RAF_RAFAppropriateSize = timesToRun[0];
 	static private int run_BTree_RAF_IsSorted = timesToRun[0];
 	static private int run_BTree_RAF_Search = timesToRun[1];
 	//example
@@ -33,7 +33,6 @@ public class BTreeTest {
 	// create progress bar to show things are working, destroy on completion (doesn't
 	//really work on eclipse)
 	static private final ProgressBar progress = new ProgressBar(15,
-			run_BNode_RAF_RAFAppropriateSize +
 			run_BTree_RAF_IsSorted +
 			run_BTree_RAF_Search +
 			BTreeTest.class.getDeclaredMethods().length - 6 //don't count methods that aren't tests i.e. utility methods
@@ -410,6 +409,7 @@ public class BTreeTest {
 			}
 
 			// read BNode in RAF
+			BReadWrite.writeBNode(memoryNode);
 			BNode readNode = BReadWrite.readBNode(BTree.getDiskSize());
 
 			// see if memoryNode contains sequences in order in long value,
@@ -424,170 +424,170 @@ public class BTreeTest {
 		}
 	}
 
-	/**
-	 * Test that a split BNode correctly writes the new root and new child to the
-	 * RAF, maintaining the correct keys, children, and properties.
-	 * 
-	 * @throws Throwable 
-	 */
-	@Test
-	public void BNode_RAF_SplitWriteRead() throws Throwable {
-		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
-		try {
-			// 180 59 108 14 103 46 118
-			String inputSequences = "GTCA ATGT CGTA AATG CGCT AGTG CTCG".toLowerCase();
-			BNode readNode;
-			BNode readParent;
-			BNode readRight;
-
-			// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
-			// are done in this order
-			BReadWrite.setRAF(TESTS_FOLDER + testName, true);
-			BNode.setDegree(4);
-			BReadWrite.setBuffer(BNode.getDiskSize());
-
-			// instantiate and populate BNode with inputLetters
-			BNode memoryNode = new BNode(new TreeObject(inputSequences.substring(0, 4), 1), BTree.getDiskSize());
-			for (int i = 5; i < inputSequences.length(); i += 5) {
-				memoryNode.insert(new TreeObject(inputSequences.substring(i, i + 4), 1));
-			}
-
-			// perform split and read the returned address (the new parent/root)
-			readParent = BReadWrite.readBNode(memoryNode.split(null));
-			// read the left and right children from parentNode
-			readNode = BReadWrite.readBNode(memoryNode.getAddress());
-//			readRight = BReadWrite.readBNode(readParent.getChildren().get(1));
-			readRight = BReadWrite.readBNode(readParent.getChild(1));
-
-			// see if memoryNode contains sequences in order in long value,
-			assertEquals(memoryNode.toString(), "14 46 59");
-
-			// then check if the read nodes contain the correct elements
-			assertEquals(readNode.toString(), memoryNode.toString());
-			assertEquals(readParent.toString(), "103");
-			assertEquals(readRight.toString(), "108 118 180");
-
-			// check that the read nodes contain the correct properties
-			assert (memoryNode.isLeaf() && !memoryNode.isRoot() && !memoryNode.isFull() && memoryNode.getN() == 3);
-			assert (readNode.isLeaf() && !readNode.isRoot() && !readNode.isFull() && readNode.getN() == 3);
-			assert (readRight.isLeaf() && !readRight.isRoot() && !readRight.isFull() && readRight.getN() == 3);
-			assert (!readParent.isLeaf() && readParent.isRoot() && !readParent.isFull() && readParent.getN() == 1);
-			
-			progress.increaseProgress();
-		} catch (Throwable e) {
-			progress.increaseProgress();
-			throw e;
-		}
-	}
-
-	/**
-	 * Tests that after inserting a random number of sequences into a rudimentary
-	 * BTree of a random degree, the size of the RAF is close to the number of nodes
-	 * * BNode.getDiskSize. This indicates that methods such as insert and split
-	 * don't overwrite other BNodes.
-	 * <p>
-	 * RANDOM: This test is random and thus, the RAFs will change every run.
-	 * 
-	 * @throws Throwable 
-	 */
-	@Test
-	public void BNode_RAF_RAFAppropriateSize() throws Throwable {
-		currentProgress = progress.getProgress();
-		ex = null;
-		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
-
-		try {
-			for (int k = 0; k < run_BNode_RAF_RAFAppropriateSize; k++) {// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
-
-				ArrayList<String> inputSequences = generateRandomSequences(20000 / 3, 30000 / 3, 2, 32);// <--- THIS
-																										// WILL TAKE A
-																										// LONG TIME IF
-																										// REALLY BIG
-				ArrayList<TreeObject> insertedSequences = new ArrayList<TreeObject>();
-
-				// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
-				// are done in this order
-				BReadWrite.setRAF(TESTS_FOLDER + testName + k, true);
-				BNode.setDegree(getRand(2, 25));
-				BReadWrite.setBuffer(BNode.getDiskSize());
-
-				// create a rudimentary BTree to insert into while counting the total BNode
-				// amount
-				insertedSequences.add(new TreeObject(inputSequences.get(0), 1));
-				long root = BTree.getDiskSize();
-
-				// create and write initial BNode to RAF
-				BNode currentNode = null;
-				BReadWrite.writeBNode(new BNode(insertedSequences.get(0), root));
-				int numNodes = 1;
-				BNode nextNode;
-
-				// debugging variables
-				ArrayList<BNode> x = new ArrayList<BNode>();
-				int y = 0;
-
-				insertLoop: for (int i = 1; i < inputSequences.size(); i++) {
-					y = 0;
-					x.clear();
-					currentNode = BReadWrite.readBNode(root);
-					insertedSequences.add(new TreeObject(inputSequences.get(i), 1));
-					x.add(currentNode);
-
-					// if currentNode(root) is full, split it
-					if (currentNode.isFull()) {
-						root = currentNode.split(null);
-						currentNode = BReadWrite.readBNode(root);
-						numNodes += 2;
-						y++;
-					}
-
-					// get to appropriate leaf BNode
-					while (!currentNode.isLeaf()) {
-						// if the object to insert is in currentNode, break and insert it
-						nextNode = BReadWrite.readBNode(currentNode.getElementLocation(insertedSequences.get(i)));
-						if (nextNode.getAddress() == currentNode.getAddress()) {
-							continue insertLoop;
-						}
-						
-
-						x.add(currentNode);
-
-						// if the currentNode is full, split it
-						if (nextNode.isFull()) {
-							currentNode = BReadWrite.readBNode(nextNode.split(currentNode));
-							numNodes++;
-							y++;
-						}
-						
-						currentNode = nextNode;
-					}
-
-					// once at LEAF, insert key
-					currentNode.insert(insertedSequences.get(i));
-				}
-
-				// the RAF size should be the DiskSize of a numNodes amount of BNodes with a MOE
-				// of 1 BNode
-				assert (BReadWrite.getRAFSize() > ((numNodes - 1) * BNode.getDiskSize() + BTree.getDiskSize())
-						&& BReadWrite.getRAFSize() < ((numNodes + 1) * BNode.getDiskSize() + BTree.getDiskSize()));
-
-//		    	for(int i =0; i< currentNode.getN(); i++) {
-//		    		System.out.println(currentNode.getKey(i).toString());
-//		    	}
-//		    	currentNode = BReadWrite.readBNode(root);
-//		    	System.out.println();
-//		    	for(int i =0; i< currentNode.getN(); i++) {
-//		    		System.out.println(currentNode.getKey(i).toString());
-//		    	}
-//		    	System.out.println("\n\n");
-
-				progress.increaseProgress();
-			}
-		} catch (Throwable e) {
-			ex = e;
-			progressAndExceptionCheck(run_BTree_RAF_Search);
-		}
-	}
+//	/**
+//	 * Test that a split BNode correctly writes the new root and new child to the
+//	 * RAF, maintaining the correct keys, children, and properties.
+//	 * 
+//	 * @throws Throwable 
+//	 */
+//	@Test
+//	public void BNode_RAF_SplitWriteRead() throws Throwable {
+//		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
+//		try {
+//			// 180 59 108 14 103 46 118
+//			String inputSequences = "GTCA ATGT CGTA AATG CGCT AGTG CTCG".toLowerCase();
+//			BNode readNode;
+//			BNode readParent;
+//			BNode readRight;
+//
+//			// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
+//			// are done in this order
+//			BReadWrite.setRAF(TESTS_FOLDER + testName, true);
+//			BNode.setDegree(4);
+//			BReadWrite.setBuffer(BNode.getDiskSize());
+//
+//			// instantiate and populate BNode with inputLetters
+//			BNode memoryNode = new BNode(new TreeObject(inputSequences.substring(0, 4), 1), BTree.getDiskSize());
+//			for (int i = 5; i < inputSequences.length(); i += 5) {
+//				memoryNode.insert(new TreeObject(inputSequences.substring(i, i + 4), 1));
+//			}
+//
+//			// perform split and read the returned address (the new parent/root)
+//			readParent = BReadWrite.readBNode(memoryNode.split(null));
+//			// read the left and right children from parentNode
+//			readNode = BReadWrite.readBNode(memoryNode.getAddress());
+////			readRight = BReadWrite.readBNode(readParent.getChildren().get(1));
+//			readRight = BReadWrite.readBNode(readParent.getChild(1));
+//
+//			// see if memoryNode contains sequences in order in long value,
+//			assertEquals(memoryNode.toString(), "14 46 59");
+//
+//			// then check if the read nodes contain the correct elements
+//			assertEquals(readNode.toString(), memoryNode.toString());
+//			assertEquals(readParent.toString(), "103");
+//			assertEquals(readRight.toString(), "108 118 180");
+//
+//			// check that the read nodes contain the correct properties
+//			assert (memoryNode.isLeaf() && !memoryNode.isRoot() && !memoryNode.isFull() && memoryNode.getN() == 3);
+//			assert (readNode.isLeaf() && !readNode.isRoot() && !readNode.isFull() && readNode.getN() == 3);
+//			assert (readRight.isLeaf() && !readRight.isRoot() && !readRight.isFull() && readRight.getN() == 3);
+//			assert (!readParent.isLeaf() && readParent.isRoot() && !readParent.isFull() && readParent.getN() == 1);
+//			
+//			progress.increaseProgress();
+//		} catch (Throwable e) {
+//			progress.increaseProgress();
+//			throw e;
+//		}
+//	}
+//
+//	/**
+//	 * Tests that after inserting a random number of sequences into a rudimentary
+//	 * BTree of a random degree, the size of the RAF is close to the number of nodes
+//	 * * BNode.getDiskSize. This indicates that methods such as insert and split
+//	 * don't overwrite other BNodes.
+//	 * <p>
+//	 * RANDOM: This test is random and thus, the RAFs will change every run.
+//	 * 
+//	 * @throws Throwable 
+//	 */
+//	@Test
+//	public void BNode_RAF_RAFAppropriateSize() throws Throwable {
+//		currentProgress = progress.getProgress();
+//		ex = null;
+//		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
+//
+//		try {
+//			for (int k = 0; k < run_BNode_RAF_RAFAppropriateSize; k++) {// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+//
+//				ArrayList<String> inputSequences = generateRandomSequences(20000 / 3, 30000 / 3, 2, 32);// <--- THIS
+//																										// WILL TAKE A
+//																										// LONG TIME IF
+//																										// REALLY BIG
+//				ArrayList<TreeObject> insertedSequences = new ArrayList<TreeObject>();
+//
+//				// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
+//				// are done in this order
+//				BReadWrite.setRAF(TESTS_FOLDER + testName + k, true);
+//				BNode.setDegree(getRand(2, 25));
+//				BReadWrite.setBuffer(BNode.getDiskSize());
+//
+//				// create a rudimentary BTree to insert into while counting the total BNode
+//				// amount
+//				insertedSequences.add(new TreeObject(inputSequences.get(0), 1));
+//				long root = BTree.getDiskSize();
+//
+//				// create and write initial BNode to RAF
+//				BNode currentNode = null;
+//				BReadWrite.writeBNode(new BNode(insertedSequences.get(0), root));
+//				int numNodes = 1;
+//				BNode nextNode;
+//
+//				// debugging variables
+//				ArrayList<BNode> x = new ArrayList<BNode>();
+//				int y = 0;
+//
+//				insertLoop: for (int i = 1; i < inputSequences.size(); i++) {
+//					y = 0;
+//					x.clear();
+//					currentNode = BReadWrite.readBNode(root);
+//					insertedSequences.add(new TreeObject(inputSequences.get(i), 1));
+//					x.add(currentNode);
+//
+//					// if currentNode(root) is full, split it
+//					if (currentNode.isFull()) {
+//						root = currentNode.split(null);
+//						currentNode = BReadWrite.readBNode(root);
+//						numNodes += 2;
+//						y++;
+//					}
+//
+//					// get to appropriate leaf BNode
+//					while (!currentNode.isLeaf()) {
+//						// if the object to insert is in currentNode, break and insert it
+//						nextNode = BReadWrite.readBNode(currentNode.getElementLocation(insertedSequences.get(i)));
+//						if (nextNode.getAddress() == currentNode.getAddress()) {
+//							continue insertLoop;
+//						}
+//						
+//
+//						x.add(currentNode);
+//
+//						// if the currentNode is full, split it
+//						if (nextNode.isFull()) {
+//							currentNode = BReadWrite.readBNode(nextNode.split(currentNode));
+//							numNodes++;
+//							y++;
+//						}
+//						
+//						currentNode = nextNode;
+//					}
+//
+//					// once at LEAF, insert key
+//					currentNode.insert(insertedSequences.get(i));
+//				}
+//
+//				// the RAF size should be the DiskSize of a numNodes amount of BNodes with a MOE
+//				// of 1 BNode
+//				assert (BReadWrite.getRAFSize() > ((numNodes - 1) * BNode.getDiskSize() + BTree.getDiskSize())
+//						&& BReadWrite.getRAFSize() < ((numNodes + 1) * BNode.getDiskSize() + BTree.getDiskSize()));
+//
+////		    	for(int i =0; i< currentNode.getN(); i++) {
+////		    		System.out.println(currentNode.getKey(i).toString());
+////		    	}
+////		    	currentNode = BReadWrite.readBNode(root);
+////		    	System.out.println();
+////		    	for(int i =0; i< currentNode.getN(); i++) {
+////		    		System.out.println(currentNode.getKey(i).toString());
+////		    	}
+////		    	System.out.println("\n\n");
+//
+//				progress.increaseProgress();
+//			}
+//		} catch (Throwable e) {
+//			ex = e;
+//			progressAndExceptionCheck(run_BTree_RAF_Search);
+//		}
+//	}
 	
 	// =================================================================================================================
 	//                                           Testing BTrees using RAF
@@ -630,7 +630,7 @@ public class BTreeTest {
 				
 				//write BTree and then read
 				BReadWrite.writeBTree(memoryTree);
-				BTree readTree = BReadWrite.readBTree();
+				BTree readTree = BReadWrite.readBTree(-1);
 				
 				//check that both BTrees are sorted
 				assert(BTree.isSorted(memoryTree.getRoot()));
@@ -658,6 +658,9 @@ public class BTreeTest {
 	@Test
 	public void BTree_RAF_Search() throws Throwable {
 		ex = null;
+		BTree memoryTree = null;
+		String newSeq = null;
+		int numNewSeq = 0;
 		currentProgress = progress.getProgress();
 		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
 		
@@ -668,33 +671,41 @@ public class BTreeTest {
 				// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
 				// are done in this order
 				BReadWrite.setRAF(TESTS_FOLDER + testName + k, true);
-				int degree = getRand(5, 70);
+				int degree = getRand(5, 30);
 				BNode.setDegree(degree);
 				BReadWrite.setBuffer(BNode.getDiskSize());
 				
 				//generate random sequences
 				ArrayList<String> inputSequences = generateRandomSequences(20000/5, 30000/5, 5, 15);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				TreeObject.setSequenceLength(inputSequences.get(0).length());
 				
 				//generate the same random sequence a random number of times and insert at random spots
-				int numNewSeq = getRand(20, 100);
-				String newSeq = inputSequences.get(getRand(0, inputSequences.size()));
+				numNewSeq = getRand(20, 100);
+				newSeq = inputSequences.get(getRand(0, inputSequences.size()));
 				for(;inputSequences.remove(newSeq););//remove all instances of newSeq
 				for(int i = 0; i < numNewSeq; i++) {
 					inputSequences.add(getRand(0, inputSequences.size()), newSeq);
 				}
 				
 				//create BTree
-				BTree memoryTree = new BTree(new TreeObject(inputSequences.get(0), 1), degree, 5);
+				memoryTree = new BTree(new TreeObject(inputSequences.get(0), 1), degree, 5);
 				
 				//debugging variable
 				int y = 0;
 				
 				//insert all sequences
-				for(int i = 1; i < inputSequences.size(); i++) {
-					memoryTree.insert(new TreeObject(inputSequences.get(i), 1));
-					if(inputSequences.get(i).equals(newSeq)) {
+				for(int i = 1; i < inputSequences.size() - 1; i++) {
+					
+							if(inputSequences.get(i).equals(newSeq)) {
+						
+						if(y != memoryTree.search(new TreeObject(newSeq, 0))) {
+					memoryTree.search(new TreeObject(newSeq, 0));
+				}
 						y++;
-					}
+					}		
+					memoryTree.insert(new TreeObject(inputSequences.get(i), 1));
+					
+	
 				}
 				
 				if(y != memoryTree.search(new TreeObject(newSeq, 0))) {
@@ -703,7 +714,7 @@ public class BTreeTest {
 				
 				//write BTree and then read
 				BReadWrite.writeBTree(memoryTree);
-				BTree readTree = BReadWrite.readBTree();
+				BTree readTree = BReadWrite.readBTree(-1);
 				
 				//check that both BTrees are sorted
 				assert(memoryTree.search(new TreeObject(newSeq, 0)) == numNewSeq);
@@ -714,6 +725,13 @@ public class BTreeTest {
 			}
 		} catch (Throwable e) {
 			ex = e;
+			//write dump to file
+			PrintStream console = System.out;
+			PrintStream file = new PrintStream( new File(TESTS_FOLDER + testName + "_dump"));
+			
+			System.setOut(file);
+			System.out.println(newSeq + numNewSeq + "\n" + memoryTree.dump());
+			System.setOut(console);
 			progressAndExceptionCheck(run_BTree_RAF_Search);
 		}
 	}
@@ -740,7 +758,7 @@ public class BTreeTest {
 			BReadWrite.setBuffer(BNode.getDiskSize());
 			
 			// generate random sequences
-			ArrayList<String> inputSequences = generateRandomSequences(20000 / 5, 30000 / 5, 5, 30);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+			ArrayList<String> inputSequences = generateRandomSequences(20000 / 5, 30000 / 5, 3, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
 			TreeObject.setSequenceLength(inputSequences.get(0).length());
 			
 			//debugging loop
@@ -766,7 +784,7 @@ public class BTreeTest {
 			
 			System.setOut(file);
 			System.out.print("Not in the dump, just here for debugging\n"
-					+ "Smallest key should be:\n" + y + "   | SeqLength is " + inputSequences.get(0).length()
+					+ "Smallest key should be:\n" + y + "\t\t| SeqLength is " + inputSequences.get(0).length()
 					+ "\n=====================================\n");
 			System.out.println(memoryTree.dump());
 			System.setOut(console);
