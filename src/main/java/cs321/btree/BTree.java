@@ -228,7 +228,7 @@ public class BTree
 		long[] children = child.getChildren();
 		
 		//create the new node that'll be to the right of this node
-		BNode splitRight = new BNode(keys[n/2 + 1], BReadWrite.getNextAddress(), parent != null ? parent.getAddress() : -1, children[(n + 1)/2], children[(n + 1)/2 + 1]);
+		BNode splitRight = new BNode(keys[n/2 + 1], getNextAddress(), parent != null ? parent.getAddress() : -1, children[(n + 1)/2], children[(n + 1)/2 + 1]);
 		n--;
 		
 		//move keys/children over to new right node
@@ -246,11 +246,14 @@ public class BTree
 		if(child.isRoot()) {
 			//                               Already new node 'splitRight' at getNextAddress, so
 			//                               have to compensate with additional offset getDiskSize
-			parent = new BNode(keys[n - 1], BReadWrite.getNextAddress() + BNode.getDiskSize(), -1, child.getAddress(), splitRight.getAddress());
+			parent = new BNode(keys[n - 1], getNextAddress() + BNode.getDiskSize(), -1, child.getAddress(), splitRight.getAddress());
 			child.setParent(parent.getAddress());
 			splitRight.setParent(parent.getAddress());
 		}
 		else {
+			if(parent == null) {
+				n = n;
+			}
 			parent.insert(keys[n - 1], splitRight.getAddress());
 		}
 		n--;
@@ -311,6 +314,15 @@ public class BTree
      */
     public short getHeight() {
     	return height;
+    }
+    
+    /**
+     * Get the next available spot in the RAF to write a BNode to.
+     * 
+     * @return Address in RAF open to being written to
+     */
+    public long getNextAddress() {
+    	return (numNodes * BNode.getDiskSize()) + BTree.getDiskSize();
     }
     
     /**
@@ -496,7 +508,7 @@ public class BTree
 	 * <p>
 	 * If there is no BCache, always write the BNode to RAF.
 	 *
-	 * @param node BNode to add to BCache or write to RAF
+	 * @param node   BNode to add to BCache or write to RAF
 	 *
 	 * @throws IOException Reading/Writing to RAF may throw exception
 	 */
@@ -504,7 +516,7 @@ public class BTree
 		if (CACHE == null) {
 			BReadWrite.writeBNode(node);
 		} else {
-			CACHE.searchBNode(node.getAddress());
+			CACHE.searchBNode(node.getAddress(), node);
 		}
 	}
     
@@ -545,26 +557,50 @@ public class BTree
 		 * 
 		 * @throws IOException Reading/Writing to RAF may throw exception
 		 */
-		public BNode searchBNode(long address) throws IOException{
-    		//find BNode via loop
+    	public BNode searchBNode(long address) throws IOException{
+    		return searchBNode(address, null);
+    	}
+    	
+		/**
+		 * Get the BNode in the cache with the same address as the given address. If
+		 * it's not in the cache it is read from the RAF, added to the cache and
+		 * returned.
+		 *
+		 * @param address The BNode location in the RAF (-1 for ignore)
+		 * @param node    BNode to add to cache (null for ignore)
+		 *
+		 * @return BNode with same address
+		 * 
+		 * @throws IOException Reading/Writing to RAF may throw exception
+		 */
+		public BNode searchBNode(long address, BNode node) throws IOException{
 			BNode retNode;
-			for(int i = 0; i < nodes.size(); i++) {
-    			if (nodes.get(i).getAddress() == address) {
-    				//send BNode to front if found and return
+			// find BNode via loop
+			for (int i = 0; i < nodes.size(); i++) {
+				if (nodes.get(i).getAddress() == address) {
+					// send BNode to front if found and return
 					retNode = nodes.remove(i);
 					nodes.addFirst(retNode);
-    				return retNode;
-    			}
-    		}
-			//check if the cache is too full, if it is remove last node
-			if (nodes.size() == SIZE) {
-				nodes.removeLast();
+					return retNode;
+				}
 			}
-			//read BNode and add to front of cache
-			retNode = BReadWrite.readBNode(address);
-			nodes.addFirst(retNode);
-    		
-    		return retNode;
+
+			// if the given node is not null and not in cache, then add to front of cache
+			if (node != null) {
+				nodes.addFirst(node);
+				retNode = null;
+			}
+			//else read BNode and add to front of cache if not found
+			else {
+				retNode = BReadWrite.readBNode(address);
+				nodes.addFirst(retNode);
+			}
+
+			// check if the cache is too full, if it is remove last node and write it
+			if (nodes.size() >= SIZE) {
+				BReadWrite.writeBNode(nodes.removeLast());
+			}
+			return retNode;
     	}
 		
 		/**

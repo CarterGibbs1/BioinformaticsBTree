@@ -173,10 +173,10 @@ public class ProgressBar {
 	 */
 	public boolean increaseProgress() throws IllegalStateException {
 		//if bar is complete, throw exception
-		if(isComplete()) {
-			System.out.println(progress + " " + FINAL_PROGRESS);
-			throw new IllegalStateException("Attempted to use method 'increaseProgress' on a completed ProgressBar");
-		}
+//		if(isComplete()) {
+//			System.out.println(progress + " " + FINAL_PROGRESS);
+//			throw new IllegalStateException("Attempted to use method 'increaseProgress' on a completed ProgressBar");
+//		}
 		
 		progress++;
 
