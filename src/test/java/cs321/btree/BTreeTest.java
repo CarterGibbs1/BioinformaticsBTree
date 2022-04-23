@@ -649,7 +649,9 @@ public class BTreeTest {
 		int ncTime = 0;
 		int chTime = 0;
 		int cTime = 0;
+		int cache = 500;
 		
+		ArrayList<String> inputSequences = null;
 		try {
 			
 			for (int k = 0; k < run_BTree_RAF_Cache; k++) {// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
@@ -660,10 +662,9 @@ public class BTreeTest {
 				int degree = getRand(5, 30);
 				BNode.setDegree(degree);
 				BReadWrite.setBuffer(BNode.getDiskSize());
-				int cache = 100;
 				
 				// generate random sequences
-				ArrayList<String> inputSequences = generateRandomSequences(20000 / 5, 30000 / 5, 3, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				inputSequences = generateRandomSequences(200000, 200001, 3, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
 				
 				//create tree with and without cache
 				BTree noC = new BTree(new TreeObject(inputSequences.get(0), 1), degree, 5);
@@ -699,7 +700,10 @@ public class BTreeTest {
 			}
 			
 			testReporting = new PrintStream(resultFile);
-			testReporting.print(testName + ":\n Without Cache Avg - " + (ncTime/run_BTree_RAF_Cache) + "ms\n With Cach Avg - " + (chTime/run_BTree_RAF_Cache) + "ms\n");
+			testReporting.print(testName + ": cache-[" + cache + "] sequences-[" + inputSequences.size()/1000 +"k]\n"
+					+   "Without Cache Avg - " + (ncTime/run_BTree_RAF_Cache) + "ms"
+					+ "\nWith Cach Avg     - " + (chTime/run_BTree_RAF_Cache) + "ms"
+					+ "\n");
 			
 		} catch (Throwable e) {
 			ex = e;

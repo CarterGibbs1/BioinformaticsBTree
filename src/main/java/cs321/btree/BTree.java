@@ -531,8 +531,8 @@ public class BTree
     	
     	private final int SIZE;
 
-		private LinkedList<BNode> nodes;//TODO: Which is more efficient
-    	//private ArrayList<BNode> nodes;
+//		private LinkedList<BNode> nodes;//TODO: Which is more efficient
+    	private ArrayList<BNode> nodes;
     	
 		/**
 		 * Constructor: Instantiate a cache that can hold a max of size number of
@@ -542,8 +542,8 @@ public class BTree
 		 */
     	BCache(int size){
     		SIZE = size;
-    		//nodes = new ArrayList<BNode>();
-			nodes = new LinkedList<BNode>();
+    		nodes = new ArrayList<BNode>();
+//			nodes = new LinkedList<BNode>();
     	}
     	
 		/**
@@ -580,25 +580,29 @@ public class BTree
 				if (nodes.get(i).getAddress() == address) {
 					// send BNode to front if found and return
 					retNode = nodes.remove(i);
-					nodes.addFirst(retNode);
+//					nodes.addFirst(retNode);
+					nodes.add(0, retNode);
 					return retNode;
 				}
 			}
 
 			// if the given node is not null and not in cache, then add to front of cache
 			if (node != null) {
-				nodes.addFirst(node);
+//				nodes.addFirst(node);
+				nodes.add(0, node);
 				retNode = null;
 			}
 			//else read BNode and add to front of cache if not found
 			else {
 				retNode = BReadWrite.readBNode(address);
-				nodes.addFirst(retNode);
+//				nodes.addFirst(retNode);
+				nodes.add(0, retNode);
 			}
 
 			// check if the cache is too full, if it is remove last node and write it
 			if (nodes.size() >= SIZE) {
-				BReadWrite.writeBNode(nodes.removeLast());
+//				BReadWrite.writeBNode(nodes.removeLast());
+				BReadWrite.writeBNode(nodes.remove(SIZE - 1));
 			}
 			return retNode;
     	}
