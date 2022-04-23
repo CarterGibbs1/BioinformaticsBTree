@@ -31,7 +31,7 @@ public class BReadWriteAlt {
      * Not doing so will result in IllegalStateExceptions being thrown.
      *
      * @param fileName Name of file to read from and possibly create as well
-     * @param True to delete the file and replace it with a new one if it exists
+     * @param replace to delete the file and replace it with a new one if it exists
      *
      * @throws IOException Creating RAF may throw exception
      */
@@ -86,7 +86,6 @@ public class BReadWriteAlt {
      * 1 (long, long int, long, long int, long ....).
      *
      * @param node    BNode to write to RAF
-     * @param address Address to write this BNode to
      *
      * @throws IOException             Writing to RAF may throw exception
      * @throws BufferOverflowException Indicates buffer capacity was incorrect for

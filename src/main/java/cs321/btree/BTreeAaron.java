@@ -1,6 +1,8 @@
 package cs321.btree;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.util.LinkedList;
@@ -18,7 +20,7 @@ public class BTreeAaron {
 
     private TestBNodeNoE root;
     private int numNodes;
-    private final int FREQUENCY;
+    private final int FREQUENCY;// substring sequence
     private final int DEGREE;
     private final int NODESIZE = 1000;
     // private final int NODEBITSIZE = TestBNodeNoE.getDiskSize();
@@ -80,22 +82,53 @@ public class BTreeAaron {
             throws BufferOverflowException, IllegalStateException, IOException {
         int i = x.getN();// step 1
         if (x.isLeaf()) {// step 2
-            while (i >= 1 && k.compare(x.getKey(i)) < 0) {// step 3
+            if (x.getKeys()[i] != null && x.getKeys()[i].compare(k) == 0) {
+                x.getKeys()[i].incrementFrequency();
+                if (cacheSize == 0) {// step 8
+                    BReadWriteAlt.setBuffer(NODESIZE);
+                    BReadWriteAlt.writeBNode(x);
+                } else {
+                    diskWriteCheck(x);
+                }
+                return;
+            }
+            while (i >= 1 && k.compare(x.getKeys()[i]) < 0) {// step 3
                 x.setKey(i + 1, x.getKeys()[i]);// step 4
                 i--;// step 5
             }
+            /*********************/
+            if (x.getKeys()[i] != null && x.getKeys()[i].compare(k) == 0) {
+                x.getKeys()[i].incrementFrequency();
+                if (cacheSize == 0) {// step 8
+                    BReadWriteAlt.setBuffer(NODESIZE);
+                    BReadWriteAlt.writeBNode(x);
+                } else {
+                    diskWriteCheck(x);
+                }
+                return;
+            }
+            /**********************/
             x.setKey(i + 1, k);// step 6
             x.setN(x.getN() + 1);// step 7
-            if (cacheSize == 0) {
+            if (cacheSize == 0) {// step 8
                 BReadWriteAlt.setBuffer(NODESIZE);
                 BReadWriteAlt.writeBNode(x);
             } else {
                 diskWriteCheck(x);
             }
-
         } else {
-            while (i >= 1 && k.compare(x.getKey(i)) < 0) {// step 9
+            while (i >= 1 && k.compare(x.getKeys()[i]) < 0) {// step 9
                 i--;// step 10
+            }
+            if (x.getKeys()[i] != null && x.getKeys()[i].compare(k) == 0) {
+                x.getKeys()[i].incrementFrequency();
+                if (cacheSize == 0) {// step 8
+                    BReadWriteAlt.setBuffer(NODESIZE);
+                    BReadWriteAlt.writeBNode(x);
+                } else {
+                    diskWriteCheck(x);
+                }
+                return;
             }
             i++;// step 11
             TestBNodeNoE xCI = diskReadCheck(x.getChildren()[i]);
@@ -105,13 +138,35 @@ public class BTreeAaron {
             }
             if (xCI.getN() == 2 * DEGREE - 1) {// step 13
                 splitChild(x, i);// step 14
-                if (k.compare(x.getKey(i)) > 0) {// step 15
+                if (x.getKeys()[i] != null && x.getKeys()[i].compare(k) == 0) {
+                    x.getKeys()[i].incrementFrequency();
+                    if (cacheSize == 0) {// step 8
+                        BReadWriteAlt.setBuffer(NODESIZE);
+                        BReadWriteAlt.writeBNode(x);
+                    } else {
+                        diskWriteCheck(x);
+                    }
+                    return;
+                }
+                if (k.compare(x.getKeys()[i]) > 0) {// step 15
                     i++;// step 16
                 }
+                /************/
+                if (x.getKeys()[i] != null && x.getKeys()[i].compare(k) == 0) {
+                    x.getKeys()[i].incrementFrequency();
+                    if (cacheSize == 0) {// step 8
+                        BReadWriteAlt.setBuffer(NODESIZE);
+                        BReadWriteAlt.writeBNode(x);
+                    } else {
+                        diskWriteCheck(x);
+                    }
+                    return;
+                }
+                /************/
                 xCI = diskReadCheck(x.getChildren()[i]);
                 if (xCI == null) {
                     BReadWriteAlt.setBuffer(NODESIZE);
-                    xCI = BReadWriteAlt.readBNode(x.getChildren()[i]);// step 12
+                    xCI = BReadWriteAlt.readBNode(x.getChildren()[i]);
                 }
             }
             insertNonFull(xCI, k);// step 17
@@ -131,7 +186,7 @@ public class BTreeAaron {
         z.setLeaf(y.isLeaf());// step 2
         z.setN(DEGREE - 1);// step 3
         for (int j = 1; j <= DEGREE - 1; j++) {// step 4
-            z.setKey(j, y.getKey(j + DEGREE));// step 5
+            z.setKey(j, y.getKeys()[j + DEGREE]);// step 5
         }
         if (!z.isLeaf()) {// step 6
             for (int j = 1; j <= DEGREE; j++) {// step 7
@@ -143,10 +198,10 @@ public class BTreeAaron {
             x.setChild(j + 1, x.getChildren()[(j)]);// step 11
         }
         x.setChild(i + 1, z.getAddress());// step 12
-        for (int j = x.getN(); j >= i + 1; j--) {// step 13
-            x.setKey(j + 1, x.getKey(j));// step 14
+        for (int j = x.getN(); j >= i; j--) {// step 13
+            x.setKey(j + 1, x.getKeys()[j]);// step 14
         }
-        x.setKey(i, y.getKey(DEGREE));// step 15
+        x.setKey(i, y.getKeys()[DEGREE]);// step 15
         x.setN(x.getN() + 1);// step 16
         // saving x y and z
         // tests
@@ -228,7 +283,10 @@ public class BTreeAaron {
     }
 
     public String toString() {
-        return root.toString();
+        if (root != null) {
+            return root.toString();
+        }
+        return "";
     }
 
     public TestBNodeNoE getNodeAtIndex(int index) throws BufferUnderflowException, IllegalStateException, IOException {
@@ -309,6 +367,32 @@ public class BTreeAaron {
         }
     }
 
+    //possible dump method
+//	public void dump(String filename) throws FileNotFoundException {// calls in order on root
+//		PrintStream pS = new PrintStream(filename);
+//		PrintStream stdout = System.out;
+//		inOrderTraversal(root, pS);
+//		System.setOut(pS);
+//		System.setOut(stdout);
+//	}
+//
+//	private void inOrderTraversal(TestBNodeNoE n, PrintStream pS) {
+//		TreeObjectNoE[] keys = n.getKeys();
+//		if (n.isLeaf()) {
+//			for (int i = 0; i <= n.getN(); i++) {
+//				pS.append(keys[i].getStringKey() + ": " + keys[i].getFrequency());
+//			}
+//		} else {
+//			for (int i = 1; i <= n.getN(); i++) {
+//				TestBNodeNoE tN = new TestBNodeNoE(n.getChildren()[i]);
+//				inOrderTraversal(tN, pS);
+//				pS.append(keys[i].getStringKey());
+//			}
+//			TestBNodeNoE tNN = new TestBNodeNoE(n.getChildren()[n.getN() + 1]);
+//			inOrderTraversal(tNN, pS);
+//		}
+//	}
+
     /**
      * Recursively get a String in dump format of this BTree.
      * <p>
@@ -326,7 +410,7 @@ public class BTreeAaron {
      * Recursively get a String in dump format of the subtree that starts at the
      * given root.
      * <p>
-     * FORMAT (for each key) - key : frequency | "agcctgc : 18"
+     * FORMAT (for each key) - key : frequency | "agcctgc 18"
      *
      * @param rootAddress The address of the root of this subtree
      *
@@ -347,7 +431,7 @@ public class BTreeAaron {
         // recursively construct the string
         ret.append(dump(root.getChildren()[1]));
         for (int i = 1; i <= root.getN(); i++) {
-            ret.append(root.getKey(i).toString() + "\n");
+            ret.append(root.getKeys()[i].toString() + "\n");
             ret.append(dump(root.getChildren()[i + 1]));
         }
 

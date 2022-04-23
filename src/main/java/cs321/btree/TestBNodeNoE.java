@@ -1,5 +1,6 @@
 package cs321.btree;
 
+
 /**
  * Used to create TestBNodeNoE objects that hold Generic Type (passed down by
  * the BTree they belong to) objects. Notable methods are insert(),
@@ -66,9 +67,6 @@ public class TestBNodeNoE {
         keys = new TreeObjectNoE[(2 * degree) + 1];
         children = new long[2 * degree + 2];
         children[0] = -2;// distinguish from other values
-//        for (int i = 1; i < children.length; i++) {
-//        	children[i] = -1;
-//        }
         if (initialKey != null) {
             keys[1] = initialKey;
         }
@@ -279,6 +277,22 @@ public class TestBNodeNoE {
 //		return parent;
 //	}
 
+    /**
+     * Get a String representation of this BNode in the form
+     * of a dump.
+     *
+     * @return String representation appropriate for dumps
+     */
+    public String dump() {
+        StringBuilder ret = new StringBuilder();
+
+        for(int i = 0; i < n; i++) {
+            ret.append(keys[i].toString() + "\n");
+        }
+
+        return ret.toString();
+    }
+
     //=================================================================================================================
     //                                           GET/SET/UTILITY METHODS
     //=================================================================================================================
@@ -324,9 +338,9 @@ public class TestBNodeNoE {
         return keys;//copy maybe later for encapsulation
     }
 
-    public TreeObjectNoE getKey(int index) {
-        return keys[index];
-    }
+//    public TreeObjectNoE getKey(int index) {
+//        return keys[index];
+//    }
 
     public void setKey(int index, TreeObjectNoE newKey) {
         keys[index] = newKey;
@@ -409,22 +423,6 @@ public class TestBNodeNoE {
             }
         }
         return s;
-    }
-
-    /**
-     * Get a String representation of this BNode in the form
-     * of a dump.
-     *
-     * @return String representation appropriate for dumps
-     */
-    public String dump() {
-        StringBuilder ret = new StringBuilder();
-
-        for(int i = 0; i < n; i++) {
-            ret.append(keys[i].toString() + "\n");
-        }
-
-        return ret.toString();
     }
 
     //=================================================================================================================
