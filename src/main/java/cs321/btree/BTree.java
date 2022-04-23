@@ -129,18 +129,14 @@ public class BTree
 	 * @throws IOException Reading/Writing to RAF may throw exception
      */
     public void insert(TreeObject toInsert) throws IOException {
-		BNode currentNode = null;
-		if (CACHE != null) currentNode = CACHE.searchBNode(root);
-		if (currentNode == null) currentNode = BReadWrite.readBNode(root);
+		BNode currentNode = cacheCheck(root);
 		BNode nextNode = null;
 		
 
 		// if currentNode(root) is full, split it
 		if (currentNode.isFull()) {
-			root = currentNode.split(null);
-			currentNode = null;
-			if (CACHE != null) currentNode = CACHE.searchBNode(root); // THIS MAY NOT BE NECESSARY, could also throw bug
-			if (currentNode == null) currentNode = BReadWrite.readBNode(root);
+			root = split(null, currentNode);
+			currentNode = cacheCheck(root);
 			numNodes += 2;
 			height++;
 		}
@@ -148,36 +144,24 @@ public class BTree
 		// get to appropriate leaf BNode
 		while (!currentNode.isLeaf()) {
 			
-			//get correct child
-			if (CACHE != null) nextNode = CACHE.searchBNode(currentNode.getElementLocation(toInsert));
-			if (nextNode == null) nextNode = BReadWrite.readBNode(currentNode.getElementLocation(toInsert));
-			
+			//get correct child to go into
+			nextNode = cacheCheck(currentNode.getElementLocation(toInsert));
 			
 			// if the object to insert is in currentNode, break to the end
 			if (nextNode.getAddress() == currentNode.getAddress()) {
 				break;
-			}
-			
-			if(currentNode.indexOf(toInsert) != -1) {
-				numNodes = numNodes;
 			}
 
 			// if the nextNode is full, split it
 			if (nextNode.isFull()) {
 				split(currentNode, nextNode);
 				numNodes++;
-				nextNode = null;
-				if (CACHE != null) nextNode = CACHE.searchBNode(currentNode.getElementLocation(toInsert));
-				if (nextNode == null) nextNode = BReadWrite.readBNode(currentNode.getElementLocation(toInsert));
+				nextNode = cacheCheck(currentNode.getElementLocation(toInsert));
 			}
 			
 			//move on to the child
 			currentNode = nextNode;
 		}
-
-			if(currentNode.indexOf(toInsert) != -1) {
-				numNodes = numNodes;
-			}
 		
 		// once at leaf, insert key if it's not in the BNode already
 		if(!currentNode.incrementElement(toInsert)) {
@@ -198,10 +182,8 @@ public class BTree
 	 * @throws IOException Reading/Writing to RAF may throw exception
      */
     public int search(TreeObject toFind) throws IOException {
-		BNode currentNode = null;
-		if (CACHE != null) currentNode = CACHE.searchBNode(root);
-		if (currentNode == null) currentNode = BReadWrite.readBNode(root);
-		long nextNode;
+		BNode currentNode = cacheCheck(root);
+		BNode nextNode;
 		
 
 		// go until at leaf node
@@ -325,7 +307,7 @@ public class BTree
     /**
      * Get the height of this BTree.
      * 
-     * @return Thre height of this BTree
+     * @return The height of this BTree
      */
     public short getHeight() {
     	return height;
@@ -474,6 +456,58 @@ public class BTree
     }
     
     
+  	//=================================================================================================================
+	//                                                BCACHE FUNCTIONALITY
+	//================================================================================================================= 
+    
+    /**
+     * Empty the BCache and write all the stored BNodes to the RAF.
+     * 
+	 * @throws IOException Reading/Writing to RAF may throw exception
+     */
+    public void emptyBCache() throws IOException {
+    	if(CACHE != null) {
+    		CACHE.emptyCache();
+    	}
+    }
+    
+    /**
+	 * Check the cache for the given BNode address and return the BNode with the
+	 * correlating address either from the BCache or from the RAF.
+	 * <p>
+	 * If there is no BCache, read BNode from RAF always.
+	 *
+	 * @param address BNode address to search for
+	 *
+	 * @return Return BNode with given address, may have been read from RAF or
+	 *         returned from cache
+	 *
+	 * @throws IOException Reading/Writing to RAF may throw exception
+	 */
+	private BNode cacheCheck(long address) throws IOException {
+		if (CACHE == null) {
+			return BReadWrite.readBNode(address);
+		}
+		return CACHE.searchBNode(address);
+	}
+
+	/**
+	 * Check that a cache exists and if it does add the given BNode to it.
+	 * <p>
+	 * If there is no BCache, always write the BNode to RAF.
+	 *
+	 * @param node BNode to add to BCache or write to RAF
+	 *
+	 * @throws IOException Reading/Writing to RAF may throw exception
+	 */
+	private void cacheCheck(BNode node) throws IOException {
+		if (CACHE == null) {
+			BReadWrite.writeBNode(node);
+		} else {
+			CACHE.searchBNode(node.getAddress());
+		}
+	}
+    
     /**
      * Cache that holds BNodes. Useful in reducing read/write
      * time in a BTree.
@@ -485,50 +519,70 @@ public class BTree
     	
     	private final int SIZE;
 
-		private LinkedList<BNode> nodes;
+		private LinkedList<BNode> nodes;//TODO: Which is more efficient
     	//private ArrayList<BNode> nodes;
     	
-    	/**
-    	 * Constructor: 
-    	 * 
-    	 * @param size - max size of cache, to be stored in constant
-    	 */
+		/**
+		 * Constructor: Instantiate a cache that can hold a max of size number of
+		 * BNodes.
+		 *
+		 * @param size Max size of the cache, to be stored in a constant
+		 */
     	BCache(int size){
     		SIZE = size;
     		//nodes = new ArrayList<BNode>();
 			nodes = new LinkedList<BNode>();
     	}
     	
-    	/**
-    	 * Get the BNode in the cache with the same address as the
-    	 * given address.
-    	 * 
-    	 * @param address The BNode location in the RAF
-    	 * 
-    	 * @return BNode with same address if it's in the Cache, null
-    	 *         otherwise.
-    	 */
+		/**
+		 * Get the BNode in the cache with the same address as the given address. If
+		 * it's not in the cache it is read from the RAF, added to the cache and
+		 * returned.
+		 *
+		 * @param address The BNode location in the RAF
+		 *
+		 * @return BNode with same address
+		 * 
+		 * @throws IOException Reading/Writing to RAF may throw exception
+		 */
 		public BNode searchBNode(long address) throws IOException{
     		//find BNode via loop
 			BNode retNode;
 			for(int i = 0; i < nodes.size(); i++) {
     			if (nodes.get(i).getAddress() == address) {
+    				//send BNode to front if found and return
 					retNode = nodes.remove(i);
 					nodes.addFirst(retNode);
-    				//send BNode to front if found and return ===================================================
     				return retNode;
     			}
     		}
-			//check if the cache is too full, if it is remove last node =================================
+			//check if the cache is too full, if it is remove last node
 			if (nodes.size() == SIZE) {
 				nodes.removeLast();
 			}
+			//read BNode and add to front of cache
 			retNode = BReadWrite.readBNode(address);
-			nodes.addFirst(BReadWrite.readBNode(address));
+			nodes.addFirst(retNode);
     		
     		return retNode;
     	}
+		
+		/**
+		 * Remove all nodes from cache and write them to the RAF.
+		 *
+		 * @throws IOException Reading/Writing to RAF may throw exception
+		 */
+		public void emptyCache() throws IOException {
+			while (!nodes.isEmpty()) {
+				BReadWrite.writeBNode(nodes.remove(0));
+			}
+		}
 
+		/**
+		 * Get the max size of this BCache.
+		 * 
+		 * @return Max size of this BCache
+		 */
 		public int getMaxSize() {
 			return SIZE;
 		}
