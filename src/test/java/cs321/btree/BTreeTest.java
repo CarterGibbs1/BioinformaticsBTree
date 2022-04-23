@@ -664,7 +664,7 @@ public class BTreeTest {
 				BReadWrite.setBuffer(BNode.getDiskSize());
 				
 				// generate random sequences
-				inputSequences = generateRandomSequences(200000, 200001, 3, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				inputSequences = generateRandomSequences(20000/5, 30000/5, 3, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
 				
 				//create tree with and without cache
 				BTree noC = new BTree(new TreeObject(inputSequences.get(0), 1), degree, 5);
