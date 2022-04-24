@@ -7,6 +7,7 @@ import org.junit.runners.MethodSorters;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.nio.channels.ScatteringByteChannel;
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class BTreeTest {
 			run_BTree_RAF_IsSorted +
 			run_BTree_RAF_Search +
 			run_BTree_RAF_Cache +
-			BTreeTest.class.getDeclaredMethods().length - 6 //don't count methods that aren't tests i.e. utility methods
+			BTreeTest.class.getDeclaredMethods().length - 7 //don't count methods that aren't tests i.e. utility methods
 			);
 
 	// =================================================================================================================
@@ -78,6 +79,57 @@ public class BTreeTest {
 		
 		if(ex != null) {
 			throw ex;
+		}
+	}
+	
+	/**
+	 * Creates a dump of the given BTree and checks that all the given inputs are
+	 * in the correct order and that the frequency of the inputs are correct as well.
+	 * 
+	 * @param inputs The list of Strings that were inserted into the tree
+	 * @param tree   BTree to dump and check
+	 * 
+	 * @throws Throwable
+	 */
+	private static void checkDump(ArrayList<String> inputs, BTree tree) throws Throwable {
+		// write dump to file
+		PrintStream console = System.out;
+		File fileT = new File(TESTS_FOLDER + testName + "_dump.txt");
+		fileT.createNewFile();
+		PrintStream file = new PrintStream(fileT);
+
+		System.setOut(file);
+		System.out.println(tree.dump());
+		System.setOut(console);
+
+		//copy given array
+		ArrayList<String> foo = new ArrayList<String>();
+		for(int i = 0; i < inputs.size(); i++) {foo.add(inputs.get(i));}
+		
+		ArrayList<TreeObject> p = new ArrayList<TreeObject>();
+		String obj;
+		//for all inputSequences, make a treeObject for it
+		while(!foo.isEmpty()) {
+			obj = foo.remove(0);
+			p.add(new TreeObject(obj, 1));			
+			
+			//remove all occurrences of the string and increment frequency for each one
+			while(foo.remove(obj)) {
+				p.get(p.size() - 1).incrementFrequency();
+			}
+		}
+		
+		mergesortTreeObject(p);
+		
+		// check that dump is correct
+		Scanner scan = new Scanner(new File(TESTS_FOLDER + testName + "_dump.txt"));
+		String exc;
+		for (int i = 0; i < p.size(); i++) {
+			exc = scan.nextLine();
+			if (!exc.equals(p.get(i).toString())) {
+				System.out.println(exc + " " + i + " | " + p.get(i));
+				assert (false);
+			}
 		}
 	}
 	
@@ -572,11 +624,8 @@ public class BTreeTest {
 	}
 	
 	/**
-	 * Insert a random number of sequences into a BTree and then print it's dump to
-	 * a file.
-	 * <p>
-	 * NOTE: This test will always pass if no exception is thrown. The user must inspect
-	 * the dump file to ensure accuracy.
+	 * Insert a random number of sequences into a BTree and then check the printed
+	 * to a file dump.
 	 * 
 	 * @throws Throwable
 	 */
@@ -614,50 +663,7 @@ public class BTreeTest {
 				memoryTree.insert(new TreeObject(inputSequences.get(i), 1));
 			}
 			
-			//write dump to file
-			PrintStream console = System.out;
-			PrintStream file = new PrintStream( new File(TESTS_FOLDER + testName + "_dump"));
-			PrintStream file2 = new PrintStream( new File(TESTS_FOLDER + testName + "_dump2"));
-			
-			System.setOut(file);
-//			System.out.print("Not in the dump, just here for debugging\n"
-//					+ "Smallest key should be:\n" + y + "\t\t| SeqLength is " + inputSequences.get(0).length()
-//					+ "\n=====================================\n");
-			System.out.println(memoryTree.dump());
-			
-//			System.setOut(file2);
-//			for(int i = 0; i < inputSequences.size(); i++) {
-//				System.out.println(inputSequences.get(i) + " : 1");
-//			}
-//			System.out.println();
-			
-			System.setOut(console);
-			
-			ArrayList<TreeObject> p = new ArrayList<TreeObject>();
-			for(int i = 0; i < inputSequences.size(); i++) {
-				p.add(new TreeObject(inputSequences.get(i), 1));
-			}
-			mergesortTreeObject(p);
-			//check that dump is correct
-			Scanner scan = new Scanner( new File(TESTS_FOLDER + testName + "_dump"));
-			
-			String exc;
-//			while(!exc.equals(inputSequences.get(0))) {	
-//				exc = scan.next();
-//				System.out.println(exc);
-//			}
-//			scan.next();scan.next();
-			
-			for(int i = 0; i < inputSequences.size(); i++) {
-				exc = scan.next();
-				if(!exc.equals(p.get(i).keyToString())) {
-					System.out.println(exc + " " + i + " | " + inputSequences.get(i));
-					assert(false);
-				}
-				scan.next();scan.next();
-			}
-			
-			
+			checkDump(inputSequences, memoryTree);
 			progress.increaseProgress();
 		} catch (Throwable e) {
 			progress.increaseProgress();
@@ -668,10 +674,8 @@ public class BTreeTest {
 	
 	/**
 	 * Insert a random number of sequences into a BTree with and without a cache and
-	 * report the time difference.
-	 * <p>
-	 * NOTE: This test will always pass if no exception is thrown. The user must inspect
-	 * the test results file to ensure accuracy.
+	 * report the time difference to 'TEST_TestResults.txt.' Also checks the dump of
+	 * the last cache BTree that was created.
 	 * 
 	 * @throws Throwable
 	 */
@@ -700,7 +704,7 @@ public class BTreeTest {
 				BReadWrite.setBuffer(BNode.getDiskSize());
 				
 				// generate random sequences
-				inputSequences = generateRandomSequences(20000/5, 30000/5, 7, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				inputSequences = generateRandomSequences(20000/5, 30000/5, 3, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
 				TreeObject.setSequenceLength(inputSequences.get(0).length());
 				
 				//create tree with and without cache
@@ -747,51 +751,7 @@ public class BTreeTest {
 					+ "\n");
 			
 			
-			//write dump to file
-			PrintStream console = System.out;
-			File fileT =new File(TESTS_FOLDER + testName + "_dump");
-			fileT.createNewFile();
-			PrintStream file = new PrintStream(fileT);
-//			PrintStream file2 = new PrintStream( new File(TESTS_FOLDER + testName + "_dump2"));
-			
-			System.setOut(file);
-//			System.out.print("Not in the dump, just here for debugging\n"
-//					+ "Smallest key should be:\n" + y + "\t\t| SeqLength is " + inputSequences.get(0).length()
-//					+ "\n=====================================\n");
-			System.out.println(wiC.dump());
-			
-//			System.setOut(file2);
-//			for(int i = 0; i < inputSequences.size(); i++) {
-//				System.out.println(inputSequences.get(i) + " : 1");
-//			}
-//			System.out.println();
-			
-			System.setOut(console);
-			
-			ArrayList<TreeObject> p = new ArrayList<TreeObject>();
-			for(int i = 0; i < inputSequences.size(); i++) {
-				p.add(new TreeObject(inputSequences.get(i), 1));
-			}
-			mergesortTreeObject(p);
-			//check that dump is correct
-			Scanner scan = new Scanner( new File(TESTS_FOLDER + testName + "_dump"));
-			
-			String exc;
-//			while(!exc.equals(inputSequences.get(0))) {	
-//				exc = scan.next();
-//				System.out.println(exc);
-//			}
-//			scan.next();scan.next();
-			
-			for(int i = 0; i < inputSequences.size(); i++) {
-				exc = scan.next();
-				if(!exc.equals(p.get(i).keyToString())) {
-					System.out.println(exc + " " + i + " | " + inputSequences.get(i));
-					assert(false);
-				}
-				scan.next();scan.next();
-			}
-			
+			checkDump(inputSequences, wiC); //check the last cache BTree's dump
 		} catch (Throwable e) {
 			ex = e;
 			progressAndExceptionCheck(run_BTree_RAF_Cache);
