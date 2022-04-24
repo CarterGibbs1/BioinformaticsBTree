@@ -8,8 +8,10 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.nio.channels.ScatteringByteChannel;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Scanner;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class BTreeTest {
@@ -581,6 +583,7 @@ public class BTreeTest {
 	@Test
 	public void BTree_RAF_Dump() throws Throwable {
 		testName = new Object() {}.getClass().getEnclosingMethod().getName(); //get the name of this method
+		 ArrayList<String> inputSequences = null;
 		try {
 			
 			// delete old RAF and set new RAF, degree, and byteBuffer. Important that they
@@ -591,7 +594,7 @@ public class BTreeTest {
 			BReadWrite.setBuffer(BNode.getDiskSize());
 			
 			// generate random sequences
-			ArrayList<String> inputSequences = generateRandomSequences(20000 / 5, 30000 / 5, 3, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+			inputSequences = generateRandomSequences(20000 / 5, 30000 / 5, 10, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
 			TreeObject.setSequenceLength(inputSequences.get(0).length());
 			
 			//debugging loop
@@ -614,13 +617,45 @@ public class BTreeTest {
 			//write dump to file
 			PrintStream console = System.out;
 			PrintStream file = new PrintStream( new File(TESTS_FOLDER + testName + "_dump"));
+			PrintStream file2 = new PrintStream( new File(TESTS_FOLDER + testName + "_dump2"));
 			
 			System.setOut(file);
-			System.out.print("Not in the dump, just here for debugging\n"
-					+ "Smallest key should be:\n" + y + "\t\t| SeqLength is " + inputSequences.get(0).length()
-					+ "\n=====================================\n");
+//			System.out.print("Not in the dump, just here for debugging\n"
+//					+ "Smallest key should be:\n" + y + "\t\t| SeqLength is " + inputSequences.get(0).length()
+//					+ "\n=====================================\n");
 			System.out.println(memoryTree.dump());
+			
+//			System.setOut(file2);
+//			for(int i = 0; i < inputSequences.size(); i++) {
+//				System.out.println(inputSequences.get(i) + " : 1");
+//			}
+//			System.out.println();
+			
 			System.setOut(console);
+			
+			ArrayList<TreeObject> p = new ArrayList<TreeObject>();
+			for(int i = 0; i < inputSequences.size(); i++) {
+				p.add(new TreeObject(inputSequences.get(i), 1));
+			}
+			mergesortTreeObject(p);
+			//check that dump is correct
+			Scanner scan = new Scanner( new File(TESTS_FOLDER + testName + "_dump"));
+			
+			String exc;
+//			while(!exc.equals(inputSequences.get(0))) {	
+//				exc = scan.next();
+//				System.out.println(exc);
+//			}
+//			scan.next();scan.next();
+			
+			for(int i = 0; i < inputSequences.size(); i++) {
+				exc = scan.next();
+				if(!exc.equals(p.get(i).keyToString())) {
+					System.out.println(exc + " " + i + " | " + inputSequences.get(i));
+					assert(false);
+				}
+				scan.next();scan.next();
+			}
 			
 			
 			progress.increaseProgress();
@@ -649,7 +684,8 @@ public class BTreeTest {
 		int ncTime = 0;
 		int chTime = 0;
 		int cTime = 0;
-		int cache = 500;
+		int cache = 100;
+		BTree wiC = null;
 		
 		ArrayList<String> inputSequences = null;
 		try {
@@ -664,7 +700,8 @@ public class BTreeTest {
 				BReadWrite.setBuffer(BNode.getDiskSize());
 				
 				// generate random sequences
-				inputSequences = generateRandomSequences(20000/5, 30000/5, 3, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				inputSequences = generateRandomSequences(20000/5, 30000/5, 7, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				TreeObject.setSequenceLength(inputSequences.get(0).length());
 				
 				//create tree with and without cache
 				BTree noC = new BTree(new TreeObject(inputSequences.get(0), 1), degree, 5);
@@ -679,7 +716,7 @@ public class BTreeTest {
 				ncTime += (System.currentTimeMillis() - cTime);
 				
 				BReadWrite.setRAF(TESTS_FOLDER + testName + k + "_Cache", true);
-				BTree wiC = new BTree(new TreeObject(inputSequences.get(0), 1), degree, 5, cache);
+				wiC = new BTree(new TreeObject(inputSequences.get(0), 1), degree, 5, cache);
 				
 				cTime = (int)System.currentTimeMillis();
 				
@@ -690,6 +727,10 @@ public class BTreeTest {
 				wiC.emptyBCache();
 				
 				chTime += (System.currentTimeMillis() - cTime);
+				
+				//check that both BTrees are sorted
+				assert(BTree.isSorted(noC.getRoot()));
+				assert(BTree.isSorted(wiC.getRoot()));
 				
 				progress.increaseProgress();
 			}
@@ -704,6 +745,52 @@ public class BTreeTest {
 					+   "Without Cache Avg - " + (ncTime/run_BTree_RAF_Cache) + "ms"
 					+ "\nWith Cach Avg     - " + (chTime/run_BTree_RAF_Cache) + "ms"
 					+ "\n");
+			
+			
+			//write dump to file
+			PrintStream console = System.out;
+			File fileT =new File(TESTS_FOLDER + testName + "_dump");
+			fileT.createNewFile();
+			PrintStream file = new PrintStream(fileT);
+//			PrintStream file2 = new PrintStream( new File(TESTS_FOLDER + testName + "_dump2"));
+			
+			System.setOut(file);
+//			System.out.print("Not in the dump, just here for debugging\n"
+//					+ "Smallest key should be:\n" + y + "\t\t| SeqLength is " + inputSequences.get(0).length()
+//					+ "\n=====================================\n");
+			System.out.println(wiC.dump());
+			
+//			System.setOut(file2);
+//			for(int i = 0; i < inputSequences.size(); i++) {
+//				System.out.println(inputSequences.get(i) + " : 1");
+//			}
+//			System.out.println();
+			
+			System.setOut(console);
+			
+			ArrayList<TreeObject> p = new ArrayList<TreeObject>();
+			for(int i = 0; i < inputSequences.size(); i++) {
+				p.add(new TreeObject(inputSequences.get(i), 1));
+			}
+			mergesortTreeObject(p);
+			//check that dump is correct
+			Scanner scan = new Scanner( new File(TESTS_FOLDER + testName + "_dump"));
+			
+			String exc;
+//			while(!exc.equals(inputSequences.get(0))) {	
+//				exc = scan.next();
+//				System.out.println(exc);
+//			}
+//			scan.next();scan.next();
+			
+			for(int i = 0; i < inputSequences.size(); i++) {
+				exc = scan.next();
+				if(!exc.equals(p.get(i).keyToString())) {
+					System.out.println(exc + " " + i + " | " + inputSequences.get(i));
+					assert(false);
+				}
+				scan.next();scan.next();
+			}
 			
 		} catch (Throwable e) {
 			ex = e;
