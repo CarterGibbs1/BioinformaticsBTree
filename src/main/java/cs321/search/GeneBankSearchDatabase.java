@@ -1,5 +1,6 @@
 package cs321.search;
 
+import com.sun.tools.javac.util.StringUtils;
 import cs321.common.ParseArgumentException;
 
 import java.io.File;
@@ -8,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class GeneBankSearchDatabase
@@ -42,11 +44,28 @@ public class GeneBankSearchDatabase
 
 
             /*****************************************************************************/
-            // search logic, similar to searchbtree
+            // search logic, similar to searchbtree, start at query file, use database to search for dna seq
             File q = new File(a.getQueryPathway());
             Scanner qScan = new Scanner(q);
+            File d = new File(a.getPathToDatabase());
+            Scanner dScan = new Scanner(d);
             while (qScan.hasNextLine()) {
-                String current = qScan.nextLine();
+                String qCurr = qScan.nextLine().toLowerCase();
+                System.out.println(qCurr + ": ");
+                int count = 0;
+                while (dScan.hasNextLine()) {
+                    String dCurr = dScan.nextLine();
+                    if (dCurr.contains(qCurr)) {
+                        Scanner getFreq = new Scanner(dCurr);
+                        int freq = getFreq.nextInt();// make sure freq is the only int on the line
+                        // and that there's a space between dna seq and the int
+                        System.out.println(freq);
+                        getFreq.close();
+                        break;// go back to qScan
+                    }
+                }
+                qScan.close();
+                dScan.close();
             }
             /*****************************************************************************/
 //            ResultSet rs = statement.executeQuery("select * from btree");
