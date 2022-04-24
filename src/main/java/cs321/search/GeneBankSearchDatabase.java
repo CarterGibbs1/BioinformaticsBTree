@@ -103,7 +103,16 @@ public class GeneBankSearchDatabase
 /***/
 //IMPORTANT: BOTH CREATEBTREE AND SEARCHDATABASE NEED THE FOLLOWING COMMAND IN THE DIR IN TERMINAL BEFORE RUNNING PROGRAM:
 // jar xf sqlite-jdbc-3.36.0.3.jar
-
+/***/
+//below is a method that could go atop the createbtree class **/
+//	private void inOrderT(BTree b) { pseudo code
+// for (int i = 1; i < b.getNumNodes; i++)
+//    TestBNodeNoE c = b.getNodeAtIndex(i);
+//    String dnaseq = c.getKeys()[1].getStringKey();
+//    int freq = c.getKeys()[1].getFrequency();
+//    statement.executeUpdate("insert into btree (dnaseq, freq) values (\'" + dnaseq + "\', " + freq + ");");
+// end for loop
+/***/
 //public static void main(String[] args) throws Exception//pass in a btree probs as arg
 //{
 //    Connection connection = null;
@@ -127,7 +136,10 @@ public class GeneBankSearchDatabase
 //        b.insert(new TreeObjectNoE("a", 1));
 //        END OF BTREE CREATED FOR TESTING
 
-//        //in order traversal here,
+//in order traversal here
+// see method struct in method imp atop this class
+// use inOrderT(TestBNodeNoE(b); instead of
+//
 //
 //        //below is a simple insert, don't need this exactly, but will following syntax for each insert
 //        TestBNodeNoE c = b.getNodeAtIndex(1);
