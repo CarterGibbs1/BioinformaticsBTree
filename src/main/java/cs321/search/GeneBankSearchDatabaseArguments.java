@@ -8,12 +8,11 @@ public class GeneBankSearchDatabaseArguments {
     public GeneBankSearchDatabaseArguments(String pathToDatabase, String queryPathway, int debugLevel) {
         this.pathToDatabase = pathToDatabase;
         this.queryPathway = queryPathway;
-        this.debugLevel = debugLevel;
+        this.debugLevel = debugLevel;// only 0
     }
 
     @Override
     public String toString() {
-        //this method was generated using an IDE
         return "GeneBankCreateBTreeArguments{" +
                 "pathToDatabase=" + pathToDatabase +
                 ", queryPathway=" + queryPathway +
