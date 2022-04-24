@@ -1,10 +1,14 @@
 package cs321.search;
 
+import cs321.common.ParseArgumentException;
+
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Scanner;
 
 public class GeneBankSearchDatabase
 {
@@ -14,30 +18,41 @@ public class GeneBankSearchDatabase
     public static void main(String[] args) throws Exception//pass in a btree probs as arg
     {
         Connection connection = null;
-        //maybe check to see if btree is legit before continuing at this point
         try
         {
+            GeneBankSearchDatabaseArguments a = parseArgs(args);
+            /* Below are things we'll have to import into the CreateBTree class */
+            /*****************************************************************************/
             // create a database connection
-            connection = DriverManager.getConnection("jdbc:sqlite:btree.db");
-            Statement statement = connection.createStatement();
-            statement.setQueryTimeout(30);  // set timeout to 30 sec.
-
-            statement.executeUpdate("drop table if exists btree");
-            statement.executeUpdate("create table btree (name dnaseq, int freq)");
+//            connection = DriverManager.getConnection("jdbc:sqlite:btree.db");
+//            Statement statement = connection.createStatement();
+//            statement.setQueryTimeout(30);  // set timeout to 30 sec.
+//
+//            statement.executeUpdate("drop table if exists btree");
+//            statement.executeUpdate("create table btree (name dnaseq, int freq)");
             /* For all numNodes in btree
-             * for (int i = 1; i <= numNodes; i++) {// or better way to inorder traverse
+             * for (int i = 1; i <= numNodes; i++) {// instead of this, do an in order traversal
              *    BNode current = btree.getNodeAtIndex(i);//from parameter
              *    String dnaseq = current.getStringKey();
              *    int freq = current.getFrequency();
              *    statement.executeUpdate("insert into btree values('dnaseq', freq)");
              * }
              */
-//          statement.executeUpdate("insert into btree values(1, 'CS321')");
-//          statement.executeUpdate("insert into btree values(2, 'CS-HU310')");
-            ResultSet rs = statement.executeQuery("select * from btree");
-            while(rs.next())
+            /*****************************************************************************/
+
+
+            /*****************************************************************************/
+            // search logic, similar to searchbtree
+            File q = new File(a.getQueryPathway());
+            Scanner qScan = new Scanner(q);
+            while (qScan.hasNextLine()) {
+                String current = qScan.nextLine();
+            }
+            /*****************************************************************************/
+//            ResultSet rs = statement.executeQuery("select * from btree");
+//            while(rs.next())
             {
-                // read the result set, if needed, or it's already stored to a db file
+                // read the result set in the db file
                 /*
                  *  System.out.println(rs.getString("dnasep") + ": " + rs.getInt("freq"));
                  */
@@ -45,12 +60,12 @@ public class GeneBankSearchDatabase
 //            System.out.println("id = " + rs.getInt("id"));
             }
         }
-        catch(SQLException e)
-        {
-            // if the error message is "out of memory",
-            // it probably means no database file is found
-            System.err.println(e.getMessage());
-        }
+//        catch(SQLException e)
+//        {
+//            // if the error message is "out of memory",
+//            // it probably means no database file is found
+//            System.err.println(e.getMessage());
+//        }
         finally
         {
             try
@@ -64,6 +79,27 @@ public class GeneBankSearchDatabase
                 System.err.println(e.getMessage());
             }
         }
+    }// end of main
+
+    public static GeneBankSearchDatabaseArguments parseArgs(String args[]) throws ParseArgumentException {
+        if (args.length < 2 || args.length > 3) {
+            System.out.println("Usage: java GeneBankSearchDatabase <path_to_SQLite_database> <query_file> [<debug_level>]");
+            throw new ParseArgumentException("Incorrect number of arguments");
+        }
+        File f = new File(args[0]);// should be String of actual db file in the directory as this point
+        if (!f.exists() || !f.isFile()) {
+            throw new ParseArgumentException("Database does not exist");
+        }
+        File fTwo = new File(args[1]);// should be existing query file in directory
+        if (!fTwo.exists() || !fTwo.isFile()) {
+            throw new ParseArgumentException("Query file does not exist or is not in pwd.");
+        }
+        int d = Integer.parseInt(args[2]);
+        if (d != 0) {// only having one option for right now: results on output stream
+            //the results will mirror GeneBankSearchBTree, where the results will be printed on console
+            throw new ParseArgumentException("Debug level is not valid.");
+        }
+        return new GeneBankSearchDatabaseArguments(args[0], args[1], d);
     }
 }
 
