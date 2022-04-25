@@ -1,9 +1,14 @@
 package cs321.search;
 
+import cs321.btree.BReadWrite;
 import cs321.btree.BTree;
+import cs321.btree.TreeObject;
 import cs321.common.ParseArgumentException;
 import cs321.common.ParseArgumentUtils;
 import cs321.create.GeneBankCreateBTreeArguments;
+
+import java.io.File;
+import java.util.Scanner;
 
 public class GeneBankSearchBTree
 {
@@ -12,7 +17,22 @@ public class GeneBankSearchBTree
     {
         System.out.println("Hello world from cs321.search.GeneBankSearchBTree.main");
         GeneBankSearchBTreeArguments arguments = parseArgumentsAndHandleExceptions(args);
-
+        File qFile = new File(arguments.getQueryFileName());
+        Scanner qScan = new Scanner(qFile);
+        int cache = 0;
+        if (arguments.getCacheSize() == 1) {
+            cache = arguments.getCacheSize();
+        }
+        BTree searchedBT = BReadWrite.readBTree(cache);// is there a different way to read this,
+        //or should it be through the .btree.data file
+        while (qScan.hasNextLine()) {
+            String qCurr = qScan.nextLine().toLowerCase();
+            System.out.print(qCurr + ": ");// wonder if we don't print if the user doesn't provide debug level
+            // I think the default value is zero, but I'm not sure for search specifically
+            TreeObject tOToFind = new TreeObject(qCurr);
+            int currFreq = searchedBT.search(tOToFind);
+            System.out.println(currFreq);
+        }
     }
 
     private static GeneBankSearchBTreeArguments parseArgumentsAndHandleExceptions(String[] args) {
@@ -50,7 +70,13 @@ public class GeneBankSearchBTree
         if (withOrWithoutCache != 0 && withOrWithoutCache != 1)
             throw new ParseArgumentException("With or Without Cache can only be 1 or 0.");
         String btreeFileName = args[1];
+        if (!btreeFileName.contains(".gbk.btree.data")) {// check to see if this file format gets written
+            throw new ParseArgumentException("BTree filename must contain\".gbk.btree.data\"");
+        }
         String queryFileName = args[2];
+        if (!queryFileName.contains("query")) {
+            throw new ParseArgumentException("Query file must contain query.");
+        }
         int cacheSize = 0;
         int debugLevel = 0;
         // Getting some warnings here, but seems fine. Probably logic error to come back to.
@@ -62,6 +88,7 @@ public class GeneBankSearchBTree
             if (args.length == 5) {
                 debugLevel = Integer.parseInt(args[4]);
                 if (debugLevel != 1 && debugLevel != 0) throw new ParseArgumentException("Debug level must be either 0 or 1");
+                //possibly change to be just 0, could do 1 if we want, but I think project just requires 0
             }
         }
 
