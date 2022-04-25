@@ -1,13 +1,4 @@
 package cs321.btree;
-
-
-
-
-
-
-
-
-
 /**
  * An object that is to be stored in a BTree. Specific placement in the BTree is
  * determined by previous TreeObjects and key values. A notable method is
@@ -24,38 +15,37 @@ public class TreeObject {
     private long keyLongVal;
     
     private static int sequenceLength;
+    
+   	//=================================================================================================================
+	//                                                CONSTRUCTORS
+	//=================================================================================================================
 
     /**
      * Constructor: Creates a TreeObject with the specified String key. Also sets the value
      * of b depending on the String key. The key values in treeObjectKey must all
      * consist of "a", "c", "g", or "t" to convert to a usable long value. Everything is set.
      *
-     * @param treeObjectKey the String key of the object
-     * @param frequency     size of each, individual sequence in possibleKey
+     * @param treeObjectKey The String key of the object to be compressed to a long
      */
-    public TreeObject(String treeObjectKey, int frequency) {
+    public TreeObject(String treeObjectKey) {
         this.keyLongVal = setLongKey(treeObjectKey);
-        this.frequency = frequency;
+        frequency = 1;
     }
 
     /**
-     * Alternate constructor, long key instead of string is passed in. String key is a blank String.
+     * Constructor: A long key is passed in. Useful if read from RAF
      *
-     * @param longKey
-     * @param frequency
+     * @param longKey   The key of this TreeObject
+     * @param frequency How many occurrences of the key there are in the BTree
      */
     public TreeObject(long longKey, int frequency) {
-//        this.treeObjectKey = "";// needs to be set later possibly, created for compatibility with other methods
         this.keyLongVal = longKey;
         this.frequency = frequency;
     }
-
-    /**
-     * Blank constructor, only sets long key to -1, can delete if needed.
-     */
-    public TreeObject() {//for testing purposes
-        this.keyLongVal = -1;
-    }
+    
+   	//=================================================================================================================
+	//                                         BTREE FUNCTIONALITY METHODS
+	//=================================================================================================================
 
     /** return string
      * Intended to be used by another driver class when the string length is known, but the second constructor is used.
@@ -91,43 +81,21 @@ public class TreeObject {
      * Coverts 2-bit binary String to it's corresponding letter.
      *
      * @param num the String representation of the 2-bit binary number
-     * @return the String of the corresponding letter, blank string if num isn't listed below
+     * @return the char of the corresponding letter, n string if num isn't listed below
      */
-    private String numToLetter(String num) {
-        if (num.equals("00")) {
-            return "a";
-        }
-        if (num.equals("01")) {
-            return "c";
-        }
-        if (num.equals("10")) {
-            return "g";
-        }
-        if (num.equals("11")) {
-            return "t";
-        }
-        return "";
-    }
-
-    /**
-     * @return the frequency of the TreeObject
-     */
-    public int getFrequency() {
-        return frequency;
-    }
-
-    /**
-     * @param newFrequency the integer that will replace the current frequency value
-     */
-    public void setFrequency(int newFrequency) {
-        this.frequency = newFrequency;
-    }
-
-    /**
-     * Increment the frequency of this object by 1
-     */
-    public void incrementFrequency() {
-        frequency++;
+    private char numToLetter(String num) {
+      	switch(num) {
+	    	case "00":
+	    		return 'a';
+	    	case "01":
+	    		return 'c';
+	    	case "10":
+	    		return 'g';
+	    	case "11":
+	    		return 't';
+	    	default:
+	    		return 'n';
+    	}
     }
 
     /**
@@ -142,16 +110,7 @@ public class TreeObject {
         }
         return byteShift(treeObjectKey);
     }
-
-    /**
-     * Gets the long key.
-     *
-     * @return the long key
-     */
-    public long getKey() {
-        return keyLongVal;
-    }
-
+    
     /**
      * Creates a long value from a treeObjectKey in String form
      *
@@ -179,19 +138,18 @@ public class TreeObject {
      * @return the corresponding long val
      */
     private long toByteVal(char c) {
-        if (c == 'a') {
-            return 0;
-        }
-        if (c == 'c') {
-            return 1;
-        }
-        if (c == 'g') {
-            return 2;
-        }
-        if (c == 't') {
-            return 3;
-        }
-        return -1;
+    	switch(c) {
+	    	case 'a':
+	    		return 0;
+	    	case 'c':
+	    		return 1;
+	    	case 'g':
+	    		return 2;
+	    	case 't':
+	    		return 3;
+	    	default:
+	    		return -1;
+    	}
     }
     
     /**
@@ -202,19 +160,18 @@ public class TreeObject {
      * @return Corresponding letter to num, 'n' if num is invalid
      */
     private char numToChar(long num) {
-    	if (num == 0) {
-            return 'a';
-        }
-        if (num == 1) {
-            return 'c';
-        }
-        if (num == 2) {
-            return 'g';
-        }
-        if (num == 3) {
-            return 't';
-        }
-        return 'n';
+    	switch((int)num) {
+	    	case 0:
+	    		return 'a';
+	    	case 1:
+	    		return 'c';
+	    	case 2:
+	    		return 'g';
+	    	case 3:
+	    		return 't';
+	    	default:
+	    		return 'n';
+    	}
     }
     
     /**
@@ -256,11 +213,51 @@ public class TreeObject {
         }
         return 0;
     }
+    
+    
+   	//=================================================================================================================
+	//                                            GET/SET/UTILITY METHODS
+	//=================================================================================================================
+    
+
+    /**
+     * @return the frequency of the TreeObject
+     */
+    public int getFrequency() {
+        return frequency;
+    }
+
+    /**
+     * @param newFrequency the integer that will replace the current frequency value
+     */
+    public void setFrequency(int newFrequency) {
+        this.frequency = newFrequency;
+    }
+
+    /**
+     * Increment the frequency of this object by 1
+     */
+    public void incrementFrequency() {
+        frequency++;
+    }
+    
+    /**
+     * Gets the long key.
+     *
+     * @return the long key
+     */
+    public long getKey() {
+        return keyLongVal;
+    }
 
     @Override
     public String toString() {
         return keyToString() + " : " + frequency;
     }
+    
+   	//=================================================================================================================
+	//                                            STATIC METHODS
+	//=================================================================================================================
     
     /**
      * Set the shared static sequence length of all TreeObjects.
@@ -276,4 +273,4 @@ public class TreeObject {
     	sequenceLength = k;
     }
 
-}// line 245
+}

@@ -156,14 +156,15 @@ public class BTree
 			//get correct child to go into
 			nextNode = cacheCheck(currentNode.getElementLocation(toInsert));
 		
-			// if the nextNode is full, split it
+			// if the nextNode is full, split it and begin again at parent
 			if (nextNode.isFull()) {
-				nextNode = cacheCheck(split(currentNode, nextNode).getElementLocation(toInsert));
+				currentNode = split(currentNode, nextNode);
 				numNodes++;
 			}
-			
-			//move on to the child
-			currentNode = nextNode;
+			//else move on to the child
+			else {
+				currentNode = nextNode;
+			}
 		}
 		
 		// once at leaf, insert key if it's not in the BNode already
