@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
- * Used to create BTree objects that hold Generic Type objects.
- * Notable method is insert() which is important in structuring the
- * BTree.
+ * Used to create BTree objects that hold String representations of objects.
+ * Used in conjunction with BReadWrite to write massive amounts of data to
+ * Random Access Files.
  *
  * @author  Carter Gibbs, Mesa Greear, Aaron Goin
  * @version Spring 2022
@@ -370,6 +370,31 @@ public class BTree
     	       ( left == null  || (current.getKey(0)                 .compare(left)  >= 0)));
     }
     
+    /**
+     * Recursively fill the given list with all the BNodes in this BTree.
+     * <p>
+     * DEBUGGING: This method is for debugging and could drastically slow
+     * down a program if used casually.
+     * 
+     * @param list The list to add BNodes to
+     * 
+	 * @throws IOException Reading/Writing to RAF may throw exception
+     */
+    public void getAllBNodes(ArrayList<BNode> list) throws IOException {
+    	getAllBNodes(list, root.getAddress());
+    }
+    
+    /**
+     * Recursively fill the given list with all the BNodes in this subtree.
+     * <p>
+     * DEBUGGING: This method is for debugging and could drastically slow
+     * down a program if used casually.
+     * 
+     * @param list        The list to add BNodes to
+     * @param rootAddress The root of this subtree
+     * 
+	 * @throws IOException Reading/Writing to RAF may throw exception
+     */
     public void getAllBNodes(ArrayList<BNode> list, long rootAddress) throws IOException{
     	//base case, the given root is non-existent
     	if(rootAddress <= 0) {

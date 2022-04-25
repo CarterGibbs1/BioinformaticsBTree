@@ -23,7 +23,7 @@ public class BTreeTest {
 	static private int[] timesToRun = new int[] {10, 20, 50, 100, 500, 1000, 5000};
 //	static private int run_BNode_RAF_RAFAppropriateSize = timesToRun[0];
 	static private int run_BTree_RAF_IsSorted = timesToRun[0];
-	static private int run_BTree_RAF_Search = timesToRun[5];
+	static private int run_BTree_RAF_Search = timesToRun[0];
 	static private int run_BTree_RAF_Cache = timesToRun[0];
 	//example
 	static private int run_EXAMPLE_LOOPED_TEST = timesToRun[3];
@@ -37,7 +37,7 @@ public class BTreeTest {
 	
 	// create progress bar to show things are working, destroy on completion (doesn't
 	//really work on eclipse)
-	static private final ProgressBar progress = new ProgressBar(15,
+	static private final ProgressBar progress = new ProgressBar(25,
 			run_BTree_RAF_IsSorted +
 			run_BTree_RAF_Search +
 			run_BTree_RAF_Cache +
@@ -109,7 +109,7 @@ public class BTreeTest {
 		//for all inputSequences, make a treeObject for it
 		while(!foo.isEmpty()) {
 			obj = foo.remove(0);
-			p.add(new TreeObject(obj, 1));			
+			p.add(new TreeObject(obj));			
 			
 			//remove all occurrences of the string and increment frequency for each one
 			while(foo.remove(obj)) {
@@ -234,7 +234,7 @@ public class BTreeTest {
 			// create ArrayList of TreeObjects from sequences
 			ArrayList<TreeObject> treeObjects = new ArrayList<TreeObject>();
 			for (int i = 0; i < randSeq.size(); i++) {
-				treeObjects.add(new TreeObject(randSeq.get(i), 1));
+				treeObjects.add(new TreeObject(randSeq.get(i)));
 			}
 
 			// sort TreeObjects
@@ -266,9 +266,9 @@ public class BTreeTest {
 			String inputSequences = "TGC ATA AGA TGT ACT AGG GTA".toLowerCase();
 
 			// instantiate and populate BNode with inputLetters
-			TestBNode<String> testNode = new TestBNode<String>(new TreeObject(inputSequences.substring(0, 3), 1));
+			TestBNode<String> testNode = new TestBNode<String>(new TreeObject(inputSequences.substring(0, 3)));
 			for (int i = 4; i < inputSequences.length(); i += 4) {
-				testNode.insert(new TreeObject(inputSequences.substring(i, i + 3), 1));
+				testNode.insert(new TreeObject(inputSequences.substring(i, i + 3)));
 			}
 
 			// see if the BNode contains sequences in order in long value
@@ -294,14 +294,14 @@ public class BTreeTest {
 			TestBNode<String> rightChild;
 
 			// instantiate and populate BNode with inputLetters
-			TestBNode<String> testNode = new TestBNode<String>(new TreeObject(inputSequences.substring(0, 4), 1));
+			TestBNode<String> testNode = new TestBNode<String>(new TreeObject(inputSequences.substring(0, 4)));
 			for (int i = 5; i < inputSequences.length(); i += 5) {
-				testNode.insert(new TreeObject(inputSequences.substring(i, i + 4), 1));
+				testNode.insert(new TreeObject(inputSequences.substring(i, i + 4)));
 			}
 
 			// split BNode and save parent and rightChild
 			parent = testNode.split();
-			rightChild = parent.getSubtree(new TreeObject("tttt", 1));
+			rightChild = parent.getSubtree(new TreeObject("tttt"));
 
 			assertEquals(parent.toString(), "59");
 			assertEquals(testNode.toString(), "14 46");
@@ -325,16 +325,16 @@ public class BTreeTest {
 			int degree = 7;
 
 			// instantiate and populate BNode with inputLetters
-			TestBNode<String> testNode = new TestBNode<String>(new TreeObject(inputSequences.substring(0, 1), 1));
+			TestBNode<String> testNode = new TestBNode<String>(new TreeObject(inputSequences.substring(0, 1)));
 			for (int i = 1; i < inputSequences.length(); i++) {
-				testNode.insert(new TreeObject(inputSequences.substring(i, i + 1), 1));
+				testNode.insert(new TreeObject(inputSequences.substring(i, i + 1)));
 			}
 
 			// testNode is not full
 			assert (!testNode.isFull(degree));
 
 			// testNode is now full
-			testNode.insert(new TreeObject("a", 1));
+			testNode.insert(new TreeObject("a"));
 			assert (testNode.isFull(degree));
 
 			progress.increaseProgress();
@@ -356,7 +356,7 @@ public class BTreeTest {
 			int degree = 2;
 
 			// instantiate and BNode root
-			TestBNode<String> root = new TestBNode<String>(new TreeObject(inputSequences.substring(0, 1), 1));
+			TestBNode<String> root = new TestBNode<String>(new TreeObject(inputSequences.substring(0, 1)));
 			TestBNode<String> currentNode;
 
 			// create a rudimentary BTree to insert into while counting the total BNode
@@ -366,7 +366,7 @@ public class BTreeTest {
 			TreeObject key;
 			for (int i = 1; i < inputSequences.length(); i++) {
 				currentNode = root;
-				key = new TreeObject(inputSequences.substring(i, i + 1), 1);
+				key = new TreeObject(inputSequences.substring(i, i + 1));
 
 				if (root.isFull(degree)) {
 					root = currentNode = currentNode.split();
@@ -415,16 +415,16 @@ public class BTreeTest {
 	@Test
 	public void TreeObject_PublicMethods() {
 		try {
-			TreeObject tO = new TreeObject("tcacgaggtc", 5);
+			TreeObject tO = new TreeObject("tcacgaggtc");
 			long key = Long.parseLong("11010001100010101101", 2);
 			assertEquals(tO.getKey(), key);
 //			assertEquals(tO.withZeros(), "11010001100010101101");
-			assertEquals(tO.getFrequency(), 5);
+//			assertEquals(tO.getFrequency(), 5);
 
 			tO.setFrequency(6);
 			assertEquals(tO.getFrequency(), 6);
 			tO.setFrequency(5);
-			TreeObject tOTwo = new TreeObject("tcacgaggta", 5);
+			TreeObject tOTwo = new TreeObject("tcacgaggta");
 			assert (tO.compare(tOTwo) > 0);
 //			assertEquals(tO.toString(), "tcacgaggtc: 5");
 
@@ -459,9 +459,9 @@ public class BTreeTest {
 			BReadWrite.setBuffer(BNode.getDiskSize());
 
 			// instantiate and populate BNode with inputLetters
-			BNode memoryNode = new BNode(new TreeObject(inputSequences.substring(0, 3), 1), BTree.getDiskSize());
+			BNode memoryNode = new BNode(new TreeObject(inputSequences.substring(0, 3)), BTree.getDiskSize());
 			for (int i = 4; i < inputSequences.length(); i += 4) {
-				memoryNode.insert(new TreeObject(inputSequences.substring(i, i + 3), 1));
+				memoryNode.insert(new TreeObject(inputSequences.substring(i, i + 3)));
 			}
 
 			// read BNode in RAF
@@ -512,11 +512,11 @@ public class BTreeTest {
 				
 				//generate random sequences and create BTree
 				ArrayList<String> inputSequences = generateRandomSequences(20000/5, 30000/5, 5, 15);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
-				BTree memoryTree = new BTree(new TreeObject(inputSequences.get(0), 1), degree, 5);
+				BTree memoryTree = new BTree(new TreeObject(inputSequences.get(0)), degree, 5);
 				
 				//insert all sequences
 				for(int i = 1; i < inputSequences.size(); i++) {
-					memoryTree.insert(new TreeObject(inputSequences.get(i), 1));
+					memoryTree.insert(new TreeObject(inputSequences.get(i)));
 				}
 				
 				//write BTree and then read
@@ -570,7 +570,7 @@ public class BTreeTest {
 				BReadWrite.setBuffer(BNode.getDiskSize());
 				
 				//generate random sequences
-				inputSequences = generateRandomSequences(2000/5, 3000/5, 3, 5);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				inputSequences = generateRandomSequences(20000/5, 30000/5, 2, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
 				TreeObject.setSequenceLength(inputSequences.get(0).length());
 				
 				//generate the same random sequence a random number of times and insert at random spots
@@ -582,8 +582,8 @@ public class BTreeTest {
 				}
 				
 				//create BTree
-				memoryTree = new BTree(new TreeObject(inputSequences.get(0), 1), degree, inputSequences.get(0).length());
-				BTree t2 = new BTree(new TreeObject(inputSequences.get(0), 1), degree, inputSequences.get(0).length());
+				memoryTree = new BTree(new TreeObject(inputSequences.get(0)), degree, inputSequences.get(0).length());
+				BTree t2 = new BTree(new TreeObject(inputSequences.get(0)), degree, inputSequences.get(0).length());
 				
 				
 				//debugging variable
@@ -594,25 +594,25 @@ public class BTreeTest {
 				for(int i = 1; i < inputSequences.size(); i++) {
 					
 							if(inputSequences.get(i).equals(newSeq)) {
-System.out.println(memoryTree.search(new TreeObject(newSeq, 0)) + " | " + y + " | " + i);
+//System.out.println(memoryTree.search(new TreeObject(newSeq, 0)) + " | " + y + " | " + i);
 						y++;
 						
 					}
 							if(memoryTree.getHeight() > oldH) {
 	oldH++;
-	System.out.println("&&&&&&&&");
+//	System.out.println("&&&&&&&&");
 }	
-					memoryTree.insert(new TreeObject(inputSequences.get(i), 1));
-					if(memoryTree.search(new TreeObject(newSeq, 0)) != y) {
-						memoryTree.search(new TreeObject(newSeq, 0));
-						System.out.println("\n" + memoryTree.dump() + "\n");
-						memoryTree.getAllBNodes(x, memoryTree.getRoot().getAddress());
-						memoryTree.insert(new TreeObject(newSeq, 0));
-					}
+					memoryTree.insert(new TreeObject(inputSequences.get(i)));
+//					if(memoryTree.search(new TreeObject(newSeq, 0)) != y) {
+//						memoryTree.search(new TreeObject(newSeq, 0));
+//						System.out.println("\n" + memoryTree.dump() + "\n");
+//						memoryTree.getAllBNodes(x, memoryTree.getRoot().getAddress());
+//						memoryTree.insert(new TreeObject(newSeq, 0));
+//					}
 	
 				}
 				
-				if(y != memoryTree.search(new TreeObject(newSeq, 0))) {
+				if(y != memoryTree.search(new TreeObject(newSeq))) {
 					
 				}
 				
@@ -621,14 +621,15 @@ System.out.println(memoryTree.search(new TreeObject(newSeq, 0)) + " | " + y + " 
 				BTree readTree = BReadWrite.readBTree(-1);
 				
 				//check that both BTrees are sorted
-				assert(memoryTree.search(new TreeObject(newSeq, 0)) == numNewSeq);
-				assert(readTree.search(new TreeObject(newSeq, 0)) == numNewSeq);
+				assert(memoryTree.search(new TreeObject(newSeq)) == numNewSeq);
+				assert(readTree.search(new TreeObject(newSeq)) == numNewSeq);
 				
 				progress.increaseProgress();
-				checkDump(inputSequences, memoryTree);
-				System.out.println("\n=======================================\n");
+				
+//				System.out.println("\n=======================================\n");
 				
 			}
+			checkDump(inputSequences, memoryTree);
 		} catch (Throwable e) {
 			System.out.println("==" + memoryTree.getDegree() + "| " + newSeq);
 				ArrayList<BNode> x = new ArrayList<BNode>();
@@ -641,6 +642,8 @@ System.out.println(memoryTree.search(new TreeObject(newSeq, 0)) + " | " + y + " 
 	/**
 	 * Insert a random number of sequences into a BTree and then check the printed
 	 * to a file dump.
+	 * <p>
+	 * RANDOM: This test is random and thus, the RAFs will change every run.
 	 * 
 	 * @throws Throwable
 	 */
@@ -658,24 +661,24 @@ System.out.println(memoryTree.search(new TreeObject(newSeq, 0)) + " | " + y + " 
 			BReadWrite.setBuffer(BNode.getDiskSize());
 			
 			// generate random sequences
-			inputSequences = generateRandomSequences(20000 / 5, 30000 / 5, 10, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				inputSequences = generateRandomSequences(20000/5, 30000/5, 2, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
 			TreeObject.setSequenceLength(inputSequences.get(0).length());
 			
 			//debugging loop
 			int x = 0;
 			for (int i = 1; i < inputSequences.size(); i++) {
-				if(new TreeObject(inputSequences.get(x), 1).compare(new TreeObject(inputSequences.get(i), 1)) > 0) {
+				if(new TreeObject(inputSequences.get(x)).compare(new TreeObject(inputSequences.get(i))) > 0) {
 					x = i;
 				}
 			}
 //			String y = inputSequences.get(x);
 
 			// create BTree
-			BTree memoryTree = new BTree(new TreeObject(inputSequences.get(0), 1), degree, 5);
+			BTree memoryTree = new BTree(new TreeObject(inputSequences.get(0)), degree, 5);
 
 			// insert all sequences
 			for (int i = 1; i < inputSequences.size(); i++) {
-				memoryTree.insert(new TreeObject(inputSequences.get(i), 1));
+				memoryTree.insert(new TreeObject(inputSequences.get(i)));
 			}
 			
 			checkDump(inputSequences, memoryTree);
@@ -691,6 +694,8 @@ System.out.println(memoryTree.search(new TreeObject(newSeq, 0)) + " | " + y + " 
 	 * Insert a random number of sequences into a BTree with and without a cache and
 	 * report the time difference to 'TEST_TestResults.txt.' Also checks the dump of
 	 * the last cache BTree that was created.
+	 * <p>
+	 * RANDOM: This test is random and thus, the RAFs will change every run.
 	 * 
 	 * @throws Throwable
 	 */
@@ -703,7 +708,8 @@ System.out.println(memoryTree.search(new TreeObject(newSeq, 0)) + " | " + y + " 
 		int ncTime = 0;
 		int chTime = 0;
 		int cTime = 0;
-		int cache = 100;
+		int cache = 250;
+		long tSize = 0;
 		BTree wiC = null;
 		
 		ArrayList<String> inputSequences = null;
@@ -719,29 +725,30 @@ System.out.println(memoryTree.search(new TreeObject(newSeq, 0)) + " | " + y + " 
 				BReadWrite.setBuffer(BNode.getDiskSize());
 				
 				// generate random sequences
-				inputSequences = generateRandomSequences(20000/5, 30000/5, 3, 7);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				inputSequences = generateRandomSequences(20000/5, 30000/5, 2, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				tSize += inputSequences.size();
 				TreeObject.setSequenceLength(inputSequences.get(0).length());
 				
 				//create tree with and without cache
-				BTree noC = new BTree(new TreeObject(inputSequences.get(0), 1), degree, 5);
+				BTree noC = new BTree(new TreeObject(inputSequences.get(0)), degree, 5);
 				
 				cTime = (int)System.currentTimeMillis();
 				
 				// insert all sequences
 				for (int i = 1; i < inputSequences.size(); i++) {
-					noC.insert(new TreeObject(inputSequences.get(i), 1));
+					noC.insert(new TreeObject(inputSequences.get(i)));
 				}
 				
 				ncTime += (System.currentTimeMillis() - cTime);
 				
 				BReadWrite.setRAF(TESTS_FOLDER + testName + k + "_Cache", true);
-				wiC = new BTree(new TreeObject(inputSequences.get(0), 1), degree, 5, cache);
+				wiC = new BTree(new TreeObject(inputSequences.get(0)), degree, 5, cache);
 				
 				cTime = (int)System.currentTimeMillis();
 				
 				// insert all sequences
 				for (int i = 1; i < inputSequences.size(); i++) {
-					wiC.insert(new TreeObject(inputSequences.get(i), 1));
+					wiC.insert(new TreeObject(inputSequences.get(i)));
 				}
 				wiC.emptyBCache();
 				
@@ -751,22 +758,22 @@ System.out.println(memoryTree.search(new TreeObject(newSeq, 0)) + " | " + y + " 
 				assert(noC.isSorted());
 				assert(wiC.isSorted());
 				
+				
+				
 				progress.increaseProgress();
 			}
-			
+			checkDump(inputSequences, wiC); //check the last cache BTree's dump
 			//report times to file
 			if(!resultFile.exists()) {
 				resultFile.createNewFile();
 			}
 			
 			testReporting = new PrintStream(resultFile);
-			testReporting.print(testName + ": cache-[" + cache + "] sequences-[" + inputSequences.size()/1000 +"k]\n"
+			testReporting.print(testName + ": cache-[" + cache + "] avg sequences-[" + (tSize/run_BTree_RAF_Cache)/1000 +"k]\n"
 					+   "Without Cache Avg - " + (ncTime/run_BTree_RAF_Cache) + "ms"
 					+ "\nWith Cach Avg     - " + (chTime/run_BTree_RAF_Cache) + "ms"
 					+ "\n");
 			
-			
-			checkDump(inputSequences, wiC); //check the last cache BTree's dump
 		} catch (Throwable e) {
 			ex = e;
 			progressAndExceptionCheck(run_BTree_RAF_Cache);
