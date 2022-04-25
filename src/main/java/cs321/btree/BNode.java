@@ -3,24 +3,23 @@ package cs321.btree;
 import java.io.IOException;
 
 /**
- * Used to create BNode objects that hold Generic Type (passed down by
- * the BTree they belong to) objects. Notable methods are insert(),
- * getSubtree(), and split() which are important in creating a functional
- * BTree.
+ * Used to create BNode objects that contain TreeObjects. Notable
+ * methods are insert(), getElementLocation(), and incrementElement()
+ * which are important in creating a functional BTree.
+ * <p>
+ * NOTE: BNodes do not write themselves to files.
  * 
- * @author  Mesa Greear
+ * @author  Mesa Greear, Aaron Goin
  * @version Spring 2022
  */
 public class BNode {
-	
-	//TODO: Add cache functionality
 
 	//child0 <= key0 <= child1 <= key1 <= child2 ... childn <= keyn <= childn + 1
 	private TreeObject[] keys;
 	private long[] children;
 	
 	private long parent; //parent address
-	private int n; //TODO: Not needed in LinkedList imp
+	private int n;
 	
 	private long address; //not written to RAF
 	
@@ -33,7 +32,7 @@ public class BNode {
 	/**
 	 * Constructor: Create BNode with one key 'initialKey,' a parent address
 	 * 'parent,' and two children 'leftChild' and 'rightChild.' An address that
-	 * is less than 0 is considered null.
+	 * is <= 0 is considered null.
 	 * 
 	 * @param intialKey   the initial object in this BNode
 	 * @param thisAddress address of this BNode
@@ -64,16 +63,10 @@ public class BNode {
 		children = new long[degree * 2];
 		
 		keys[0] = initialKey;
-		
-		for(int i = 0; i < children.length; i++) {//TODO: inefficient, if we end up using arrays then best just to consider 0 as null
-			children[i] = -1;
-		}
+		n = 1;
 		
 		children[0] = leftChild;
 		children[1] = rightChild;
-		
-		
-		n = 1;
 		
 		address = thisAddress;
 		this.parent = parent;
@@ -91,7 +84,7 @@ public class BNode {
 	 * @throws IllegalStateException Static degree has not been set
 	 */
 	public BNode(TreeObject initialKey, long address, long parent) throws IllegalStateException {
-		this(initialKey, address, parent, -1, -1);
+		this(initialKey, address, parent, 0, 0);
 	}
 	
 	/**
@@ -103,7 +96,7 @@ public class BNode {
 	 * @throws IllegalStateException Static degree has not been set
 	 */
 	public BNode(TreeObject initialKey, long address) throws IllegalStateException {
-		this(initialKey, address, -1, -1, -1);
+		this(initialKey, address, 0, 0, 0);
 	}
 	
 	//=================================================================================================================
@@ -116,8 +109,6 @@ public class BNode {
 	 * 
 	 * @param key   TreeObject containing Object to insert
 	 * @param child Child related to key to insert 
-	 * @param write Whether to write to the RAF or not
-	 * @param tree  BTree this BNode belongs to write to cache
 	 * 
 	 * @throws IOException Writing to RAF may throw exception
 	 */
@@ -134,10 +125,7 @@ public class BNode {
 	 * children - # # # * # # #
 	 */
 	public void insert(TreeObject key, long child) throws IOException {
-		//get to the index of the first k less than key
-		if(child != -1) {
-			child = child;
-		}
+		//get to the index of the first k less than key and move keys/children over
 		int i;
 		for(i = (n - 1); i >= 0 && key.compare(keys[i]) <= 0; i--) {
 			keys[i + 1] = keys[i];
@@ -151,30 +139,16 @@ public class BNode {
 	}
 	
 	/**
-	 * Insert the given key into this BNode. If the key is in this
-	 * BNode, then increment that key's frequency and always write.
+	 * Insert the given key into this BNode, should only be used on
+	 * leaf BNodes.
 	 * 
 	 * @param key TreeObject containing Object to insert
 	 * 
 	 * @throws IOException Writing to RAF may throw exception
 	 */
 	public void insert(TreeObject key) throws IOException {
-		insert(key, -1);
+		insert(key, 0);
 	}
-//	
-//	/**
-//	 * Insert the given key into this BNode and insert the given child.
-//	 * <p>
-//	 * NO WRITE: This method does not write the changed BNode to the RAF
-//	 * 
-//	 * @param key   TreeObject containing Object to insert
-//	 * @param child Child related to key to insert 
-//	 * 
-//	 * @throws IOException Writing to RAF may throw exception
-//	 */
-//	public void insertNoWrite(TreeObject key, long child) throws IOException {
-//		insert(key, child, false);
-//	}
 	
 	/**
 	 * Get the child of this BNode where the given key should be
@@ -204,12 +178,10 @@ public class BNode {
 	
 	/**
 	 * Increments the frequency of the given key in this BNode.
-	 * <p>
-	 * WRITE: This method writes this changed BNode to the RAF
 	 * 
 	 * @param key The Object to increment the frequency of
 	 * 
-	 * @return True if element was found, false otherwise
+	 * @return True if element was found and incremented, false otherwise
 	 * 
 	 * @throws IOException Reading/Writing to RAF may throw exception
 	 */
@@ -221,77 +193,6 @@ public class BNode {
 		}
 		return false;
 	}
-	
-//	/**
-//	 * Split the given node into two, or three if it's a root. Does
-//	 * not add the new BNodes to the BTree's BCache
-//	 * <p>
-//	 * WRITE: This method writes this changed BNodes to the RAF
-//	 * 
-//	 * @param parent The parent of the BNode you're splitting, null if
-//	 *               this is the root
-//	 * 
-//	 * @return The address of the parent BNode
-//	 * 
-//	 * @throws IOException Reading/Writing to RAF may throw exception
-//	 */
-//	public long split(BNode parent) throws IOException {
-//		return split(parent, null);
-//	}
-//	
-//	/**
-//	 * Split the given node into two, or three if it's a root. Adds
-//	 * the new BNodes to the given BTree's BCache.
-//	 * <p>
-//	 * NO WRITE: This method does not write the changed BNodes to the RAF
-//	 * 
-//	 * @param parent The parent of the BNode you're splitting, null if
-//	 *               this is the root
-//	 * @param tree   BTree this BNode belongs to.
-//	 * 
-//	 * @return The address of the parent BNode
-//	 * 
-//	 * @throws IOException Reading/Writing to RAF may throw exception
-//	 */
-//	public long split(BNode parent, BTree tree) throws IOException {		
-//		//create the new node that'll be to the right of this node
-//		BNode splitRight = new BNode(keys[n/2 + 1], BReadWrite.getNextAddress(), this.parent, children[(n + 1)/2], children[(n + 1)/2 + 1]);
-//		n--;
-//		
-//		//move keys/children over to new right node
-//		for(int i = keys.length/2 + 1; i < keys.length - 1; i++) {
-//			splitRight.insertNoWrite(keys[i + 1], children[i + 2]);
-//			n--;
-//		}
-//
-//		//if this is the ROOT, create new parent/root to insert into
-//		//else just insert into the parent
-//		if(isRoot()) {
-//			//                               Already new node 'splitRight' at getNextAddress, so
-//			//                               have to compensate with additional offset getDiskSize
-//			parent = new BNode(keys[n - 1], BReadWrite.getNextAddress() + BNode.getDiskSize(), -1, address, splitRight.getAddress());
-//			this.parent = splitRight.parent = parent.getAddress();
-//		}
-//		else {
-//			parent.insertNoWrite(keys[n - 1], splitRight.getAddress());
-//		}
-//		n--;
-//		
-//		//if the given BTree is null, write the BNodes
-//		if(tree == null) {
-//			BReadWrite.writeBNode(splitRight);
-//			BReadWrite.writeBNode(this);
-//			BReadWrite.writeBNode(parent);
-//		}
-//		//else add the BNodes to the BCache
-//		else {
-//			tree.addToCache(splitRight);
-//			tree.addToCache(parent);
-//		}
-//		
-//		
-//		return parent.getAddress();
-//	}
 	
 	//=================================================================================================================
 	//                                           GET/SET/UTILITY METHODS
@@ -401,12 +302,7 @@ public class BNode {
 	 * @return true if leaf, false otherwise
 	 */
 	public boolean isLeaf() {
-		for(int i = 0; i < n + 1; i++) {
-			if(children[i] < 0) {
-				return true;
-			}
-		}
-		return false;
+		return children[0] <= 0;
 	}
 	
 	/**
@@ -415,7 +311,7 @@ public class BNode {
 	 * @return true if root, false otherwise
 	 */
 	public boolean isRoot() {
-		return parent < 0;
+		return parent <= 0;
 	}
 	
 	/**
@@ -425,6 +321,22 @@ public class BNode {
 	 */
 	public boolean isFull() {
 		return ((2 * degree ) - 1) == n;
+	}
+	
+	/**
+	 * Returns a string of the compresses (long) keys in a single line.
+	 * 
+	 * @return String of "key0 key1 key2 + ... + keyn"
+	 */
+	public String getKeysAsString() {
+		StringBuilder retString = new StringBuilder();
+		int i;
+		for(i = 0; i < n - 1 ; i++) {
+			retString.append(keys[i].getKey() + " ");
+		}
+		retString.append(keys[n - 1].getKey());
+		
+		return retString.toString();
 	}
 	
 	/**
@@ -443,65 +355,39 @@ public class BNode {
 		return ret.toString();
 	}
 	
-	//incomplete equals method, may be needed later
-//	@SuppressWarnings("unchecked")
-//	@Override
-//	public boolean equals(Object otherObject) {
-//		//check if other object is null
-//		if(otherObject == null) {
-//			return false;
-//		}
-//		
-//		//check if other object is not the same as this class
-//		if(otherObject.getClass() != this.getClass()) {
-//			return false;
-//		}
-//		
-//		//can 'safely' cast otherObject to HashObject and do actual comparison
-//		BNode<E> other = (BNode<E>) otherObject;
-//		
-//		//check that all children are the same
-//		if(children.size() != other.children.size()) {
-//			return false;
-//		}
-//		for(int i = 0; i < children.size(); i++) {
-//			if(children.get(i) != other.children.get(i)) {
-//				return false;
-//			}
-//		}
-//		
-//		//check that all keys are the same
-//		if(keys.size() != other.keys.size()) {
-//			return false;
-//		}
-//		for(int i = 0; i < keys.size(); i++) {
-//			if(keys.get(i).compare(other.keys.get(i)) != 0) {
-//				return false;
-//			}
-//		}
-//		
-//		return address == other.address;
-//	}
-	
-//	@Override
-//	public String toString() {
-//		StringBuilder retString = new StringBuilder();
-//		for(int i = 0; i < keys.size(); i++) {
-//			retString.append(keys.get(i).getKey() + " ");
-//		}
-//		
-//		return retString.toString().substring(0, retString.length() - 1);
-//	}
-	
-	//returns a single line of the long keys separated by spaces
+	//only compares the address of the other BNode
 	@Override
-	public String toString() {
-		StringBuilder retString = new StringBuilder();
-		for(int i = 0; i < n ; i++) {
-			retString.append(keys[i].getKey() + " ");
+	public boolean equals(Object otherObject) {
+		//check if other object is null
+		if(otherObject == null) {
+			return false;
 		}
 		
-		return retString.toString().substring(0, retString.length() - 1);
+		//check if other object is not the same as this class
+		if(otherObject.getClass() != this.getClass()) {
+			return false;
+		}
+		
+		//can 'safely' cast otherObject to HashObject and do actual comparison
+		BNode other = (BNode) otherObject;
+		
+		return address == other.address;
+	}
+	
+	
+	
+	//returns '{child [key|keyLong : frequency] child ...}'
+	@Override
+	public String toString() {
+		StringBuilder retString = new StringBuilder("{");
+		int i;
+		for(i = 0; i < n ; i++) {
+			retString.append(children[i]);
+			retString.append(" [" + keys[i].keyToString() + "|" + keys[i].getKey() + " : " + keys[i].getFrequency() + "] ");
+		}
+		retString.append(children[i + 1] + "}");
+		
+		return retString.toString();
 	}
 	
 	//=================================================================================================================

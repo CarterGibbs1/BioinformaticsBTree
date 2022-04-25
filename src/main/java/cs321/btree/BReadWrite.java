@@ -106,19 +106,7 @@ public class BReadWrite {
 			// store and write n
 			int n = node.getN();
 			buffer.putInt(n);
-
-			// get children and keys
-//			LinkedList<Long> children = node.getChildren();
-//			LinkedList<TreeObject> keys = node.getKeys();
-
-			// write the children and keys in alternating order
-//			buffer.putLong(children.get(0));
-//			for (int i = 0; i < n; i++) {
-//				buffer.putLong(keys.get(i).getKey());
-//				buffer.putInt(keys.get(i).getFrequency());
-//
-//				buffer.putLong(children.get(i + 1));
-//			}
+			
 			buffer.putLong(node.getChild(0));
 			for (int i = 0; i < n; i++) {
 				buffer.putLong(node.getKey(i).getKey());
@@ -206,7 +194,7 @@ public class BReadWrite {
 			buffer.clear();
 
 			//write metadata to RAF
-			buffer.putLong(tree.getRoot()); // root address
+			buffer.putLong(tree.getRoot().getAddress()); // root address
 			buffer.putInt(tree.getDegree());  // degree
 			buffer.putShort(tree.getFrequency());  // frequency
 			buffer.putInt(tree.getNumNodes());  //number of nodes
@@ -218,6 +206,8 @@ public class BReadWrite {
 
 			// reset buffer capacity to match BNode size
 			setBuffer(BNode.getDiskSize());
+			//write the root
+			writeBNode(tree.getRoot());
 		} catch (NullPointerException e) {
 			throw new IllegalStateException(
 					e.getClass() + " thrown, may indicate that RAF or buffer have not been set properly.");
@@ -229,7 +219,7 @@ public class BReadWrite {
 	 * degree to match the BTree degree. Automatically sets the buffer capacity to
 	 * the BNode disk size after running.
 	 * 
-	 * @param cache The cache size of this BTree, < 0 for no cache
+	 * @param cache The cache size of this BTree, <= 0 for no cache
 	 * 
 	 * @return BTree at beginning of RAF
 	 * 
@@ -257,91 +247,18 @@ public class BReadWrite {
 			int numNodes = buffer.getInt();
 			short height = buffer.getShort();
 
-			// initialize BTree and return 
-			BTree retTree = new BTree(root, t, k, numNodes, height, cache);
-
-			// set static BNode degree
-			BNode.setDegree(retTree.getDegree());
-
 			// reset buffer capacity to match BNode size
 			setBuffer(BNode.getDiskSize());
-
-			return retTree;
+			
+			// set static BNode degree
+			BNode.setDegree(t);
+			
+			// initialize BTree and return
+			return new BTree(root, t, k, numNodes, height, cache);
 		} catch (NullPointerException e) {
 			throw new IllegalStateException(
 					e.getClass() + " thrown, may indicate that RAF or buffer have not been set properly.");
 		}
-	}
-	
-	/**
-	 * Rewrites all the parents of the children of the given BNode. Useful after
-	 * splitting a non-leaf BNode.
-	 * 
-	 * @param right The right BNode created after a split
-	 * 
-	 * @throws IOException              Reading RAF may throw exception
-	 * @throws BufferUnderflowException Indicates buffer capacity was incorrect for
-	 *                                  what is was reading
-	 * @throws IllegalStateException    If thrown, it's likely RAF or buffer have
-	 *                                  not been set
-	 */
-	static public void reassignParents(BNode right) throws IOException {
-		try {
-			//set buffer capacity to just a single long/address
-			setBuffer(8);
-			
-			//for each child in right, rewrite the parent address to point at right
-//			for(Long child : right.getChildren()) {
-//				RAF.position(child);
-//				buffer.clear();
-//				buffer.putLong(right.getAddress());
-//				buffer.flip();
-//				RAF.write(buffer);
-//			}
-			for(int i = 0; i < right.getN() + 1; i++) {
-				RAF.position(right.getChild(i));
-				buffer.clear();
-				buffer.putLong(right.getAddress());
-				buffer.flip();
-				RAF.write(buffer);
-			}
-			
-			//reset the buffer to BNode
-			setBuffer(BNode.getDiskSize());
-		} catch (NullPointerException e) {
-			throw new IllegalStateException(
-					e.getClass() + " thrown, may indicate that RAF or buffer have not been set properly.");
-		}
-	}
-	
-	/**
-	 * Get the next available address in the RAF, i.e. the end of the RAF.
-	 * 
-	 * @return The next available address in the RAF.
-	 * 
-	 * @throws IOException Reading RAF may throw exception
-	 */
-	static public long getNextAddress() throws IOException {
-		/*
-		 * I spent so long trying to figure this out. I'm so tired
-		 * Writing to the RAF size will often overwrite another BNode unless the last BNode in the RAF is full
-		 * To account for this, we 'round up' the address to return to the next correct address to write a BNode to
-		 * ----------------------------------------------
-		 * Example Demonstration: 
-		 * Say -
-		 * BTree.disk = 8 | BNode.disk = 20 | RAF.size = 450
-		 * 
-		 * (450 - 8)/20(int) * 20 + 8 = 448 | The BNode at 448 will be overwritten if we write to RAF.size/450
-		 * 
-		 * So instead -
-		 * ((450 - 8)/20(int) + 1) * 20 + 8 = 468 | Writing at 468 leaves space for the prior BNode 448 to write to
-		 * 
-		 */
-		if((RAF.size() - BTree.getDiskSize()) % BNode.getDiskSize() != 0) {
-			return (((RAF.size() - BTree.getDiskSize())/BNode.getDiskSize() + 1) * BNode.getDiskSize()) + BTree.getDiskSize();
-		}
-		
-		return RAF.size();
 	}
 	
 	/**
