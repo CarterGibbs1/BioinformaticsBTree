@@ -7,7 +7,6 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.LinkedList;
 
 /**
  * Contains static methods used to read and write to a Random Access File. Used
@@ -194,11 +193,11 @@ public class BReadWrite {
 			buffer.clear();
 
 			//write metadata to RAF
-			buffer.putLong(tree.getRoot().getAddress()); // root address
-			buffer.putInt(tree.getDegree());  // degree
-			buffer.putShort(tree.getFrequency());  // frequency
-			buffer.putInt(tree.getNumNodes());  //number of nodes
-			buffer.putShort(tree.getHeight());  //height
+			buffer.putLong(tree.getRoot().getAddress());
+			buffer.putInt(tree.getDegree());
+			buffer.putShort(tree.getFrequency());
+			buffer.putInt(tree.getNumNodes());
+			buffer.putShort(tree.getHeight());
 
 			// make buffer ready to write and then write to RAF
 			buffer.flip();
