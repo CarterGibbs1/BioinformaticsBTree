@@ -13,8 +13,35 @@ public class GeneBankCreateBTree {
     public static void main(String[] args) throws Exception {
         GeneBankCreateBTreeArguments geneBankCreateBTreeArguments = parseArgumentsAndHandleExceptions(args);
         String dnaSequence = readGBKFile(geneBankCreateBTreeArguments);
-
-
+        // suggestion/way to parse seq //
+        //int idx = 0;
+        //while (idx < dnaSequence.length() - seqL) {
+            //String thisSeq = "";
+            //int index = idx;
+            //while (thisSeq.length() < seqL) {
+                //thisSeq += dnaSequence.charAt(index);
+                //index++;
+            //}
+            //bT.insert(new TreeObject(thisSeq, 1));
+            //idx++;
+        //}// end of while
+        // create dump file if needed
+        //if (args.getDebugLevel() == 1) {
+            //String dumpFilename = "";
+            //dumpFilename += filename + ".btree.dump." + bT.getFrequency();
+            //PrintStream pS = new PrintStream(filename);
+            //PrintStream stdout = System.out;
+            //String dumpData = bT.dump();
+            //pS.append(dumpData);
+            //System.setOut(pS);
+            //System.setOut(stdout);
+        //end of if statement
+        //bT.emptyCache();
+        //bT.writeBTree();
+        /***/
+        // not sure if we need the part below, somehow this'll be the filename of the btree file
+        //String bTreefilename += args.getGbkFileName() + ".btree.data." + seqL + args.getDegree();
+        /***/
     }
 
     /**
