@@ -18,19 +18,31 @@ public class GeneBankSearchBTree
         GeneBankSearchBTreeArguments arguments = parseArgumentsAndHandleExceptions(args);
         File qFile = new File(arguments.getQueryFileName());
         Scanner qScan = new Scanner(qFile);
-        int cache = 0;
-        if (arguments.getCacheSize() == 1) {
-            cache = arguments.getCacheSize();
+        int cache = arguments.getCacheSize();
+//        if (arguments.getCacheSize() == 1) {
+//            cache = arguments.getCacheSize();
+//        }
+//        
+        
+        try {
+        	
+        	//set file to read from and read BTree
+        	BReadWrite.setRAF(arguments.getBTreeFileName(), false);
+	        BTree searchTree = BReadWrite.readBTree(cache);
+	        
+	        while (qScan.hasNextLine()) {
+	            String qCurr = qScan.nextLine().toLowerCase();
+	            System.out.print(qCurr + ": ");// wonder if we don't print if the user doesn't provide debug level
+	            // I think the default value is zero, but I'm not sure for search specifically
+	            TreeObject tOToFind = new TreeObject(qCurr);
+	            int currFreq = searchTree.search(tOToFind);
+	            System.out.println(currFreq);
+	        }
+        
+        
         }
-        BTree searchedBT = BReadWrite.readBTree(cache);// is there a different way to read this,
-        //or should it be through the .btree.data file
-        while (qScan.hasNextLine()) {
-            String qCurr = qScan.nextLine().toLowerCase();
-            System.out.print(qCurr + ": ");// wonder if we don't print if the user doesn't provide debug level
-            // I think the default value is zero, but I'm not sure for search specifically
-            TreeObject tOToFind = new TreeObject(qCurr);
-            int currFreq = searchedBT.search(tOToFind);
-            System.out.println(currFreq);
+        catch(Exception e) {
+        	printUsageAndExit(e.getMessage());
         }
     }
 
