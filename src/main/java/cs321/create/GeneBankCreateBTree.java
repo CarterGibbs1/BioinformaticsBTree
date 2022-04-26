@@ -40,7 +40,8 @@ public class GeneBankCreateBTree {
         //bT.writeBTree();
         /***/
         // not sure if we need the part below, somehow this'll be the filename of the btree file
-        //String bTreefilename += args.getGbkFileName() + ".btree.data." + seqL + args.getDegree();
+        //String bTreeFilename += args.getGbkFileName() + ".btree.data." + seqL + args.getDegree();
+        // guess: setRAF(bTreeFilename);
         /***/
     }
 

@@ -15,7 +15,6 @@ public class GeneBankSearchBTree
 
     public static void main(String[] args) throws Exception
     {
-        System.out.println("Hello world from cs321.search.GeneBankSearchBTree.main");
         GeneBankSearchBTreeArguments arguments = parseArgumentsAndHandleExceptions(args);
         File qFile = new File(arguments.getQueryFileName());
         Scanner qScan = new Scanner(qFile);
