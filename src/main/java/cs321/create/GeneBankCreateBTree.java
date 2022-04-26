@@ -138,3 +138,73 @@ public class GeneBankCreateBTree {
         System.exit(1);
     }
 }
+
+/***/
+//Below is some of the implementation needed to create a database in createbtree
+/***/
+//IMPORTANT: BOTH CREATEBTREE AND SEARCHDATABASE NEED THE FOLLOWING COMMAND IN THE DIR IN TERMINAL BEFORE RUNNING PROGRAM:
+// jar xf sqlite-jdbc-3.36.0.3.jar
+/***/
+//below is a method that could go atop the createbtree class **/
+
+//
+//      private void inOrderT(BTree b)
+//          String seqs = dump();
+//          *parse each seq of length sequenceLength and insert it with following:*
+//            int idx = 0;
+//			  while (idx < seqs.length() - args.getSubSequenceLength()) {
+//                String thisSeq = "";
+//                int index = idx;
+//                while (thisSeq.length() < seqL) {
+//                    thisSeq += overallSeqs.charAt(index);
+//                    index++;
+//                }
+//                index = index + 3;// three spaces for space, colon, then space in toString
+//                int freq = Integer.parseInt(overallSeqs.charAt(index));// better way to do this probs
+//                statement.executeUpdate("insert into btree (dnaseq, freq) values (\'" + thisSeq + "\', " + freq + ");");
+//                idx++;
+//          }// end of while
+//
+/***/
+//this part goes in main
+//    Connection connection = null;
+//    try
+//    {
+//
+//
+//        /*Test for a driver*/
+//        /*********/
+//        // create a database connection
+//        connection = DriverManager.getConnection("jdbc:sqlite:btree.db");
+//        Statement statement = connection.createStatement();
+//        statement.setQueryTimeout(30);  // set timeout to 30 sec.
+//        statement.executeUpdate("drop table if exists btree;");
+//        statement.executeUpdate("create table btree (dnaseq varchar(255), freq int);");
+//
+//        ReadWrite.writeBTree(*insert name of bTree variable here*);
+
+//in order traversal here
+//        inOrderT(*insert name of bTree variable here*);
+//
+//    }
+//    catch(SQLException e)
+//    {
+//        // if the error message is "out of memory",
+//        // it probably means no database file is found
+//        System.err.println(e.getMessage());
+//    }
+//    finally
+//    {
+//        try
+//        {
+//            if(connection != null)
+//                connection.close();
+//        }
+//        catch(SQLException e)
+//        {
+//            // connection close failed.
+//            System.err.println(e.getMessage());
+//        }
+//    }
+//}// end of main
+//}
