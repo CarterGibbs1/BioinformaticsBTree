@@ -11,12 +11,15 @@ import java.util.Scanner;
 public class GeneBankCreateBTree {
 
     public static void main(String[] args) throws Exception {
-        System.out.println("Hello world from cs321.create.GeneBankCreateBTree.main");
         GeneBankCreateBTreeArguments geneBankCreateBTreeArguments = parseArgumentsAndHandleExceptions(args);
+        String dnaSequence = readGBKFile(geneBankCreateBTreeArguments);
 
 
     }
 
+    /**
+     * Catches any ParseArgumentExceptions and returns a GeneBankCreateBTreeArguments object
+     */
     private static GeneBankCreateBTreeArguments parseArgumentsAndHandleExceptions(String[] args) {
         GeneBankCreateBTreeArguments geneBankCreateBTreeArguments = null;
         try {
@@ -27,11 +30,12 @@ public class GeneBankCreateBTree {
         return geneBankCreateBTreeArguments;
     }
 
-    private static void printUsageAndExit(String errorMessage) {
-        System.err.println(errorMessage);
-        System.exit(1);
-    }
-
+    /**
+     * Parses the command-line arguments and handles exceptions
+     * @param args - array of Strings of command-line arguments
+     * @return - a GeneBankCreateBTreeArguments object holding the arguments of the command line
+     * @throws ParseArgumentException - if any issues with arguments, throws this exception
+     */
     public static GeneBankCreateBTreeArguments parseArguments(String[] args) throws ParseArgumentException {
         if (args.length < 4 || args.length > 6) {
             System.out.println
@@ -74,30 +78,63 @@ public class GeneBankCreateBTree {
         return new GeneBankCreateBTreeArguments(withOrWithoutCache == 1, degree, gbkFileName, sequenceLength, cacheSize, debugLevel);
     }
 
-    public static void createBTree(GeneBankCreateBTreeArguments args) {
+    /**
+     * Parses a file formated as a GBK, then fills a string with the DNA sequence of the file.
+     * @param args - arguments of the tree, includes gbkfile name
+     * @return - a string containing the entire dna sequence. Ends character before n or end of sequence.
+     */
+    public static String readGBKFile(GeneBankCreateBTreeArguments args) {
         try {
             Scanner fileScan = new Scanner(new File(args.getGbkFileName()));
             while (!fileScan.nextLine().contains("ORIGIN"));
-            String line = fileScan.nextLine();
-            Scanner lineScan = new Scanner(line);
-            String sequence = lineScan.next();
-            int index;
-            char charSeq[] = new char[args.getSubsequenceLength()];
-            for (index = 0; index < args.getSubsequenceLength(); index++) { // fills array initially
-                charSeq[index] = sequence.charAt(index); // get char at index of sequence
-            }
-            BTree tree = new BTree(args.getDegree(),args.getSubsequenceLength(), new TreeObject(new String(charSeq), args.getSubsequenceLength()));
-            while (!line.contains("//") && fileScan.hasNextLine()) { // while has another line in sequence
-                while (lineScan.hasNext()) { // while has another sequence
-                    for ()
+            String line = fileScan.next();
+            while (isNumber(line)) line = fileScan.next();
+            //BTree tree = new BTree(args.getDegree(),args.getSubsequenceLength(), new TreeObject(new String(charSeq), args.getSubsequenceLength()));
+            String dnaSequence = ""; // full DNA sequence
+            while (!line.contains("//") && fileScan.hasNext()) { // while has another sequence
+                if (isNumber(line)) {
+                    line = fileScan.next();
+                    continue;
                 }
+                int locN = line.indexOf("n"); // location of N in line
+                if (locN != -1) {
+                    dnaSequence += line.substring(0, locN);
+                    break;
+                }
+                dnaSequence += line;
+                line = fileScan.next();
             }
-        } catch (FileNotFoundException fe) {
-            System.err.println("File not found\n");
-            System.exit(1);
-        } catch (IOException io) {
-            System.err.println("IO Exception thrown\n");
-            System.exit(1);
+
+            return dnaSequence;
+
         }
+        catch (FileNotFoundException fe) {
+            printUsageAndExit("File Not Found.");
+        }
+        return null;
+    }
+
+    // HELPER METHODS FOR DRIVER
+
+    /**
+     * Takes in a string and returns true if the string is a number and false if it isn't
+     */
+    private static boolean isNumber(String line) {
+        try {
+            Integer.parseInt(line);
+            return true;
+        }
+        catch (NumberFormatException nfe) {
+            return false;
+        }
+    }
+
+    /**
+     * Print error message and exits program.
+     * @param errorMessage
+     */
+    private static void printUsageAndExit(String errorMessage) {
+        System.err.println(errorMessage);
+        System.exit(1);
     }
 }
