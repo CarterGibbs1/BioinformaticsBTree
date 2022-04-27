@@ -19,6 +19,7 @@ import java.nio.channels.FileChannel;
 public class BReadWrite {
 
 	private static FileChannel RAF = null;
+	private static String RAFName = null;
 	private static ByteBuffer buffer;
 
 	/**
@@ -37,7 +38,8 @@ public class BReadWrite {
 	 */
 	@SuppressWarnings("resource") //TODO: memory leak? Talk to tutor
 	static public void setRAF(String fileName, boolean replace) throws IOException {
-		File file = new File(fileName);
+		RAFName = fileName;
+		File file = new File(RAFName);
 		RandomAccessFile RAFRaw = null;
 
 		try {
@@ -258,6 +260,15 @@ public class BReadWrite {
 			throw new IllegalStateException(
 					e.getClass() + " thrown, may indicate that RAF or buffer have not been set properly.");
 		}
+	}
+	
+	/**
+	 * Get the name of the RAF.
+	 * 
+	 * @return Filename of the RAF
+	 */
+	static public String getRAFName() {
+		return RAFName;
 	}
 	
 	/**

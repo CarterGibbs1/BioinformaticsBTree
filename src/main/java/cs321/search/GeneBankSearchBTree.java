@@ -36,7 +36,8 @@ public class GeneBankSearchBTree
 	        boolean debug = arguments.getDebugLevel() == 1;
 	        PrintStream result = null;
 	        if(debug) {
-		        File resultFile = new File("/results/genebank/" + arguments.getQueryFileName()  + "_ON_" + arguments.getBTreeFileName());
+		        File resultFile = new File("./results/genebank/" + arguments.getQueryFileName().substring(arguments.getQueryFileName().lastIndexOf('/') + 1, arguments.getQueryFileName().length()) 
+		        		+ "_ON_" + arguments.getBTreeFileName().substring(arguments.getBTreeFileName().lastIndexOf('/') + 1, arguments.getBTreeFileName().length()));
 		        if(resultFile.exists()) {
 		        	if(!resultFile.delete()) {
 		        		throw new IOException("Already existing result file '" + resultFile.getName() + "' could not be deleted, might be open elsewhere.");
@@ -51,16 +52,13 @@ public class GeneBankSearchBTree
 	            String qCurr = qScan.next().toLowerCase();
 	            int resultFreq = searchTree.search(new TreeObject(qCurr));
 	            
-	            System.out.println(qCurr + " : " + resultFreq);
-	            if(debug) {
-	            	result.println(qCurr + " : " + resultFreq);
-	            }
-	            
-	            qScan.next(); //skip expected frequency in query
+	            System.out.println(qCurr + " " + resultFreq);
+	            if(debug)
+	            	result.println(qCurr + " " + resultFreq);
 	        }
         }
         catch(Exception e) {
-        	printUsageAndExit(e + ": " + e.getMessage());
+        	printUsageAndExit(e.toString());
         }
     }
 
@@ -133,14 +131,15 @@ public class GeneBankSearchBTree
         // Getting some warnings here, but seems fine. Probably logic error to come back to.
         if (withOrWithoutCache == 1 && args.length < 4) {
             throw new ParseArgumentException("If With/Without Cache is 1, then must provide Cache size.");
-        } else if (args.length >= 4){
-            cacheSize = Integer.parseInt(args[3]);
-            if (cacheSize <= 0) throw new ParseArgumentException("Cache size must be greater than 0.");
-            if (args.length == 5) {
-                debugLevel = Integer.parseInt(args[4]);
-                if (debugLevel != 1 && debugLevel != 0) throw new ParseArgumentException("Debug level must be either 0 or 1");
-                //possibly change to be just 0, could do 1 if we want, but I think project just requires 0
-            }
+        } else if (args.length > 3){
+        	if(withOrWithoutCache == 1) {
+	            cacheSize = Integer.parseInt(args[3]);
+	            if (cacheSize <= 0) throw new ParseArgumentException("Cache size must be greater than 0.");
+	            if(args.length > 4) debugLevel = Integer.parseInt(args[4]);
+        	}
+        	else {
+        		debugLevel = Integer.parseInt(args[3]);
+        	}
         }
 
         return new GeneBankSearchBTreeArguments(withOrWithoutCache == 1, btreeFileName, queryFileName, cacheSize, debugLevel);
