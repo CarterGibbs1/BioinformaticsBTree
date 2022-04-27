@@ -15,5 +15,6 @@ TBD
 TBD
 
 # Additional Notes
-TBD
+Run the following command (in the same directory as the class) before you use GeneBankCreateBTree and GeneBankSearchDatabase:
+jar xf sqlite-jdbc-3.36.0.3.jar
 
