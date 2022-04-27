@@ -10,9 +10,18 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Scanner;
 
+/**
+ * Driver class for performing searches on BTree RAFs.
+ * 
+ * @author  Mesa Greear, Aaron Goin
+ * @version Spring 2022
+ */
 public class GeneBankSearchBTree
 {
 
+	/**
+	 * Main: Perform a search on the given file using the given query
+	 */
     public static void main(String[] args) throws Exception
     {
         GeneBankSearchBTreeArguments arguments = parseArgumentsAndHandleExceptions(args); //get args
@@ -55,6 +64,14 @@ public class GeneBankSearchBTree
         }
     }
 
+    /**
+     * Parse the given command line arguments and handle exceptions that may
+     * be thrown, printing messages to command line.
+     * 
+     * @param args String array of command line arguments
+     * 
+     * @return Object instance that contains parsed arguments
+     */
     private static GeneBankSearchBTreeArguments parseArgumentsAndHandleExceptions(String[] args) {
         GeneBankSearchBTreeArguments geneBankSearchBTreeArguments = null;
         try {
@@ -65,11 +82,25 @@ public class GeneBankSearchBTree
         return geneBankSearchBTreeArguments;
     }
 
+    /**
+     * Print the given error message to the console and exit.
+     * 
+     * @param errorMessage Message of throwable
+     */
     private static void printUsageAndExit(String errorMessage) {
         System.err.println(errorMessage);
         System.exit(1);
     }
 
+    /**
+     * Parse the given command line arguments.
+     * 
+     * @param args String array of command line arguments
+     * 
+     * @return Object instance that contains parsed arguments
+     * 
+     * @throws ParseArgumentException 
+     */
     public static GeneBankSearchBTreeArguments parseArguments(String[] args) throws ParseArgumentException {
         if (args.length < 4 || args.length > 5) {
             System.out.println
