@@ -41,7 +41,7 @@ public class GeneBankCreateBTree {
         /***/
         // not sure if we need the part below, somehow this'll be the filename of the btree file
         //String bTreeFilename += args.getGbkFileName() + ".btree.data." + seqL + args.getDegree();
-        // guess: setRAF(bTreeFilename);
+        // guess: setRAF(bTreeFilename, true);
         /***/
     }
 
@@ -194,7 +194,7 @@ public class GeneBankCreateBTree {
 //          }// end of while
 //
 /***/
-//this part goes in main
+//this part also goes in main, after BTree is created
 //    Connection connection = null;
 //    try
 //    {

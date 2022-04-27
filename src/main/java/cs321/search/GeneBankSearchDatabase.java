@@ -18,6 +18,8 @@ public class GeneBankSearchDatabase
 {
 
     //sqlite-jdbc-3.36.0.3.jar is needed in directory, attached it here
+    //IMPORTANT: BOTH CREATEBTREE AND SEARCHDATABASE NEED THE FOLLOWING COMMAND IN THE DIR IN TERMINAL BEFORE RUNNING PROGRAM:
+    // jar xf sqlite-jdbc-3.36.0.3.jar
 
     public static void main(String[] args) throws Exception//pass in a btree probs as arg
     {
@@ -97,6 +99,3 @@ public class GeneBankSearchDatabase
         return new GeneBankSearchDatabaseArguments(args[0], args[1], d);
     }
 }
-
-//IMPORTANT: BOTH CREATEBTREE AND SEARCHDATABASE NEED THE FOLLOWING COMMAND IN THE DIR IN TERMINAL BEFORE RUNNING PROGRAM:
-// jar xf sqlite-jdbc-3.36.0.3.jar
