@@ -37,12 +37,13 @@ public class GeneBankCreateBTree {
             //System.setOut(stdout);
         //end of if statement
         //bT.emptyCache();
-        //bT.writeBTree();
         /***/
         // not sure if we need the part below, somehow this'll be the filename of the btree file
         //String bTreeFilename += args.getGbkFileName() + ".btree.data." + seqL + args.getDegree();
         // guess: setRAF(bTreeFilename, true);
+        // wonder if it goes before or after you write the bTree
         /***/
+        //bT.writeBTree();
     }
 
     /**
