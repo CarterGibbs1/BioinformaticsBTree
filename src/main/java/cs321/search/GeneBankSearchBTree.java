@@ -4,10 +4,10 @@ import cs321.btree.BReadWrite;
 import cs321.btree.BTree;
 import cs321.btree.TreeObject;
 import cs321.common.ParseArgumentException;
-import cs321.common.ParseArgumentUtils;
-import cs321.create.GeneBankCreateBTreeArguments;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Scanner;
 
 public class GeneBankSearchBTree
@@ -15,34 +15,43 @@ public class GeneBankSearchBTree
 
     public static void main(String[] args) throws Exception
     {
-        GeneBankSearchBTreeArguments arguments = parseArgumentsAndHandleExceptions(args);
-        File qFile = new File(arguments.getQueryFileName());
-        Scanner qScan = new Scanner(qFile);
-        int cache = arguments.getCacheSize();
-//        if (arguments.getCacheSize() == 1) {
-//            cache = arguments.getCacheSize();
-//        }
-//        
+        GeneBankSearchBTreeArguments arguments = parseArgumentsAndHandleExceptions(args); //get args
         
         try {
-        	
-        	//set file to read from and read BTree
+        	//create Scanner for query file, set file to read BTree from, and instantiate BTree
+        	Scanner qScan = new Scanner(new File(arguments.getQueryFileName()));
         	BReadWrite.setRAF(arguments.getBTreeFileName(), false);
-	        BTree searchTree = BReadWrite.readBTree(cache);
+	        BTree searchTree = BReadWrite.readBTree(arguments.getCacheSize());
 	        
-	        while (qScan.hasNextLine()) {
-	            String qCurr = qScan.nextLine().toLowerCase();
-	            System.out.print(qCurr + ": ");// wonder if we don't print if the user doesn't provide debug level
-	            // I think the default value is zero, but I'm not sure for search specifically
-	            TreeObject tOToFind = new TreeObject(qCurr);
-	            int currFreq = searchTree.search(tOToFind);
-	            System.out.println(currFreq);
+	        //if debug == 1, create new file to put query results in
+	        boolean debug = arguments.getDebugLevel() == 1;
+	        PrintStream result = null;
+	        if(debug) {
+		        File resultFile = new File("/results/genebank/" + arguments.getQueryFileName()  + "_ON_" + arguments.getBTreeFileName());
+		        if(resultFile.exists()) {
+		        	if(!resultFile.delete()) {
+		        		throw new IOException("Already existing result file '" + resultFile.getName() + "' could not be deleted, might be open elsewhere.");
+		        	}
+		        }
+		        resultFile.createNewFile();
+		        result = new PrintStream(resultFile);
 	        }
-        
-        
+	        
+	        //scan each line from the query, printing the String and frequency of each String in result file
+	        while (qScan.hasNext()) {
+	            String qCurr = qScan.next().toLowerCase();
+	            int resultFreq = searchTree.search(new TreeObject(qCurr));
+	            
+	            System.out.println(qCurr + " : " + resultFreq);
+	            if(debug) {
+	            	result.println(qCurr + " : " + resultFreq);
+	            }
+	            
+	            qScan.next(); //skip expected frequency in query
+	        }
         }
         catch(Exception e) {
-        	printUsageAndExit(e.getMessage());
+        	printUsageAndExit(e + ": " + e.getMessage());
         }
     }
 
