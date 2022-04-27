@@ -21,6 +21,12 @@ public class GeneBankSearchDatabase
     //IMPORTANT: BOTH CREATEBTREE AND SEARCHDATABASE NEED THE FOLLOWING COMMAND IN THE DIR IN TERMINAL BEFORE RUNNING PROGRAM:
     // jar xf sqlite-jdbc-3.36.0.3.jar
 
+    /**
+     * Opens a database file and query file, and prints the quantities of matching DNA sequences from the query file.
+     *
+     * @param args args that get parsed with parseArgs
+     * @throws Exception for any rare, untested circumstance that causes the program to not complete
+     */
     public static void main(String[] args) throws Exception//pass in a btree probs as arg
     {
         Connection connection = null;
@@ -75,6 +81,13 @@ public class GeneBankSearchDatabase
         }
     }// end of main
 
+    /**
+     * Determines if command line arguments are legitimate.
+     *
+     * @param args the args that are passed in when using this class
+     * @return all arguments that were passed in, if legitimate
+     * @throws ParseArgumentException if any argument doesn't match the needed format
+     */
     public static GeneBankSearchDatabaseArguments parseArgs(String args[]) throws ParseArgumentException {
         if (args.length < 2 || args.length > 3) {
             System.out.println("Usage: java GeneBankSearchDatabase <path_to_SQLite_database> <query_file> [<debug_level>]");
