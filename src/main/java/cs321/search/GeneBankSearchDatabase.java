@@ -1,8 +1,5 @@
 package cs321.search;
 
-import com.sun.tools.javac.util.StringUtils;
-import cs321.btree.BTree;//delete
-import cs321.btree.TreeObject;
 import cs321.common.ParseArgumentException;
 
 import java.io.File;
@@ -14,6 +11,10 @@ import java.sql.Statement;
 import java.util.Locale;
 import java.util.Scanner;
 
+/**
+ * Searches through db file and query file, displays 0 for frequencies not in the database,
+ * or number that represents the frequency of the found dna sequence.
+ */
 public class GeneBankSearchDatabase
 {
 
