@@ -215,7 +215,7 @@ public class GeneBankCreateBTree {
 //below is a method that could go atop the createbtree class **/
 
 //
-//      private void inOrderT(BTree b)
+//      private void inOrderT(BTree b, Statement statement)
 //          String seqs = dump();
 //          *parse each seq of length sequenceLength and insert it with following:*
 //            int idx = 0;
@@ -248,7 +248,6 @@ public class GeneBankCreateBTree {
 //        statement.executeUpdate("drop table if exists btree;");
 //        statement.executeUpdate("create table btree (dnaseq varchar(255), freq int);");
 //
-//        ReadWrite.writeBTree(*insert name of bTree variable here*);
 
 //in order traversal here
 //        inOrderT(*insert name of bTree variable here*);
