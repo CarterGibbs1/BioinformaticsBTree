@@ -3,6 +3,7 @@ package cs321.create;
 import cs321.btree.BTree;
 import cs321.btree.TreeObject;
 import cs321.common.ParseArgumentException;
+import sun.reflect.generics.tree.Tree;
 
 import java.io.*;
 import java.util.List;
@@ -12,20 +13,44 @@ public class GeneBankCreateBTree {
 
     public static void main(String[] args) throws Exception {
         GeneBankCreateBTreeArguments geneBankCreateBTreeArguments = parseArgumentsAndHandleExceptions(args);
-        String dnaSequence = readGBKFile(geneBankCreateBTreeArguments);
-        // suggestion/way to parse seq //
-        //int idx = 0;
-        //while (idx < dnaSequence.length() - seqL) {
-            //String thisSeq = "";
-            //int index = idx;
-            //while (thisSeq.length() < seqL) {
-                //thisSeq += dnaSequence.charAt(index);
-                //index++;
-            //}
-            //bT.insert(new TreeObject(thisSeq, 1));
-            //idx++;
-        //}// end of while
-        // create dump file if needed
+        BTree bT = null;
+        // Read in from file
+        try {
+            Scanner fileScan = new Scanner(new File(geneBankCreateBTreeArguments.getGbkFileName()));
+            boolean newSegment = true;
+            while (fileScan.hasNextLine()) {
+                while (newSegment && fileScan.hasNextLine() && fileScan.nextLine().contains("ORIGIN"));
+                newSegment = false;
+                if (!fileScan.hasNextLine()) break;
+                String line = fileScan.next();
+                while (isNumber(line)) line = fileScan.next();
+                //BTree tree = new BTree(args.getDegree(),args.getSubsequenceLength(), new TreeObject(new String(charSeq), args.getSubsequenceLength()));
+                String dnaSequence = ""; // full DNA sequence
+                while (!line.contains("//") && fileScan.hasNext()) { // while has another sequence
+                    if (isNumber(line)) {
+                        line = fileScan.next();
+                        continue;
+                    }
+                    int locN = line.indexOf("n"); // location of N in line
+                    if (locN != -1) { // if we have an N in sequence, add up to n, then parse sequence.
+                        dnaSequence += line.substring(0, locN);
+                        parseDNASequence(dnaSequence, bT, geneBankCreateBTreeArguments);
+                        break;
+                    }
+                    dnaSequence += line;
+                    line = fileScan.next();
+                }
+                parseDNASequence(dnaSequence, bT, geneBankCreateBTreeArguments);
+                newSegment = true;
+            }
+        }
+        catch (FileNotFoundException fe) {
+            printUsageAndExit("File Not Found.");
+        }
+
+
+
+        // Deal with Dump file
         //if (args.getDebugLevel() == 1) {
             //String dumpFilename = "";
             //dumpFilename += filename + ".btree.dump." + bT.getFrequency();
@@ -44,6 +69,17 @@ public class GeneBankCreateBTree {
         // wonder if it goes before or after you write the bTree
         /***/
         //bT.writeBTree();
+    }
+
+    public static void parseDNASequence(String dnaSequence, BTree bT, GeneBankCreateBTreeArguments args) throws IOException {
+        // Parse data in dnaSequence
+        int index = 0;
+        while (index < dnaSequence.length() - args.getSubsequenceLength()) {
+            String thisSeq = "";
+            thisSeq += dnaSequence.substring(index, index + args.getSubsequenceLength());
+            bT.insert(new TreeObject(thisSeq));
+            index++;
+        }
     }
 
     /**
@@ -111,7 +147,7 @@ public class GeneBankCreateBTree {
      * Parses a file formated as a GBK, then fills a string with the DNA sequence of the file.
      * @param args - arguments of the tree, includes gbkfile name
      * @return - a string containing the entire dna sequence. Ends character before n or end of sequence.
-     */
+
     public static String readGBKFile(GeneBankCreateBTreeArguments args) {
         try {
             Scanner fileScan = new Scanner(new File(args.getGbkFileName()));
@@ -142,6 +178,8 @@ public class GeneBankCreateBTree {
         }
         return null;
     }
+*/
+
 
     // HELPER METHODS FOR DRIVER
 
