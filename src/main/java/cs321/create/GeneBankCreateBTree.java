@@ -230,6 +230,7 @@ public class GeneBankCreateBTree {
 //                int freq = Integer.parseInt(overallSeqs.charAt(index));// better way to do this probs
 //                statement.executeUpdate("insert into btree (dnaseq, freq) values (\'" + thisSeq + "\', " + freq + ");");
 //                idx++;
+//                idx++;// for /n char
 //          }// end of while
 //
 /***/
