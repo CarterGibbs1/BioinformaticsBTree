@@ -63,12 +63,15 @@ public class GeneBankCreateBTree {
 
 
         // Deal with Dump file
+        /***/
+        //imo, best to have this no matter what, even if debug level is zero, as it's something needed for db
+        //String dumpData = bT.dump();
+        /***/
         //if (args.getDebugLevel() == 1) {
             //String dumpFilename = "";
             //dumpFilename += filename + ".btree.dump." + bT.getFrequency();
             //PrintStream pS = new PrintStream(filename);
             //PrintStream stdout = System.out;
-            //String dumpData = bT.dump();
             //pS.append(dumpData);
             //System.setOut(pS);
             //System.setOut(stdout);
