@@ -234,18 +234,16 @@ public class GeneBankCreateBTree {
 //          String seqs = dump();
 //          *parse each seq of length sequenceLength and insert it with following:*
 //            int idx = 0;
-//			  while (idx < seqs.length() - args.getSubSequenceLength()) {
+//			  while (idx < seqs.length()) {
 //                String thisSeq = "";
-//                int index = idx;
-//                while (thisSeq.length() < seqL) {
-//                    thisSeq += overallSeqs.charAt(index);
-//                    index++;
+//                while (thisSeq.length() < args.getSubSequenceLength()) {
+//                    thisSeq += overallSeqs.charAt(idx);
+//                    idx++;
 //                }
-//                index = index + 3;// three spaces for space, colon, then space in toString
-//                int freq = Integer.parseInt(overallSeqs.charAt(index));// better way to do this probs
+//                idx = idx + 3;// three spaces for space, colon, then space in toString
+//                int freq = Integer.parseInt(overallSeqs.charAt(idx));// better way to do this probs
 //                statement.executeUpdate("insert into btree (dnaseq, freq) values (\'" + thisSeq + "\', " + freq + ");");
-//                idx++;
-//                idx++;// for /n char
+//                idx++;// /n char is just one char
 //          }// end of while
 //
 /***/
