@@ -54,8 +54,9 @@ public class GeneBankCreateBTree {
                 }
                 parseDNASequence(dnaSequence, bT, geneBankCreateBTreeArguments);
                 newSegment = true;
-            }
-        }
+            }// end of while
+            //deal with dump and db stuff in notes go here
+        }// end of try
         catch (FileNotFoundException fe) {
             printUsageAndExit("File Not Found.");
         }
@@ -75,15 +76,80 @@ public class GeneBankCreateBTree {
             //pS.append(dumpData);
             //System.setOut(pS);
             //System.setOut(stdout);
-        //end of if statement
+        //}end of if statement
         //bT.emptyCache();
         /***/
         // not sure if we need the part below, somehow this'll be the filename of the btree file
         //String bTreeFilename += args.getGbkFileName() + ".btree.data." + seqL + args.getDegree();
-        // guess: setRAF(bTreeFilename, true);
-        // wonder if it goes before or after you write the bTree
-        /***/
+        // guess: setRAF(bTreeFilename, true) // wonder if it goes before or after you write the bTree
         //bT.writeBTree();
+        /***/
+//Below is some of the implementation needed to create a database in createbtree
+/***/
+//IMPORTANT: BOTH CREATEBTREE AND SEARCHDATABASE NEED THE FOLLOWING COMMAND IN THE DIR IN TERMINAL BEFORE RUNNING PROGRAM:
+// jar xf sqlite-jdbc-3.36.0.3.jar
+/***/
+//below is a method that could go atop the createbtree class **/
+
+//
+//      private void inOrderT(String s, Statement statement)// s from dump() before
+//          String seqs = s;
+//          *parse each seq of length sequenceLength and insert it with following:*
+//            int idx = 0;
+//			  while (idx < seqs.length()) {
+//                String thisSeq = "";
+//                while (thisSeq.length() < args.getSubSequenceLength()) {
+//                    thisSeq += overallSeqs.charAt(idx);
+//                    idx++;
+//                }
+//                idx = idx + 3;// three spaces for space, colon, then space in toString
+//                int freq = Integer.parseInt(overallSeqs.charAt(idx));// better way to do this probs
+//                statement.executeUpdate("insert into btree (dnaseq, freq) values (\'" + thisSeq + "\', " + freq + ");");
+//                idx++;// /n char is just one char
+//          }// end of while
+//
+/***/
+//this part also goes in main, after BTree is created
+//    Connection connection = null;
+//    try
+//    {
+//
+//
+//        /*Test for a driver*/
+//        /*********/
+//        // create a database connection
+//        connection = DriverManager.getConnection("jdbc:sqlite:btree.db");
+//        Statement statement = connection.createStatement();
+//        statement.setQueryTimeout(30);  // set timeout to 30 sec.
+//        statement.executeUpdate("drop table if exists btree;");
+//        statement.executeUpdate("create table btree (dnaseq varchar(255), freq int);");
+//
+
+//in order traversal here
+//        inOrderT(dumpData, statement);
+//
+//    }
+//    catch(SQLException e)
+//    {
+//        // if the error message is "out of memory",
+//        // it probably means no database file is found
+//        System.err.println(e.getMessage());
+//    }
+//    finally
+//    {
+//        try
+//        {
+//            if(connection != null)
+//                connection.close();
+//        }
+//        catch(SQLException e)
+//        {
+//            // connection close failed.
+//            System.err.println(e.getMessage());
+//        }
+//    }
+//}// end of main
+//}
     }
 
     public static void parseDNASequence(String dnaSequence, BTree bT, GeneBankCreateBTreeArguments args) throws IOException {
@@ -220,71 +286,3 @@ public class GeneBankCreateBTree {
         System.exit(1);
     }
 }
-
-/***/
-//Below is some of the implementation needed to create a database in createbtree
-/***/
-//IMPORTANT: BOTH CREATEBTREE AND SEARCHDATABASE NEED THE FOLLOWING COMMAND IN THE DIR IN TERMINAL BEFORE RUNNING PROGRAM:
-// jar xf sqlite-jdbc-3.36.0.3.jar
-/***/
-//below is a method that could go atop the createbtree class **/
-
-//
-//      private void inOrderT(BTree b, Statement statement)
-//          String seqs = dump();
-//          *parse each seq of length sequenceLength and insert it with following:*
-//            int idx = 0;
-//			  while (idx < seqs.length()) {
-//                String thisSeq = "";
-//                while (thisSeq.length() < args.getSubSequenceLength()) {
-//                    thisSeq += overallSeqs.charAt(idx);
-//                    idx++;
-//                }
-//                idx = idx + 3;// three spaces for space, colon, then space in toString
-//                int freq = Integer.parseInt(overallSeqs.charAt(idx));// better way to do this probs
-//                statement.executeUpdate("insert into btree (dnaseq, freq) values (\'" + thisSeq + "\', " + freq + ");");
-//                idx++;// /n char is just one char
-//          }// end of while
-//
-/***/
-//this part also goes in main, after BTree is created
-//    Connection connection = null;
-//    try
-//    {
-//
-//
-//        /*Test for a driver*/
-//        /*********/
-//        // create a database connection
-//        connection = DriverManager.getConnection("jdbc:sqlite:btree.db");
-//        Statement statement = connection.createStatement();
-//        statement.setQueryTimeout(30);  // set timeout to 30 sec.
-//        statement.executeUpdate("drop table if exists btree;");
-//        statement.executeUpdate("create table btree (dnaseq varchar(255), freq int);");
-//
-
-//in order traversal here
-//        inOrderT(*insert name of bTree variable here*);
-//
-//    }
-//    catch(SQLException e)
-//    {
-//        // if the error message is "out of memory",
-//        // it probably means no database file is found
-//        System.err.println(e.getMessage());
-//    }
-//    finally
-//    {
-//        try
-//        {
-//            if(connection != null)
-//                connection.close();
-//        }
-//        catch(SQLException e)
-//        {
-//            // connection close failed.
-//            System.err.println(e.getMessage());
-//        }
-//    }
-//}// end of main
-//}
