@@ -87,7 +87,7 @@ public class BTree
 	 * @param degree        (t) How many keys/objects (t - 1 to 2t - 1)
 	 *                      and children (t to 2t) BNodes can have
      * @param frequency     (k) How many letters are stored per key (< 32)
-     * @param cacheSize     The max BNodes the cache can hold, < 0 for no
+     * @param cacheSize     The max BNodes the cache can hold, <= 0 for no
      *                      cache
      * 
 	 * @throws IOException Reading/Writing to RAF may throw exception
@@ -103,7 +103,7 @@ public class BTree
     
     /**
      * Constructor: Create a new BTree with one initial object and BNode.
-     * Written to file after instantiation.
+     * Does not use a Cache. Written to file after instantiation.
      * 
      * @param initialObject The first object this BTree will hold
 	 * @param degree        (t) How many keys/objects (t - 1 to 2t - 1)
@@ -121,6 +121,45 @@ public class BTree
     	BReadWrite.writeBNode(root);
     }
     
+    /**
+     * Constructor: Create a new BTree with one empty BNode. Written to
+     * file after instantiation.
+     * 
+	 * @param degree        (t) How many keys/objects (t - 1 to 2t - 1)
+	 *                      and children (t to 2t) BNodes can have
+     * @param frequency     (k) How many letters are stored per key (< 32)
+     * @param cacheSize     The max BNodes the cache can hold, <= 0 for no
+     *                      cache
+     * 
+	 * @throws IOException Reading/Writing to RAF may throw exception
+     */
+    public BTree(int degree, int frequency, int cacheSize) throws IOException {
+    	this(BTree.getDiskSize(), degree, frequency, 1, 0, cacheSize);
+    	
+    	//write new BTree and root BNode to RAF
+    	root = new BNode(BTree.getDiskSize());
+    	BReadWrite.writeBTree(this);
+    	BReadWrite.writeBNode(root);
+    }
+    
+    /**
+     * Constructor: Create a new BTree with one empty BNode. Does not use
+     * a Cache. Written to file after instantiation.
+     * 
+	 * @param degree        (t) How many keys/objects (t - 1 to 2t - 1)
+	 *                      and children (t to 2t) BNodes can have
+     * @param frequency     (k) How many letters are stored per key (< 32)
+     * 
+	 * @throws IOException Reading/Writing to RAF may throw exception
+     */
+    public BTree(int degree, int frequency) throws IOException {
+    	this(BTree.getDiskSize(), degree, frequency, 1, 0);
+    	
+    	//write new BTree and root BNode to RAF
+    	root = new BNode(BTree.getDiskSize());
+    	BReadWrite.writeBTree(this);
+    	BReadWrite.writeBNode(root);
+    }
     
    	//=================================================================================================================
 	//                                         BTREE FUNCTIONALITY METHODS

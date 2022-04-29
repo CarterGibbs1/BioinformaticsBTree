@@ -511,11 +511,11 @@ public class BTreeTest {
 				BReadWrite.setBuffer(BNode.getDiskSize());
 				
 				//generate random sequences and create BTree
-				ArrayList<String> inputSequences = generateRandomSequences(20000/5, 30000/5, 5, 15);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
-				BTree memoryTree = new BTree(new TreeObject(inputSequences.get(0)), degree, 5);
+				ArrayList<String> inputSequences = generateRandomSequences(200000/5, 300000/5, 5, 15);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				BTree memoryTree = new BTree(degree, 5);
 				
 				//insert all sequences
-				for(int i = 1; i < inputSequences.size(); i++) {
+				for(int i = 0; i < inputSequences.size(); i++) {
 					memoryTree.insert(new TreeObject(inputSequences.get(i)));
 				}
 				
@@ -570,7 +570,7 @@ public class BTreeTest {
 				BReadWrite.setBuffer(BNode.getDiskSize());
 				
 				//generate random sequences
-				inputSequences = generateRandomSequences(20000/5, 30000/5, 2, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				inputSequences = generateRandomSequences(200000/5, 300000/5, 2, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
 				TreeObject.setSequenceLength(inputSequences.get(0).length());
 				
 				//generate the same random sequence a random number of times and insert at random spots
@@ -578,12 +578,12 @@ public class BTreeTest {
 				newSeq = inputSequences.get(getRand(0, inputSequences.size()));
 				while(inputSequences.remove(newSeq));//remove all instances of newSeq
 				for(int i = 0; i < numNewSeq; i++) {
-					inputSequences.add(getRand(1, inputSequences.size()), newSeq);
+					inputSequences.add(getRand(0, inputSequences.size()), newSeq);
 				}
 				
 				//create BTree
-				memoryTree = new BTree(new TreeObject(inputSequences.get(0)), degree, inputSequences.get(0).length());
-				BTree t2 = new BTree(new TreeObject(inputSequences.get(0)), degree, inputSequences.get(0).length());
+				memoryTree = new BTree(degree, inputSequences.get(0).length());
+//				BTree t2 = new BTree(new TreeObject(inputSequences.get(0)), degree, inputSequences.get(0).length());
 				
 				
 				//debugging variable
@@ -591,7 +591,7 @@ public class BTreeTest {
 				ArrayList<BNode> x = new ArrayList<BNode>();
 				
 				//insert all sequences
-				for(int i = 1; i < inputSequences.size(); i++) {
+				for(int i = 0; i < inputSequences.size(); i++) {
 					
 							if(inputSequences.get(i).equals(newSeq)) {
 //System.out.println(memoryTree.search(new TreeObject(newSeq, 0)) + " | " + y + " | " + i);
@@ -633,7 +633,7 @@ public class BTreeTest {
 		} catch (Throwable e) {
 			System.out.println("==" + memoryTree.getDegree() + "| " + newSeq);
 				ArrayList<BNode> x = new ArrayList<BNode>();
-						memoryTree.getAllBNodes(x, memoryTree.getRoot().getAddress());
+//						memoryTree.getAllBNodes(x, memoryTree.getRoot().getAddress());
 			ex = e;
 			progressAndExceptionCheck(run_BTree_RAF_Search);
 		}
@@ -661,7 +661,7 @@ public class BTreeTest {
 			BReadWrite.setBuffer(BNode.getDiskSize());
 			
 			// generate random sequences
-				inputSequences = generateRandomSequences(20000/5, 30000/5, 2, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				inputSequences = generateRandomSequences(200000/5, 300000/5, 2, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
 			TreeObject.setSequenceLength(inputSequences.get(0).length());
 			
 			//debugging loop
@@ -674,10 +674,10 @@ public class BTreeTest {
 //			String y = inputSequences.get(x);
 
 			// create BTree
-			BTree memoryTree = new BTree(new TreeObject(inputSequences.get(0)), degree, 5);
+			BTree memoryTree = new BTree(degree, 5);
 
 			// insert all sequences
-			for (int i = 1; i < inputSequences.size(); i++) {
+			for (int i = 0; i < inputSequences.size(); i++) {
 				memoryTree.insert(new TreeObject(inputSequences.get(i)));
 			}
 			
@@ -725,29 +725,29 @@ public class BTreeTest {
 				BReadWrite.setBuffer(BNode.getDiskSize());
 				
 				// generate random sequences
-				inputSequences = generateRandomSequences(20000/5, 30000/5, 2, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				inputSequences = generateRandomSequences(200000/5, 300000/5, 2, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
 				tSize += inputSequences.size();
 				TreeObject.setSequenceLength(inputSequences.get(0).length());
 				
 				//create tree with and without cache
-				BTree noC = new BTree(new TreeObject(inputSequences.get(0)), degree, 5);
+				BTree noC = new BTree(degree, 5);
 				
 				cTime = (int)System.currentTimeMillis();
 				
 				// insert all sequences
-				for (int i = 1; i < inputSequences.size(); i++) {
+				for (int i = 0 ; i < inputSequences.size(); i++) {
 					noC.insert(new TreeObject(inputSequences.get(i)));
 				}
 				
 				ncTime += (System.currentTimeMillis() - cTime);
 				
 				BReadWrite.setRAF(TESTS_FOLDER + testName + k + "_Cache", true);
-				wiC = new BTree(new TreeObject(inputSequences.get(0)), degree, 5, cache);
+				wiC = new BTree(degree, 5, cache);
 				
 				cTime = (int)System.currentTimeMillis();
 				
 				// insert all sequences
-				for (int i = 1; i < inputSequences.size(); i++) {
+				for (int i = 0; i < inputSequences.size(); i++) {
 					wiC.insert(new TreeObject(inputSequences.get(i)));
 				}
 				wiC.emptyBCache();

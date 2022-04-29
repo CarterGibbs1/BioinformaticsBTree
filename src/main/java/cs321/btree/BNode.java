@@ -32,7 +32,7 @@ public class BNode {
 	/**
 	 * Constructor: Create BNode with one key 'initialKey,' a parent address
 	 * 'parent,' and two children 'leftChild' and 'rightChild.' An address that
-	 * is <= 0 is considered null.
+	 * is <= 0 is considered null. A null initialKey makes this an empty BNode.
 	 * 
 	 * @param intialKey   the initial object in this BNode
 	 * @param thisAddress address of this BNode
@@ -46,11 +46,11 @@ public class BNode {
 	 * Example Demonstration:
 	 * 
 	 * 
-	 *      new BNode(a, |, /, \)
+	 *      new BNode(a, 20, 0, 90, 50)
 	 * 
-	 * result     -    |
-	 *                 a
-	 *                / \
+	 * result     -    0
+	 *            20 = a
+	 *               90 50
 	 */
 	public BNode(TreeObject initialKey, long thisAddress, long parent, long leftChild, long rightChild) throws IllegalStateException {
 		//check that DEGREE has been set
@@ -63,7 +63,7 @@ public class BNode {
 		children = new long[degree * 2];
 		
 		keys[0] = initialKey;
-		n = 1;
+		n = keys[0] == null ? 0 : 1;
 		
 		children[0] = leftChild;
 		children[1] = rightChild;
@@ -74,11 +74,11 @@ public class BNode {
 	
 	/**
 	 * Constructor: Create leaf BNode with one key 'initialKey' and
-	 * a parent address 'parent.' An address that is less than 0 is
-	 * considered null.
+	 * a parent address 'parent.'  An address that is <= 0 is considered
+	 * null. A null initialKey makes this an empty BNode.
 	 * 
 	 * @param intialKey  the initial object in this BNode
-	 * @param thisAddress address of this BNode
+	 * @param address address of this BNode
 	 * @param parent     address of the parent of this BNode
 	 * 
 	 * @throws IllegalStateException Static degree has not been set
@@ -88,15 +88,28 @@ public class BNode {
 	}
 	
 	/**
-	 * Constructor: Create singular BNode with one key initialKey.
+	 * Constructor: Create singular BNode with one key initialKey. An
+	 * address that is <= 0 is considered null. A null initialKey
+	 * makes this an empty BNode.
 	 * 
 	 * @param intialKey the initial object in this BNode
-	 * @param thisAddress address of this BNode
+	 * @param address address of this BNode
 	 * 
 	 * @throws IllegalStateException Static degree has not been set
 	 */
 	public BNode(TreeObject initialKey, long address) throws IllegalStateException {
 		this(initialKey, address, 0, 0, 0);
+	}
+	
+	/**
+	 * Constructor: Create singular empty BNode.
+	 * 
+	 * @param address address of this BNode
+	 * 
+	 * @throws IllegalStateException Static degree has not been set
+	 */
+	public BNode(long address) throws IllegalStateException {
+		this(null, address);
 	}
 	
 	//=================================================================================================================
