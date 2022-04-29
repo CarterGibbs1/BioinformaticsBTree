@@ -13,20 +13,21 @@ public class GeneBankCreateBTree {
 
     public static void main(String[] args) throws Exception {
         GeneBankCreateBTreeArguments geneBankCreateBTreeArguments = parseArgumentsAndHandleExceptions(args);
-        BTree bT = null;
         // Read in from file
         try {
             Scanner fileScan = new Scanner(new File(geneBankCreateBTreeArguments.getGbkFileName()));
+            BTree bT = (geneBankCreateBTreeArguments.getDebugLevel() == 1) ?
+                    new BTree(geneBankCreateBTreeArguments.getDegree(), 1, geneBankCreateBTreeArguments.getCacheSize()) : // with cache
+                    new BTree(geneBankCreateBTreeArguments.getDegree(), 1); // without cache
             boolean newSegment = true;
             while (fileScan.hasNextLine()) {
-                while (newSegment && fileScan.hasNextLine() && fileScan.nextLine().contains("ORIGIN"));
+                while (newSegment && fileScan.hasNextLine() && !fileScan.nextLine().contains("ORIGIN"));
                 newSegment = false;
                 if (!fileScan.hasNextLine()) break;
                 String line = fileScan.next();
                 while (isNumber(line)) line = fileScan.next();
-                //BTree tree = new BTree(args.getDegree(),args.getSubsequenceLength(), new TreeObject(new String(charSeq), args.getSubsequenceLength()));
                 String dnaSequence = ""; // full DNA sequence
-                while (!line.contains("//") && fileScan.hasNext()) { // while has another sequence
+                while (!line.contains("//") && fileScan.hasNext()) { // while has another sequence and is not end of segment
                     if (isNumber(line)) {
                         line = fileScan.next();
                         continue;
@@ -35,9 +36,20 @@ public class GeneBankCreateBTree {
                     if (locN != -1) { // if we have an N in sequence, add up to n, then parse sequence.
                         dnaSequence += line.substring(0, locN);
                         parseDNASequence(dnaSequence, bT, geneBankCreateBTreeArguments);
-                        break;
+                        int ind = locN;
+                        while (fileScan.hasNext() && !line.contains("//")) { // if we ended dna sequence from 'n' instead of end of sequence.
+                            if (line.charAt(ind) != 'n') {
+                                dnaSequence = line.substring(ind, line.length());
+                                break;
+                            }
+                            if (++ind == line.length()) {
+                                ind = 0;
+                                line = fileScan.next();
+                            }
+                        }
+                    } else {
+                        dnaSequence += line;
                     }
-                    dnaSequence += line;
                     line = fileScan.next();
                 }
                 parseDNASequence(dnaSequence, bT, geneBankCreateBTreeArguments);
