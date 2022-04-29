@@ -387,8 +387,6 @@ public class BNode {
 		return address == other.address;
 	}
 	
-	
-	
 	//returns '{child [key|keyLong : frequency] child ...}'
 	@Override
 	public String toString() {
