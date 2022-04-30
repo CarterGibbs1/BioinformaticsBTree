@@ -254,6 +254,7 @@ public class TreeObject {
     public String toString() {
         return keyToString() + " : " + frequency;
     }
+    //suggestion: return keyToString() + ": " + frequency;, to match dump project specifications
     
    	//=================================================================================================================
 	//                                            STATIC METHODS
