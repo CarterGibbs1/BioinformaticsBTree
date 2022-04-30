@@ -376,6 +376,7 @@ public class GeneBankCreateBTree {
 //				System.setOut(pS);
 //				System.setOut(stdout);
 //			}
+//          BReadWrite.writeBTree(bT); //need to verify with searchBTree
 //			// IMPORTANT: BOTH CREATEBTREE AND SEARCHDATABASE NEED THE FOLLOWING COMMAND IN
 //			// THE DIR IN TERMINAL BEFORE RUNNING PROGRAM:
 //			// jar xf sqlite-jdbc-3.36.0.3.jar
