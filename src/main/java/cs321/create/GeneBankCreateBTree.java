@@ -288,8 +288,8 @@ public class GeneBankCreateBTree {
 }
 
 /***/
-//Below is a suggested implementation. The main problem with this imp is not getting string DNA sequences to
-//appear in the dump method. Might need to change this in TreeObject. However, the frequencies match
+//Below is a suggested implementation. String DNA seqs now
+//appear in the dump method. The frequencies match
 //in the dump file test3.gbk.btree.dump.6
 //errors will be thrown in the database implementation (at parseint for freq) due to the dna string not
 // appearing in the dump method
@@ -306,6 +306,7 @@ public class GeneBankCreateBTree {
 //	public static void main(String[] args) throws Exception {
 //		GeneBankCreateBTreeArguments geneBankCreateBTreeArguments = parseArgumentsAndHandleExceptions(args);
 //		String dnaSequence = ""; // full DNA sequence
+//      TreeObject.setSequenceLength(geneBankCreateBTreeArguments.getSubsequenceLength());
 //		// Read in from file
 //		try {
 //			Scanner fileScan = new Scanner(new File(geneBankCreateBTreeArguments.getGbkFileName()));
@@ -395,7 +396,12 @@ public class GeneBankCreateBTree {
 //	                }
 //	               idx = idx + 3;// three spaces for space, colon, then space in toString
 //                 if toString changes in TreeObject, this will be idx = idx + 2;
-//	               int freq = Integer.parseInt(String.valueOf(thisSeq.charAt(idx)));// better way to do this probs
+//                  String stringF = "";
+//					while (Character.isDigit(dumpData.charAt(idx))) {
+//                            stringF += dumpData.charAt(idx);
+//                            idx++;
+//                            }
+//                            int freq = Integer.parseInt(stringF);// better way to do this probs
 //	               statement.executeUpdate("insert into btree (dnaseq, freq) values (\'" + thisSeq + "\', " + freq + ");");
 //	               idx++;// /n char is just one char
 //	          }// end of while
