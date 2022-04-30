@@ -8,7 +8,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Locale;
 import java.util.Scanner;
 
 /**
@@ -33,8 +32,6 @@ public class GeneBankSearchDatabase
         Connection connection = null;
         try
         {
-
-            /*****************************************************************************/
             GeneBankSearchDatabaseArguments a = parseArgs(args);
             // create a database connection
             connection = DriverManager.getConnection(a.getPathToDatabase());
@@ -46,7 +43,6 @@ public class GeneBankSearchDatabase
             Scanner qScan = new Scanner(q);
             while (qScan.hasNextLine()) {
                 String qCurr = qScan.nextLine().toLowerCase();
-                System.out.print(qCurr + ": ");
                 ResultSet rs = statement.executeQuery("select * from btree where dnaseq = '" + qCurr + "';");
                 int currFreq;
                 if (!rs.isClosed()) {
@@ -54,11 +50,13 @@ public class GeneBankSearchDatabase
                 } else {
                     currFreq = 0;
                 }
-                System.out.println(currFreq);
+                if (currFreq > 0) {
+                    System.out.print(qCurr + ": ");
+                    System.out.println(currFreq);
+                }
                 rs.close();
             }
             qScan.close();
-            /*****************************************************************************/
 
         }
         catch(SQLException e)
