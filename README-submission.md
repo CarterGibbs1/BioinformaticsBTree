@@ -4,7 +4,7 @@ Last Name       | First Name      | GitHub User Name
 --------------- | --------------- | --------------------
 TBD             | TBD             | TBD
 TBD             | TBD             | TBD
-TBD             | TBD             | TBD
+Goin            | Aaron           | aarongoinboise
 TBD             | TBD             | TBD
 TBD             | TBD             | TBD
 
