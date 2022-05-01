@@ -376,6 +376,8 @@ public class GeneBankCreateBTree {
 //				System.setOut(pS);
 //				System.setOut(stdout);
 //			}
+// dunno if this is needed for search, as it's a btree not read from RAF
+//          BReadWrite.setBuffer((int)BReadWrite.getRAFSize());
 //          BReadWrite.writeBTree(bT); //need to verify with searchBTree
 //			// IMPORTANT: BOTH CREATEBTREE AND SEARCHDATABASE NEED THE FOLLOWING COMMAND IN
 //			// THE DIR IN TERMINAL BEFORE RUNNING PROGRAM:
