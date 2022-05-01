@@ -252,9 +252,8 @@ public class TreeObject {
 
     @Override
     public String toString() {
-        return keyToString() + " : " + frequency;
+        return keyToString() + ": " + frequency;
     }
-    //suggestion: return keyToString() + ": " + frequency;, to match dump project specifications
     
    	//=================================================================================================================
 	//                                            STATIC METHODS

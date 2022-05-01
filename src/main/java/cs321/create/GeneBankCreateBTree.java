@@ -395,8 +395,7 @@ public class GeneBankCreateBTree {
 //	                    thisSeq += dumpData.charAt(idx);
 //	                    idx++;
 //	                }
-//                 //change below statement to  "idx = idx + 2;" if TO gets changed to DNA: freq, with no space btwn DNA string and colon
-//	               idx = idx + 3;// three spaces for space, colon, then space in toString
+//	               idx = idx + 2;// colon, then space in toString
 //                 if toString changes in TreeObject, this will be idx = idx + 2;
 //                  String stringF = "";
 //					while (Character.isDigit(dumpData.charAt(idx))) {
