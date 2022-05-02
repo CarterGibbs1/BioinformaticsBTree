@@ -20,11 +20,11 @@ public class BTreeTest {
 	static private final String VALID_LETTERS = "atcg";
 
 	// how many times to run certain Tests, some of these drastically increase run time
-	static private int[] timesToRun = new int[] {10, 20, 50, 100, 500, 1000, 5000};
+	static private int[] timesToRun = new int[] {1, 10, 20, 50, 100, 500, 1000, 5000};
 //	static private int run_BNode_RAF_RAFAppropriateSize = timesToRun[0];
 	static private int run_BTree_RAF_IsSorted = timesToRun[0];
 	static private int run_BTree_RAF_Search = timesToRun[0];
-	static private int run_BTree_RAF_Cache = timesToRun[0];
+	static private int run_BTree_RAF_Cache = timesToRun[1];
 	//example
 	static private int run_EXAMPLE_LOOPED_TEST = timesToRun[3];
 
@@ -707,10 +707,13 @@ public class BTreeTest {
 		
 		int ncTime = 0;
 		int chTime = 0;
+		int ch2Time = 0;
 		int cTime = 0;
-		int cache = 250;
+		int cache = 100;
+		int cache2 = 500;
 		long tSize = 0;
 		BTree wiC = null;
+		BTree wiC2 = null;
 		
 		ArrayList<String> inputSequences = null;
 		try {
@@ -725,7 +728,7 @@ public class BTreeTest {
 				BReadWrite.setBuffer(BNode.getDiskSize());
 				
 				// generate random sequences
-				inputSequences = generateRandomSequences(200000/5, 300000/5, 2, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
+				inputSequences = generateRandomSequences(10000, 10001, 2, 32);// <--- THIS WILL TAKE A LONG TIME IF REALLY BIG
 				tSize += inputSequences.size();
 				TreeObject.setSequenceLength(inputSequences.get(0).length());
 				
@@ -754,15 +757,30 @@ public class BTreeTest {
 				
 				chTime += (System.currentTimeMillis() - cTime);
 				
+				
+				BReadWrite.setRAF(TESTS_FOLDER + testName + k + "_Cache2", true);
+				wiC2 = new BTree(degree, 5, cache2);
+				
+				cTime = (int)System.currentTimeMillis();
+				
+				// insert all sequences
+				for (int i = 0; i < inputSequences.size(); i++) {
+					wiC2.insert(new TreeObject(inputSequences.get(i)));
+				}
+				wiC2.emptyBCache();
+				
+				ch2Time += (System.currentTimeMillis() - cTime);
+				
+				
 				//check that both BTrees are sorted
 				assert(noC.isSorted());
 				assert(wiC.isSorted());
-				
+				assert(wiC2.isSorted());
 				
 				
 				progress.increaseProgress();
 			}
-			checkDump(inputSequences, wiC); //check the last cache BTree's dump
+//			checkDump(inputSequences, wiC); //check the last cache BTree's dump
 			//report times to file
 			if(!resultFile.exists()) {
 				resultFile.createNewFile();
@@ -772,6 +790,7 @@ public class BTreeTest {
 			testReporting.print(testName + ": cache-[" + cache + "] avg sequences-[" + (tSize/run_BTree_RAF_Cache)/1000 +"k]\n"
 					+   "Without Cache Avg - " + (ncTime/run_BTree_RAF_Cache) + "ms"
 					+ "\nWith Cach Avg     - " + (chTime/run_BTree_RAF_Cache) + "ms"
+					+ "\nWith Cach2 Avg    - " + (ch2Time/run_BTree_RAF_Cache) + "ms"
 					+ "\n");
 			
 		} catch (Throwable e) {
