@@ -1,5 +1,6 @@
 package cs321.create;
 
+import cs321.btree.BReadWrite;
 import cs321.common.ParseArgumentException;
 import org.junit.Test;
 
@@ -35,9 +36,15 @@ public class GeneBankCreateBTreeTest
         String expectedOutput = "AGCTAAGCTAGCTATGCTATGCATGTAGTCAACACGTGCATTTTCGCAGACATCGTAGAGCTCTGTGTTAGCATCGTGATGCTACAGTGATG" +
                 "AGTCGTAGTTAGCTAGTCATGTCAGTGATCGTAGTGCTAGTAGTAGTC";
 
-        //String actualOutput = GeneBankCreateBTree.readGBKFile(args);
+        //GeneBankCreateBTree.testMain(args);
+        //assert(true);
+    }
 
-        //assertEquals(expectedOutput, actualOutput);
+    @Test
+    public void testNInFormat() throws FileNotFoundException, IOException, ParseArgumentException {
+        GeneBankCreateBTreeArguments args = new GeneBankCreateBTreeArguments(false, 20, "src/test/java/cs321/create/testNFormat", 13, 0, 0);
+        BReadWrite.setRAF("./results.txt", true);
+        //GeneBankCreateBTree.testMain(args);
     }
 
     @Test
