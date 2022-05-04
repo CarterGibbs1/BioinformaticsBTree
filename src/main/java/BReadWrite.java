@@ -252,7 +252,7 @@ public class BReadWrite {
 			setBuffer(BNode.getDiskSize());
 			
 			// set static BNode degree
-			BNode.setDegree(t);
+			BNode.setDegree(t);//put this above setBuffer on line 252
 			
 			// initialize BTree and return
 			return new BTree(root, t, k, numNodes, height, cache);
