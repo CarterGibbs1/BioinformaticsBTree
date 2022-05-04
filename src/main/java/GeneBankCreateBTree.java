@@ -16,6 +16,7 @@ public class GeneBankCreateBTree {
         Connection connection = null;
         try {
             Scanner fileScan = new Scanner(new File(geneBankCreateBTreeArguments.getGbkFileName()));
+            BReadWrite.setRAF("./data/files_gbk_btree_rafs/" + geneBankCreateBTreeArguments.getGbkFileName().substring(geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1, geneBankCreateBTreeArguments.getGbkFileName().length()) + ".btree.data." + geneBankCreateBTreeArguments.getSubsequenceLength() + "." + geneBankCreateBTreeArguments.getDegree(), true);
             bT = (geneBankCreateBTreeArguments.getDebugLevel() == 1) ?
                     new BTree(geneBankCreateBTreeArguments.getDegree(), 1, geneBankCreateBTreeArguments.getCacheSize()) : // with cache
                     new BTree(geneBankCreateBTreeArguments.getDegree(), 1); // without cache
@@ -55,6 +56,11 @@ public class GeneBankCreateBTree {
                 parseDNASequence(dnaSequence, bT, geneBankCreateBTreeArguments);
                 newSegment = true;
             }// end of while
+            
+            //write BTree to RAF
+            bT.emptyBCache();
+            BReadWrite.writeBTree(bT);
+            
             /*Test for a driver*/
             connection = DriverManager.getConnection("jdbc:sqlite:btree.db");
             Statement statement = connection.createStatement();
@@ -68,23 +74,26 @@ public class GeneBankCreateBTree {
 
             //imo, best to have this no matter what, even if debug level is zero, as it's something needed for db
             String dumpData = bT.dump();
+            System.out.println(dumpData);
             if (geneBankCreateBTreeArguments.getDebugLevel() == 1) {
                 String dumpFilename = "";
-                dumpFilename += geneBankCreateBTreeArguments.getGbkFileName() + ".btree.dump." + bT.getFrequency();
-                PrintStream pS = new PrintStream(geneBankCreateBTreeArguments.getGbkFileName());
-                PrintStream stdout = System.out;
-                pS.append(dumpData);
-                System.setOut(pS);
-                System.setOut(stdout);
+                dumpFilename += "./data/files_gbk_actual_results/" + geneBankCreateBTreeArguments.getGbkFileName().substring(geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1, geneBankCreateBTreeArguments.getGbkFileName().length()) + ".btree.dump." + bT.getFrequency();
+                PrintStream pS = new PrintStream(dumpFilename);
+//                PrintStream stdout = System.out;
+                pS.println(dumpData);
+                pS.close();
+//                System.setOut(pS);
+//                System.setOut(stdout);
             }
-            bT.emptyBCache();
+//            bT.emptyBCache();
             // not sure if we need the part below, somehow this'll be the filename of the btree file
-            String bTreeFilename = geneBankCreateBTreeArguments.getGbkFileName() + ".btree.data." + geneBankCreateBTreeArguments.getSubsequenceLength() + geneBankCreateBTreeArguments.getDegree();
-            BReadWrite.setRAF(bTreeFilename, true); // wonder if it goes before or after you write the bTree
-            BReadWrite.writeBTree(bT);
+//            String bTreeFilename = geneBankCreateBTreeArguments.getGbkFileName() + ".btree.data." + geneBankCreateBTreeArguments.getSubsequenceLength() + geneBankCreateBTreeArguments.getDegree();
+//            BReadWrite.setRAF(bTreeFilename, true); // wonder if it goes before or after you write the bTree
+//            BReadWrite.writeBTree(bT);
 
             //in order traversal here
-            inOrderT(dumpData, statement, geneBankCreateBTreeArguments);
+//            inOrderT(dumpData, statement, geneBankCreateBTreeArguments);
+//            bT.dump();
 
         } catch (FileNotFoundException fe) {
             printUsageAndExit("File Not Found.");
