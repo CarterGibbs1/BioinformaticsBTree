@@ -15,8 +15,8 @@ public class GeneBankCreateBTree {
         BTree bT;
         Connection connection = null;
         try {
-            Scanner fileScan = new Scanner(new File(geneBankCreateBTreeArguments.getGbkFileName()));
             BReadWrite.setRAF("./data/files_gbk_btree_rafs/" + geneBankCreateBTreeArguments.getGbkFileName().substring(geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1, geneBankCreateBTreeArguments.getGbkFileName().length()) + ".btree.data." + geneBankCreateBTreeArguments.getSubsequenceLength() + "." + geneBankCreateBTreeArguments.getDegree(), true);
+        	Scanner fileScan = new Scanner(new File("./data/files_gbk_btree_rafs/" + geneBankCreateBTreeArguments.getGbkFileName().substring(geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1, geneBankCreateBTreeArguments.getGbkFileName().length()) + ".btree.data." + geneBankCreateBTreeArguments.getSubsequenceLength() + "." + geneBankCreateBTreeArguments.getDegree()));
             bT = (geneBankCreateBTreeArguments.getDebugLevel() == 1) ?
                     new BTree(geneBankCreateBTreeArguments.getDegree(), 1, geneBankCreateBTreeArguments.getCacheSize()) : // with cache
                     new BTree(geneBankCreateBTreeArguments.getDegree(), 1); // without cache
