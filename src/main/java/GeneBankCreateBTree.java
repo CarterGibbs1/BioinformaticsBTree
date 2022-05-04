@@ -318,7 +318,7 @@ public class GeneBankCreateBTree {
 //            // deal with dump and db stuff in notes go here
 //            bT.emptyBCache();
 //            String dumpData = "";
-//            if ((bT.getNumNodes() == 0)) {
+//            if (bT.getRoot().getN() != 0) {
 //                dumpData = bT.dump();
 //            }
 //            if (geneBankCreateBTreeArguments.getDebugLevel() == 1) {
