@@ -1,14 +1,28 @@
 
 
+/**
+ * Used to hold SearchBTree driver arguments
+ *
+ * @author  Carter Gibbs
+ * @version Spring 2022
+ */
 public class GeneBankSearchBTreeArguments
 {
 
-    private final boolean useCache;
-    private final String BTreeFileName;
-    private final String queryFileName;
-    private final int cacheSize;
-    private final int debugLevel;
+    private final boolean useCache; // bool of if BTree uses cache
+    private final String BTreeFileName; // BTree filename
+    private final String queryFileName; // query filename
+    private final int cacheSize; // cache size (optional)
+    private final int debugLevel; // debug level (1 or 0) (optional)
 
+    /**
+     * Constructor to hold args
+     * @param useCache
+     * @param BTreeFileName
+     * @param queryFileName
+     * @param cacheSize
+     * @param debugLevel
+     */
     public GeneBankSearchBTreeArguments(boolean useCache, String BTreeFileName, String queryFileName, int cacheSize, int debugLevel)
     {
         this.useCache = useCache;

@@ -1,13 +1,27 @@
 
-
+/**
+ * Used to hold CreateBTree driver arguments
+ *
+ * @author  Carter Gibbs
+ * @version Spring 2022
+ */
 public class GeneBankCreateBTreeArguments {
-    private final boolean useCache;
-    private final int degree;
-    private final String gbkFileName;
-    private final int subsequenceLength;
-    private final int cacheSize;
-    private final int debugLevel;
+    private final boolean useCache; // bool to if the BTree uses a cache
+    private final int degree; // degree of the BTree
+    private final String gbkFileName; // gbk file name
+    private final int subsequenceLength; // subsequence length of the dna
+    private final int cacheSize; // cache size (optional)
+    private final int debugLevel; // debug level (0 or 1) (optional)
 
+    /**
+     * Constructor to hold args
+     * @param useCache
+     * @param degree
+     * @param gbkFileName
+     * @param subsequenceLength
+     * @param cacheSize
+     * @param debugLevel
+     */
     public GeneBankCreateBTreeArguments(boolean useCache, int degree, String gbkFileName, int subsequenceLength, int cacheSize, int debugLevel) {
         this.useCache = useCache;
         this.degree = degree;
