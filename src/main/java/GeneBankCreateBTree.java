@@ -270,10 +270,10 @@ public class GeneBankCreateBTree {
 //                    + geneBankCreateBTreeArguments.getSubsequenceLength() + "."
 //                    + geneBankCreateBTreeArguments.getDegree();
 //            BReadWrite.setRAF(bTreeFilename, true); // wonder if it goes before or after you write the bTree
-//            BTree bT = (geneBankCreateBTreeArguments.getDebugLevel() == 1) ? new BTree(
-//                    geneBankCreateBTreeArguments.getDegree(), 1, geneBankCreateBTreeArguments.getCacheSize()) : // with
-//                    // cache
-//                    new BTree(geneBankCreateBTreeArguments.getDegree(), 1); // without cache
+//			BTree bT = (geneBankCreateBTreeArguments.getDebugLevel() == 1) ? new BTree(
+//					geneBankCreateBTreeArguments.getDegree(), geneBankCreateBTreeArguments.getSubsequenceLength(), geneBankCreateBTreeArguments.getCacheSize()) : // with
+//																												// cache
+//					new BTree(geneBankCreateBTreeArguments.getDegree(), geneBankCreateBTreeArguments.getSubsequenceLength()); // without cache
 //            boolean newSegment = true;
 //            while (fileScan.hasNextLine()) {
 //                while (newSegment && fileScan.hasNextLine() && !fileScan.nextLine().contains("ORIGIN"))
