@@ -173,6 +173,7 @@ public class GeneBankSearchBTree
 //	        BTree searchTree = BReadWrite.readBTree(arguments.getCacheSize());
 //
 //	        /* Don't think this part below is needed, if we're just doing printing to console*/
+            /* Double comments can be deleted if we want to go this route */
 //	        //if debug == 1, create new file to put query results in
 //	        //boolean debug = arguments.getDebugLevel() == 1;
 //	        //PrintStream result = null;
