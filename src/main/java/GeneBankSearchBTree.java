@@ -31,7 +31,7 @@ public class GeneBankSearchBTree
 	        boolean debug = arguments.getDebugLevel() == 1;
 	        PrintStream result = null;
 	        if(debug) {
-		        File resultFile = new File("./data/queries_results/" + arguments.getQueryFileName().substring(arguments.getQueryFileName().lastIndexOf('/') + 1, arguments.getQueryFileName().length()) 
+		        File resultFile = new File("./data/files_gbk_actual_results/" + arguments.getQueryFileName().substring(arguments.getQueryFileName().lastIndexOf('/') + 1, arguments.getQueryFileName().length()) 
 		        		+ "_ON_" + arguments.getBTreeFileName().substring(arguments.getBTreeFileName().lastIndexOf('/') + 1, arguments.getBTreeFileName().length()));
 		        if(resultFile.exists()) {
 		        	if(!resultFile.delete()) {
@@ -43,13 +43,17 @@ public class GeneBankSearchBTree
 	        }
 	        
 	        //scan each line from the query, printing the String and frequency of each String in result file
+	       String qCurr;
+	       int resultFreq;
 	        while (qScan.hasNext()) {
-	            String qCurr = qScan.next().toLowerCase();
-	            int resultFreq = searchTree.search(new TreeObject(qCurr));
+	            qCurr = qScan.next().toLowerCase();
+	            resultFreq = searchTree.search(new TreeObject(qCurr));
 	            
-	            System.out.println(qCurr + " " + resultFreq);
-	            if(debug)
-	            	result.println(qCurr + " " + resultFreq);
+	            if(resultFreq != 0) {
+		            System.out.println(qCurr + ": " + resultFreq);
+		            if(debug)
+		            	result.println(qCurr + ": " + resultFreq);
+	            }
 	        }
         }
         catch(Exception e) {

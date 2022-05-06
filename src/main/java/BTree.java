@@ -490,7 +490,7 @@ public class BTree
     	//recursively construct the string
     	ret.append(dump(root.getChild(0)));
     	for(int i = 0; i < root.getN(); i++) {
-    		ret.append(root.getKey(i).toString() + "\r\n");
+    		ret.append(root.getKey(i).toString() + "\r\n"); //for some reason "\r\n" are used to create new lines in dumps
     		ret.append(dump(root.getChild(i + 1)));
     	}
     	
