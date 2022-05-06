@@ -3,6 +3,8 @@
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Scanner;
 
 /**
@@ -31,7 +33,14 @@ public class GeneBankSearchBTree
 	        boolean debug = arguments.getDebugLevel() == 1;
 	        PrintStream result = null;
 	        if(debug) {
-		        File resultFile = new File("./data/files_gbk_actual_results/" + arguments.getQueryFileName().substring(arguments.getQueryFileName().lastIndexOf('/') + 1, arguments.getQueryFileName().length()) 
+	        	
+	        	//if the desired location doesn't exist, create query result in main directory
+	        	String QLocation = "./data/files_gbk_actual_results/";
+	        	if(!Files.exists(Path.of(QLocation))) {
+	        		QLocation = "./";
+	        	}
+	        	
+		        File resultFile = new File(QLocation + arguments.getQueryFileName().substring(arguments.getQueryFileName().lastIndexOf('/') + 1, arguments.getQueryFileName().length()) 
 		        		+ "_ON_" + arguments.getBTreeFileName().substring(arguments.getBTreeFileName().lastIndexOf('/') + 1, arguments.getBTreeFileName().length()));
 		        if(resultFile.exists()) {
 		        	if(!resultFile.delete()) {

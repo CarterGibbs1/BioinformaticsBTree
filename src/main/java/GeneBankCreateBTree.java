@@ -1,4 +1,6 @@
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -14,7 +16,14 @@ public class GeneBankCreateBTree {
         BTree bT;
         Connection connection = null;
         try {
-            BReadWrite.setRAF("./data/files_gbk_btree_rafs/" + geneBankCreateBTreeArguments.getGbkFileName().substring(geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1, geneBankCreateBTreeArguments.getGbkFileName().length()) + ".btree.data." + geneBankCreateBTreeArguments.getSubsequenceLength() + "." + geneBankCreateBTreeArguments.getDegree(), true);
+        	
+        	//if the desired location doesn't exist, create RAF in main directory
+        	String RAFLocation = "./data/files_gbk_btree_rafs/";
+        	if(!Files.exists(Path.of(RAFLocation))) {
+        		RAFLocation = "./";
+        	}
+        	
+            BReadWrite.setRAF(RAFLocation + geneBankCreateBTreeArguments.getGbkFileName().substring(geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1, geneBankCreateBTreeArguments.getGbkFileName().length()) + ".btree.data." + geneBankCreateBTreeArguments.getSubsequenceLength() + "." + geneBankCreateBTreeArguments.getDegree(), true);
             TreeObject.setSequenceLength(geneBankCreateBTreeArguments.getSubsequenceLength());
             
             //create Scanner for file
@@ -142,7 +151,13 @@ public class GeneBankCreateBTree {
 	            
 	            //print dump to file if debug level is 1
 	            if(geneBankCreateBTreeArguments.isUseCache()) {
-	            	File dumpFile = new File("./data/files_gbk_actual_results/" + geneBankCreateBTreeArguments.getGbkFileName().substring(geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1, geneBankCreateBTreeArguments.getGbkFileName().length()) + ".btree.dump." + bT.getFrequency());
+		            //if the desired location doesn't exist, create dump in main directory
+		        	String DLocation = "./data/files_gbk_actual_results/";
+		        	if(!Files.exists(Path.of(DLocation))) {
+		        		DLocation = "./";
+		        	}
+	            	
+	            	File dumpFile = new File(DLocation + geneBankCreateBTreeArguments.getGbkFileName().substring(geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1, geneBankCreateBTreeArguments.getGbkFileName().length()) + ".btree.dump." + bT.getFrequency());
 	            	dumpFile.createNewFile();
 	            	
 	            	PrintStream fileOut = new PrintStream(dumpFile);
