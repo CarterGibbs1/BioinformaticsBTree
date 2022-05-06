@@ -252,7 +252,7 @@ public class TreeObject {
 
     @Override
     public String toString() {
-        return keyToString() + " " + frequency;
+        return keyToString() + ": " + frequency;
     }
     
    	//=================================================================================================================
