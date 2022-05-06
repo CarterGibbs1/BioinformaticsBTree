@@ -15,6 +15,7 @@ public class GeneBankCreateBTree {
         Connection connection = null;
         try {
             BReadWrite.setRAF("./data/files_gbk_btree_rafs/" + geneBankCreateBTreeArguments.getGbkFileName().substring(geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1, geneBankCreateBTreeArguments.getGbkFileName().length()) + ".btree.data." + geneBankCreateBTreeArguments.getSubsequenceLength() + "." + geneBankCreateBTreeArguments.getDegree(), true);
+            TreeObject.setSequenceLength(geneBankCreateBTreeArguments.getSubsequenceLength());
             Scanner fileScan = new Scanner(new File(geneBankCreateBTreeArguments.getGbkFileName()));
             bT = (geneBankCreateBTreeArguments.getDebugLevel() == 1) ?
                     new BTree(geneBankCreateBTreeArguments.getDegree(), geneBankCreateBTreeArguments.getSubsequenceLength(), geneBankCreateBTreeArguments.getCacheSize()) : // with cache
@@ -25,16 +26,20 @@ public class GeneBankCreateBTree {
                 while (newSegment && fileScan.hasNextLine() && !fileLine.contains("ORIGIN")) {
                     fileLine = fileScan.nextLine();
                 }
+                
                 newSegment = false;
                 if (!fileScan.hasNextLine()) break;
-                String line = fileScan.next();
-                while (isNumber(line)) line = fileScan.next();
-                String dnaSequence = ""; // full DNA sequence
-                while (!line.contains("//") && fileScan.hasNext()) { // while has another sequence and is not end of segment
-                    if (isNumber(line)) {
-                        line = fileScan.next();
-                        continue;
-                    }
+                
+                //holds an entire sequence from ORIGIN to //, ORIGIN to n, n to //, etc.
+                StringBuilder seq = new StringBuilder();
+                
+                fileLine = fileScan.nextLine();
+                while (!fileLine.contains("//") && fileScan.hasNextLine()) { // while has another sequence and is not end of segment
+                	
+                	//get rid of all spaces and numbers in the line
+                	fileLine = fileLine.substring(10);
+                	fileLine = fileLine.replaceAll(" ", "");
+
 /**
                     int locN = line.indexOf("n"); // location of N in line
                     if (locN != -1) { // if we have an N in sequence, add up to n, then parse sequence.
@@ -56,23 +61,40 @@ public class GeneBankCreateBTree {
                     }
                     line = fileScan.next();
 */
-
-
-                    for (int i = 0; i < line.length(); i++) {
-                        if (line.charAt(i) == 'n') {
-                            bT = parseDNASequence(dnaSequence, bT, geneBankCreateBTreeArguments);
-                            dnaSequence = "";
-                        } else {
-                            dnaSequence += line.charAt(i);
+                	//add all the characters of this line to the sequence
+                    for (int i = 0; i < fileLine.length(); i++) {
+                    	
+                    	//if an n is detected, parse the current sequence and clear it
+                        if (fileLine.charAt(i) == 'n') {
+                        	parseDNASequence(seq.toString(), bT, geneBankCreateBTreeArguments);
+                        	seq.setLength(0);
+                        	
+                        	//move past n's
+                        	while(i < fileLine.length() && fileLine.charAt(i) == 'n') {
+                        		i++;
+                        	}
+                        	
+                        	//if at end of line, break
+                        	if(i >= fileLine.length()) {
+                        		break;
+                        	}
                         }
+                        
+                        seq.append(fileLine.charAt(i));
                     }
-                    line = fileScan.next();
-
+                    
+                	fileLine = fileScan.nextLine();
                 }
-                bT = parseDNASequence(dnaSequence, bT, geneBankCreateBTreeArguments);
+                	
+                //parse the last sequence
+                parseDNASequence(seq.toString(), bT, geneBankCreateBTreeArguments);
                 newSegment = true;
+                
+                
             }// end of while
 
+         
+            
             //write BTree to RAF
             bT.emptyBCache();
             BReadWrite.writeBTree(bT);
@@ -86,7 +108,19 @@ public class GeneBankCreateBTree {
             //deal with dump and db stuff in notes go here
 
 
-            // Deal with Dump file
+            // print dump to console
+            String dump = bT.dump();
+            System.out.println(dump);
+            
+            //print dump to file if debug level is 1
+            if(geneBankCreateBTreeArguments.isUseCache()) {
+            	File file = new File("./data/files_gbk_actual_results/" + geneBankCreateBTreeArguments.getGbkFileName().substring(geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1, geneBankCreateBTreeArguments.getGbkFileName().length()) + ".btree.dump." + bT.getFrequency());
+            	file.createNewFile();
+            	
+            	PrintStream fileOut = new PrintStream(file);
+            	fileOut.print(dump);
+            	fileOut.close();
+            }
 
 /**
         bT.emptyBCache();
@@ -228,11 +262,15 @@ public class GeneBankCreateBTree {
     public static BTree parseDNASequence(String dnaSequence, BTree bT, GeneBankCreateBTreeArguments args) throws IOException {
         // Parse data in dnaSequence
         int index = 0;
+        
         if (dnaSequence.length() >= args.getSubsequenceLength()) {
-            while (index < dnaSequence.length() - args.getSubsequenceLength()) {
+            while (index < dnaSequence.length() - args.getSubsequenceLength() + 1) {
                 String thisSeq = "";
                 thisSeq += dnaSequence.substring(index, index + args.getSubsequenceLength());
-                bT.insert(new TreeObject(thisSeq));
+                
+                TreeObject x = new TreeObject(thisSeq);
+                
+                bT.insert(x);
                 index++;
             }
         }

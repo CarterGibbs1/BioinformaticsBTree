@@ -8,6 +8,10 @@ import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+
+//1 ./data/files_gbk_btree_rafs/test0.gbk.btree.data.4.3 ./results/queries/query4 100 1
+//1 3 ./data/files_gbk/test0.gbk 4 100 1
+
 public class GeneBankCreateBTreeTest
 {
     private String[] args;
