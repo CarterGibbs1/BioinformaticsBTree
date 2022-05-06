@@ -1,6 +1,10 @@
 
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -31,14 +35,40 @@ public class GeneBankSearchDatabase
         try
         {
             GeneBankSearchDatabaseArguments a = parseArgs(args);
+
             // create a database connection
-            connection = DriverManager.getConnection(a.getPathToDatabase());
+            Class.forName("org.sqlite.JDBC");
+            connection = DriverManager.getConnection("jdbc:sqlite:" + a.getPathToDatabase());
             Statement statement = connection.createStatement();
             statement.setQueryTimeout(30);  // set timeout to 30 sec.
 
+            
+            //if debug == 1, create new file to put query results in
+	        boolean debug = a.debugLevel() == 1;
+	        PrintStream result = null;
+	        if(debug) {
+	        	
+	        	//if the desired location doesn't exist, create query result in main directory
+	        	String QLocation = "./data/files_gbk_actual_results/";
+	        	if(!Files.exists(Path.of(QLocation))) {
+	        		QLocation = "./";
+	        	}
+	        	
+		        File resultFile = new File(QLocation + a.getQueryPathway().substring(a.getQueryPathway().lastIndexOf('/') + 1, a.getQueryPathway().length()) 
+		        		+ "_ON_" + a.getPathToDatabase().substring(a.getPathToDatabase().lastIndexOf('/') + 1, a.getPathToDatabase().length()) + ".out");
+		        if(resultFile.exists()) {
+		        	if(!resultFile.delete()) {
+		        		throw new IOException("Already existing result file '" + resultFile.getName() + "' could not be deleted, might be open elsewhere.");
+		        	}
+		        }
+		        resultFile.createNewFile();
+		        result = new PrintStream(resultFile);
+	        }
+            
             // search logic, similar to searchbtree, start at query file, use database to search for dna seq
             File q = new File(a.getQueryPathway());
             Scanner qScan = new Scanner(q);
+            String stringResult;
             while (qScan.hasNextLine()) {
                 String qCurr = qScan.nextLine().toLowerCase();
                 ResultSet rs = statement.executeQuery("select * from btree where dnaseq = '" + qCurr + "';");
@@ -49,8 +79,12 @@ public class GeneBankSearchDatabase
                     currFreq = 0;
                 }
                 if (currFreq > 0) {
-                    System.out.print(qCurr + ": ");
-                    System.out.println(currFreq);
+                	stringResult = qCurr + ": " + currFreq;
+                	
+                    System.out.println(stringResult);
+                    if(debug) {
+                    	result.println(stringResult);
+                    }
                 }
                 rs.close();
             }
@@ -88,7 +122,15 @@ public class GeneBankSearchDatabase
     public static GeneBankSearchDatabaseArguments parseArgs(String args[]) throws ParseArgumentException {
         if (args.length < 2 || args.length > 3) {
             System.out.println("Usage: java GeneBankSearchDatabase <path_to_SQLite_database> <query_file> [<debug_level>]");
-            throw new ParseArgumentException("Incorrect number of arguments");
+            System.out.println
+                    ("<path_to_SQLite_database>: path to the SQLite database");
+            System.out.println
+                    ("<query_file>: file name of the query.");
+            System.out.println
+                    ("[<debug level>]: type of output wanted for program. 1 for a dump file output with console. 0 for just console.");
+            
+            System.err.println("Incorrect number of arguments");
+            System.exit(1);
         }
         String dbName = args[0];
         if (!dbName.contains(".db")) {
@@ -98,14 +140,7 @@ public class GeneBankSearchDatabase
         if (!fTwo.exists() || !fTwo.isFile() || !args[1].contains("query")) {//check extension
             throw new ParseArgumentException("Query file does not exist or is not in pwd.");
         }
-        int d = 0;
-        if (args.length == 3) {
-            Integer.parseInt(args[2]);
-            if (d != 0) {// only having one option for right now: results on output stream
-                //the results will mirror GeneBankSearchBTree, where the results will be printed on console
-                throw new ParseArgumentException("Debug level is not valid.");
-            }
-        }
+        int d = args.length == 3 && Integer.parseInt(args[2]) == 1 ? 1 : 0;
         return new GeneBankSearchDatabaseArguments(args[0], args[1], d);
     }
 }
