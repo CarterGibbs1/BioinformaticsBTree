@@ -640,3 +640,51 @@ public class GeneBankCreateBTree {
 //        System.exit(1);
 //    }
 //}
+
+
+
+
+/*********************************************************************************/
+//Data part of imp
+//            String dumpData = bT.dump();
+//            Connection connection = null;
+//            try {
+//                // create a database connection
+//                connection = DriverManager.getConnection("jdbc:sqlite:btree.db");
+//                Statement statement = connection.createStatement();
+//                statement.setQueryTimeout(30); // set timeout to 30 sec.
+//                statement.executeUpdate("drop table if exists btree;");
+//                statement.executeUpdate("create table btree (dnaseq varchar(255), freq int);");
+//                int idx = 0;
+//                while (idx < dumpData.length()) {
+//                    String thisSeq = "";
+//                    while (thisSeq.length() < geneBankCreateBTreeArguments.getSubsequenceLength()) {
+//                        thisSeq += dumpData.charAt(idx);
+//                        idx++;
+//                    }
+//                    idx = idx + 2;// colon, then space in toString
+//                    String stringF = "";
+//                    while (Character.isDigit(dumpData.charAt(idx))) {
+//                        stringF += dumpData.charAt(idx);
+//                        idx++;
+//                    }
+//                    int freq = Integer.parseInt(stringF);// better way to do this probs
+//                    statement.executeUpdate(
+//                            "insert into btree (dnaseq, freq) values (\'" + thisSeq + "\', " + freq + ");");
+//                    idx++;// /n char is just one char
+//                } // end of while
+//
+//            } catch (SQLException e) {
+//                // if the error message is "out of memory",
+//                // it probably means no database file is found
+//                System.err.println(e.getMessage());
+//            } finally {
+//                try {
+//                    if (connection != null)
+//                        connection.close();
+//                } catch (SQLException e) {
+//                    // connection close failed.
+//                    System.err.println(e.getMessage());
+//                }
+//            }
+/********************************************************************/
