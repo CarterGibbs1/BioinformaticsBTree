@@ -661,7 +661,11 @@ public class GeneBankCreateBTree {
 
 /*********************************************************************************/
 //Data part of imp
-//            String dumpData = bT.dump();
+//            
+//	      String dumpData = "";// maybe needed with the gbk file with no dna seqs on the doc
+//	      if (bT.getRoot().getN() != 0) {
+//		dumpData = bT.dump();
+//		}
 //            Connection connection = null;
 //            try {
 //                // create a database connection
