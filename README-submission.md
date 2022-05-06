@@ -29,6 +29,7 @@ From 20 bytes onwards, BNodes are written as:
 parent address (8) | n (4) | child0 (8) | key0 (8) | key0 frequency (4) | child1 (8) | key1 (8) ...
 
 # Additional Notes
+The database will be named btree.db after using GeneBankCreateBTree. Use this for the respective argument in GeneBankSearchDatabase.
 Run the following command (in the same directory as the class) before you use GeneBankCreateBTree and GeneBankSearchDatabase:
 jar xf sqlite-jdbc-3.36.0.3.jar
 
