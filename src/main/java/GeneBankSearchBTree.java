@@ -31,7 +31,7 @@ public class GeneBankSearchBTree
 	        boolean debug = arguments.getDebugLevel() == 1;
 	        PrintStream result = null;
 	        if(debug) {
-		        File resultFile = new File("./results/genebank/" + arguments.getQueryFileName().substring(arguments.getQueryFileName().lastIndexOf('/') + 1, arguments.getQueryFileName().length()) 
+		        File resultFile = new File("./data/queries_results/" + arguments.getQueryFileName().substring(arguments.getQueryFileName().lastIndexOf('/') + 1, arguments.getQueryFileName().length()) 
 		        		+ "_ON_" + arguments.getBTreeFileName().substring(arguments.getBTreeFileName().lastIndexOf('/') + 1, arguments.getBTreeFileName().length()));
 		        if(resultFile.exists()) {
 		        	if(!resultFile.delete()) {

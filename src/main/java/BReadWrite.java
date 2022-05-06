@@ -247,12 +247,12 @@ public class BReadWrite {
 			short k = buffer.getShort();
 			int numNodes = buffer.getInt();
 			short height = buffer.getShort();
-
-			// reset buffer capacity to match BNode size
-			setBuffer(BNode.getDiskSize());
 			
 			// set static BNode degree
 			BNode.setDegree(t);//put this above setBuffer on line 252
+			
+			// reset buffer capacity to match BNode size
+			setBuffer(BNode.getDiskSize());
 			
 			// initialize BTree and return
 			return new BTree(root, t, k, numNodes, height, cache);

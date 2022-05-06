@@ -485,7 +485,7 @@ public class BTree
     	
     	//return string and read this BNode
     	StringBuilder ret = new StringBuilder();
-    	BNode root = BReadWrite.readBNode(rootAddress);
+    	BNode root = cacheCheck(rootAddress);
     	
     	//recursively construct the string
     	ret.append(dump(root.getChild(0)));
