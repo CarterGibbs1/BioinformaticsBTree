@@ -16,7 +16,33 @@ public class GeneBankCreateBTree {
         try {
             BReadWrite.setRAF("./data/files_gbk_btree_rafs/" + geneBankCreateBTreeArguments.getGbkFileName().substring(geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1, geneBankCreateBTreeArguments.getGbkFileName().length()) + ".btree.data." + geneBankCreateBTreeArguments.getSubsequenceLength() + "." + geneBankCreateBTreeArguments.getDegree(), true);
             TreeObject.setSequenceLength(geneBankCreateBTreeArguments.getSubsequenceLength());
-            Scanner fileScan = new Scanner(new File(geneBankCreateBTreeArguments.getGbkFileName()));
+            
+            //create Scanner for file
+            File file = new File(geneBankCreateBTreeArguments.getGbkFileName());
+            Scanner fileScan = new Scanner(file);
+            int lineCount = 0;
+            
+            //get number of scannable lines in file, lil inefficient, but it works
+            boolean flag = false;
+            String line = "";
+            while(fileScan.hasNextLine()) {
+            	line = fileScan.nextLine();
+            	
+            	if(line.contains("ORIGIN")) {
+            		flag = true;
+            	}
+            	else if(line.contains("//")) {
+            		flag = false;
+            	}
+            	
+            	lineCount += flag ? 1 : 0;
+            }
+            fileScan = new Scanner(file);
+            
+            //create a progress bar to show that things are happening
+            ProgressBar progress = new ProgressBar(30, lineCount + 1);
+            
+            
             bT = (geneBankCreateBTreeArguments.getDebugLevel() == 1) ?
                     new BTree(geneBankCreateBTreeArguments.getDegree(), geneBankCreateBTreeArguments.getSubsequenceLength(), geneBankCreateBTreeArguments.getCacheSize()) : // with cache
                     new BTree(geneBankCreateBTreeArguments.getDegree(), geneBankCreateBTreeArguments.getSubsequenceLength()); // without cache
@@ -35,6 +61,7 @@ public class GeneBankCreateBTree {
                 
                 fileLine = fileScan.nextLine();
                 while (!fileLine.contains("//") && fileScan.hasNextLine()) { // while has another sequence and is not end of segment
+                	progress.increaseProgress();
                 	
                 	//get rid of all spaces and numbers in the line
                 	fileLine = fileLine.substring(10);
@@ -108,18 +135,20 @@ public class GeneBankCreateBTree {
             //deal with dump and db stuff in notes go here
 
 
-            // print dump to console
-            String dump = bT.dump();
-            System.out.println(dump);
-            
-            //print dump to file if debug level is 1
-            if(geneBankCreateBTreeArguments.isUseCache()) {
-            	File file = new File("./data/files_gbk_actual_results/" + geneBankCreateBTreeArguments.getGbkFileName().substring(geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1, geneBankCreateBTreeArguments.getGbkFileName().length()) + ".btree.dump." + bT.getFrequency());
-            	file.createNewFile();
-            	
-            	PrintStream fileOut = new PrintStream(file);
-            	fileOut.print(dump);
-            	fileOut.close();
+            // print dump to console if there are elements in the BTree
+            if(bT.getRoot().getN() > 0) {
+	            String dump = bT.dump();
+	            System.out.println(dump);
+	            
+	            //print dump to file if debug level is 1
+	            if(geneBankCreateBTreeArguments.isUseCache()) {
+	            	File dumpFile = new File("./data/files_gbk_actual_results/" + geneBankCreateBTreeArguments.getGbkFileName().substring(geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1, geneBankCreateBTreeArguments.getGbkFileName().length()) + ".btree.dump." + bT.getFrequency());
+	            	dumpFile.createNewFile();
+	            	
+	            	PrintStream fileOut = new PrintStream(dumpFile);
+	            	fileOut.print(dump);
+	            	fileOut.close();
+	            }
             }
 
 /**
