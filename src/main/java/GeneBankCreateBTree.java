@@ -2,8 +2,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
@@ -166,7 +164,7 @@ public class GeneBankCreateBTree {
 				SQLiteConfig config = new SQLiteConfig();
 				
 				//Optimize inserting, only dangerous if Onyx goes up in flames
-				config.setPragma(Pragma.SYNCHRONOUS, "0");
+				config.setPragma(Pragma.SYNCHRONOUS, "OFF");
 				config.setPragma(Pragma.JOURNAL_MODE, "OFF");
 				config.setPragma(Pragma.LOCKING_MODE, "EXCLUSIVE");
 				

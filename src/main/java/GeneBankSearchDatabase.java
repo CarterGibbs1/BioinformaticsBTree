@@ -6,7 +6,6 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -18,6 +17,10 @@ import org.sqlite.SQLiteConfig.Pragma;
 /**
  * Searches through db file and query file, displays 0 for frequencies not in the database,
  * or number that represents the frequency of the found dna sequence.
+ * 
+ * @author  Aaron Goin, Mesa Greear 
+ * @version Spring 2022
+ * 
  */
 public class GeneBankSearchDatabase
 {
@@ -44,7 +47,7 @@ public class GeneBankSearchDatabase
 			SQLiteConfig config = new SQLiteConfig();
 
 			// Optimize searching, only dangerous if Onyx goes up in flames
-			config.setPragma(Pragma.SYNCHRONOUS, "0");
+			config.setPragma(Pragma.SYNCHRONOUS, "OFF");
 			config.setPragma(Pragma.JOURNAL_MODE, "OFF");
 			config.setPragma(Pragma.LOCKING_MODE, "EXCLUSIVE");
 				          

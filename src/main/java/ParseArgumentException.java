@@ -2,7 +2,9 @@
 
 public class ParseArgumentException extends Exception
 {
-    public ParseArgumentException(String message)
+	private static final long serialVersionUID = 1L;
+
+	public ParseArgumentException(String message)
     {
         super(message);
     }
