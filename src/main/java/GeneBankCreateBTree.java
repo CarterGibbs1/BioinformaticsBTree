@@ -3,6 +3,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
@@ -191,35 +192,33 @@ public class GeneBankCreateBTree {
 			        // create a database connection
 		        	Class.forName("org.sqlite.JDBC");
 			        connection = DriverManager.getConnection("jdbc:sqlite:" + RAFLocation + geneBankCreateBTreeArguments.getGbkFileName().substring(geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1, geneBankCreateBTreeArguments.getGbkFileName().length())
-			        		+  "btree.database." + geneBankCreateBTreeArguments.getSubsequenceLength() + "." + geneBankCreateBTreeArguments.getDegree() + ".db");
+			        		+  ".btree.database." + geneBankCreateBTreeArguments.getSubsequenceLength() + "." + geneBankCreateBTreeArguments.getDegree() + ".db");
 			        
 			        Statement statement = connection.createStatement();
 			        statement.setQueryTimeout(30); // set timeout to 30 sec.
 			        statement.executeUpdate("drop table if exists btree;");
 			        statement.executeUpdate("create table btree (dnaseq varchar(255), freq int);");
 			        
+			        statement.execute("PRAGMA synchronous = OFF;");
+			        
 			        System.out.println("Creating Database...");
-//			        progress = new ProgressBar(30, dump.length() - dump.replace("\n", "").length());
+			        progress = new ProgressBar(30, dump.length() - dump.replace("\n", "").length());
 			        
 			        Scanner scanDump = new Scanner(dump);
-			        StringBuilder statements = new StringBuilder();
 			        String dumpLine;
 			        
-			        while (scanDump.hasNextLine()) {
-				        dumpLine = scanDump.nextLine().replace(':', ' ');
-				        	
-				        statements.append("insert into btree (dnaseq, freq) values (\'" + dumpLine.substring(0, dumpLine.indexOf(' '))
-				        + "\', " + dumpLine.substring(dumpLine.lastIndexOf(' ') + 1) + ");");
-				        
-				        	
-//				        statement.executeUpdate(
-//				        "insert into btree (dnaseq, freq) values (\'" + dumpLine.substring(0, dumpLine.indexOf(' '))
-//				        + "\', " + dumpLine.substring(dumpLine.lastIndexOf(' ') + 1) + ");");
-				        
-//				        progress.increaseProgress();
-			        } // end of while
+			        PreparedStatement insert = connection.prepareStatement("insert into btree (dnaseq, freq) values (?, ?);");
 			        
-			        statement.executeUpdate(statements.toString());
+			        while (scanDump.hasNextLine()) {
+				        dumpLine = scanDump.nextLine();
+				        
+				        insert.setString(1, dumpLine.substring(0, dumpLine.indexOf(' ')));
+				        insert.setInt(2, Integer.parseInt(dumpLine.substring(dumpLine.lastIndexOf(' ') + 1)));
+				        insert.executeUpdate();
+				        
+				        progress.increaseProgress();
+			        } // end of while
+
 			        scanDump.close();
 		        } catch (SQLException e) {
 		        	// if the error message is "out of memory",

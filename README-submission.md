@@ -28,8 +28,10 @@ From 20 bytes onwards, BNodes are written as:
 
 parent address (8) | n (4) | child0 (8) | key0 (8) | key0 frequency (4) | child1 (8) | key1 (8) ...
 
-# Additional Notes
-The database will be named btree.db after using GeneBankCreateBTree. Use this for the respective argument in GeneBankSearchDatabase.
+# SQLite
+## Create Database
 Run the following command (in the same directory as the class) before you use GeneBankCreateBTree and GeneBankSearchDatabase:
-jar xf sqlite-jdbc-3.36.0.3.jar
-
+"jar xf sqlite-jdbc-3.36.0.3.jar"
+## Efficiency
+The creation of the database is very slow on onyx. On our computers at home, the creation of the database is nearly instant, but on onyx it makes GeneBankCreate run about 100x slower, but does not effect GeneBankSearchDatabase. We are not sure why this happens, if there is a fix for this,
+or if the database is supposed to be slow.
