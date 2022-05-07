@@ -62,6 +62,12 @@ public class GeneBankCreateBTreeTest
     }
 
     @Test
+    public void testgbk3File() throws Exception {
+        String args[] = {"1", "3", "data/files_gbk/test3.gbk", "6", "100", "1"};
+        GeneBankCreateBTree.main(args);
+    }
+
+    @Test
     public void numberInFrontOfLinesTest() throws FileNotFoundException, IOException, ParseArgumentException {
         GeneBankCreateBTreeArguments args = new GeneBankCreateBTreeArguments(false, 20, "src/test/java/cs321/create/testNumberFormat.txt", 13, 0, 0);
         String expectedOutput = "AGTCGTCAGTCAGTAATATTGCGTTGTGCCGATCGTAGTTTATGCGATGGCTAGAGGTAGTCGTATAATATTTTTCGGCTTAGATGAGACCCCAGCTGAATTGTCTGGCGGTGTGTTGGTGTGCACCAGCTGAGACCAGCTACATCGGAGTTCAGGGTCTGGCGATCGTAGA";
