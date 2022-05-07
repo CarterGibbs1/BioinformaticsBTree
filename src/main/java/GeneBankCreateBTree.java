@@ -123,7 +123,7 @@ public class GeneBankCreateBTree {
 			if (!Files.exists(Path.of(DLocation))) {
 				DLocation = "./";
 			}
-
+		//String dump = "";
             // print dump to console if there are elements in the BTree
             if(bT.getRoot().getN() > 0) {
 	            String dump = bT.dump();
