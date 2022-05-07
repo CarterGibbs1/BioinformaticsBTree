@@ -22,7 +22,8 @@ public class GeneBankCreateBTree {
      * @param args - arguments
      * @throws Exception
      */
-    public static void main(String[] args) throws Exception {
+    @SuppressWarnings("resource")
+	public static void main(String[] args) throws Exception {
         GeneBankCreateBTreeArguments geneBankCreateBTreeArguments = parseArgumentsAndHandleExceptions(args);
         // Read in from file
         BTree bT;
@@ -37,6 +38,19 @@ public class GeneBankCreateBTree {
         	
             BReadWrite.setRAF(RAFLocation + geneBankCreateBTreeArguments.getGbkFileName().substring(geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1, geneBankCreateBTreeArguments.getGbkFileName().length()) + ".btree.data." + geneBankCreateBTreeArguments.getSubsequenceLength() + "." + geneBankCreateBTreeArguments.getDegree(), true);
             TreeObject.setSequenceLength(geneBankCreateBTreeArguments.getSubsequenceLength());
+            
+            //if degree is <= 0, calculate optimal degree based on disk block size of 4096
+            int degree = geneBankCreateBTreeArguments.getDegree();
+            if (degree <= 0) { 
+            	degree = 1;
+            	BNode.setDegree(degree);
+            	
+            	while(BNode.getDiskSize() <= 4096) {
+            		BNode.setDegree(++degree);
+            	}
+            	degree--;
+            }
+            
             
             //create Scanner for file
             File file = new File(geneBankCreateBTreeArguments.getGbkFileName());
@@ -65,8 +79,8 @@ public class GeneBankCreateBTree {
             
             
             bT = (geneBankCreateBTreeArguments.getDebugLevel() == 1) ?
-                    new BTree(geneBankCreateBTreeArguments.getDegree(), geneBankCreateBTreeArguments.getSubsequenceLength(), geneBankCreateBTreeArguments.getCacheSize()) : // with cache
-                    new BTree(geneBankCreateBTreeArguments.getDegree(), geneBankCreateBTreeArguments.getSubsequenceLength()); // without cache
+                    new BTree(degree, geneBankCreateBTreeArguments.getSubsequenceLength(), geneBankCreateBTreeArguments.getCacheSize()) : // with cache
+                    new BTree(degree, geneBankCreateBTreeArguments.getSubsequenceLength()); // without cache
             boolean newSegment = true;
             while (fileScan.hasNextLine()) {
                 String fileLine = fileScan.nextLine();
@@ -124,123 +138,83 @@ public class GeneBankCreateBTree {
 				DLocation = "./";
 			}
 
-            // print dump to console if there are elements in the BTree
-            if(bT.getRoot().getN() > 0) {
-	            String dump = bT.dump();
-	            System.out.println(dump);
-	            
-	            //print dump to file if debug level is 1
-	            if(geneBankCreateBTreeArguments.isUseCache()) {
-	            	
-	            	File dumpFile = new File(DLocation + geneBankCreateBTreeArguments.getGbkFileName().substring(geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1, geneBankCreateBTreeArguments.getGbkFileName().length()) + ".btree.dump." + bT.getFrequency());
-	            	dumpFile.createNewFile();
-	            	
-	            	PrintStream fileOut = new PrintStream(dumpFile);
-	            	fileOut.print(dump);
-	            	fileOut.close();
-	            }
+			// dump is empty if there are no elements
+			String dump = bT.getRoot().getN() == 0 ? "" : bT.dump();
+			System.out.println(dump);
 
+			// print dump to file if debug level is 1
+			if (geneBankCreateBTreeArguments.isUseCache()) {
 
+				File dumpFile = new File(DLocation
+						+ geneBankCreateBTreeArguments.getGbkFileName().substring(
+								geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1,
+								geneBankCreateBTreeArguments.getGbkFileName().length())
+						+ ".btree.dump." + bT.getFrequency());
+				dumpFile.createNewFile();
 
-//        bT.emptyBCache();
-//        String dumpData = "";
-//        if (bT.getRoot().getN() != 0) {
-//        dumpData = bT.dump();
-//        }
-//        if (geneBankCreateBTreeArguments.getDebugLevel() == 1) {
-//        String dumpFilename = geneBankCreateBTreeArguments.getGbkFileName() + ".btree.dump."
-//        + geneBankCreateBTreeArguments.getSubsequenceLength();
-//        PrintStream pS = new PrintStream(dumpFilename);
-//        PrintStream stdout = System.out;
-//        pS.append(dumpData);
-//        System.setOut(pS);
-//        System.setOut(stdout);
-//        }
-//        BReadWrite.writeBTree(bT); // need to verify with searchBTree
-        // IMPORTANT: BOTH CREATEBTREE AND SEARCHDATABASE NEED THE FOLLOWING COMMAND IN
-        // THE DIR IN TERMINAL BEFORE RUNNING PROGRAM:
-        // jar xf sqlite-jdbc-3.36.0.3.jar
-        //Connection connection = null;
-		        try {
-			        // create a database connection
-		        	Class.forName("org.sqlite.JDBC");
-			        connection = DriverManager.getConnection("jdbc:sqlite:" + RAFLocation + geneBankCreateBTreeArguments.getGbkFileName().substring(geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1, geneBankCreateBTreeArguments.getGbkFileName().length())
-			        		+  ".btree.database." + geneBankCreateBTreeArguments.getSubsequenceLength() + "." + geneBankCreateBTreeArguments.getDegree() + ".db");
-			        
-			        Statement statement = connection.createStatement();
-			        statement.setQueryTimeout(30); // set timeout to 30 sec.
-			        statement.executeUpdate("drop table if exists btree;");
-			        statement.executeUpdate("create table btree (dnaseq varchar(255), freq int);");
-			        
-			        statement.execute("PRAGMA synchronous = OFF;");
-			        
-			        System.out.println("Creating Database...");
-			        progress = new ProgressBar(30, dump.length() - dump.replace("\n", "").length());
-			        
-			        Scanner scanDump = new Scanner(dump);
-			        String dumpLine;
-			        
-			        PreparedStatement insert = connection.prepareStatement("insert into btree (dnaseq, freq) values (?, ?);");
-			        
-			        while (scanDump.hasNextLine()) {
-				        dumpLine = scanDump.nextLine();
-				        
-				        insert.setString(1, dumpLine.substring(0, dumpLine.indexOf(' ')));
-				        insert.setInt(2, Integer.parseInt(dumpLine.substring(dumpLine.lastIndexOf(' ') + 1)));
-				        insert.executeUpdate();
-				        
-				        progress.increaseProgress();
-			        } // end of while
+				PrintStream fileOut = new PrintStream(dumpFile);
+				fileOut.print(dump);
+				fileOut.close();
+			}
 
-			        scanDump.close();
-		        } catch (SQLException e) {
-		        	// if the error message is "out of memory",
-		        	// it probably means no database file is found
-		        	System.err.println(e.getMessage());
-		        } finally {
-		        	try {
-		        		if (connection != null)
-		        				connection.close();
-		        	} catch (SQLException e) {
-		        		// connection close failed.
-		        		System.err.println(e.getMessage());
-		        	}
-		        }
+			try {
+				// create a database connection
+				Class.forName("org.sqlite.JDBC");
+				connection = DriverManager.getConnection("jdbc:sqlite:" + RAFLocation
+						+ geneBankCreateBTreeArguments.getGbkFileName().substring(
+								geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1,
+								geneBankCreateBTreeArguments.getGbkFileName().length())
+						+ ".btree.database." + geneBankCreateBTreeArguments.getSubsequenceLength() + "."
+						+ geneBankCreateBTreeArguments.getDegree() + ".db");
 
-            }
+				Statement statement = connection.createStatement();
+				statement.setQueryTimeout(30); // set timeout to 30 sec.
+				statement.executeUpdate("drop table if exists btree;");
+				statement.executeUpdate("create table btree (dnaseq varchar(255), freq int);");
+
+				statement.execute("PRAGMA synchronous = OFF;");
+
+				System.out.println("Creating Database...");
+				progress = new ProgressBar(30, dump.length() - dump.replace("\n", "").length() + 1);
+
+				Scanner scanDump = new Scanner(dump);
+				String dumpLine;
+
+				PreparedStatement insert = connection
+						.prepareStatement("insert into btree (dnaseq, freq) values (?, ?);");
+
+				while (scanDump.hasNextLine()) {
+					dumpLine = scanDump.nextLine();
+
+					insert.setString(1, dumpLine.substring(0, dumpLine.indexOf(' ')));
+					insert.setInt(2, Integer.parseInt(dumpLine.substring(dumpLine.lastIndexOf(' ') + 1)));
+					insert.executeUpdate();
+
+					progress.increaseProgress();
+				} // end of while
+
+				scanDump.close();
+			} catch (SQLException e) {
+				// if the error message is "out of memory",
+				// it probably means no database file is found
+				System.err.println(e.getMessage());
+			} finally {
+				try {
+					if (connection != null)
+						connection.close();
+				} catch (SQLException e) {
+					// connection close failed.
+					System.err.println(e.getMessage());
+				}
+			}
+
+            
+            fileScan.close();
 
         } // end of try
         catch (FileNotFoundException fe) {
         printUsageAndExit("File Not Found.");
         }
-    }
-
-//Below is some of the implementation needed to create a database in createbtree
-
-//IMPORTANT: BOTH CREATEBTREE AND SEARCHDATABASE NEED THE FOLLOWING COMMAND IN THE DIR IN TERMINAL BEFORE RUNNING PROGRAM:
-// jar xf sqlite-jdbc-3.36.0.3.jar
-
-    /**
-     * This method will in order traversal of a DNA Sequence.
-     *
-     * @param s - string of DNA subsequence
-     * @param statement - SQL statement
-     * @param args - arguments of the driver
-     * @throws SQLException
-     */
-    private static void inOrderT (String s, Statement statement, GeneBankCreateBTreeArguments args) throws SQLException {// s from dump() before
-        int idx = 0;
-        while (idx < s.length()) {
-            String thisSeq = "";
-            while (thisSeq.length() < args.getSubsequenceLength()) {
-                thisSeq += s.charAt(idx);
-                idx++;
-            }
-            idx = idx + 3;// three spaces for space, colon, then space in toString
-            int freq = Integer.parseInt("" + s.charAt(idx));// better way to do this probs
-            statement.executeUpdate("insert into btree (dnaseq, freq) values (\'" + thisSeq + "\', " + freq + ");");
-            idx++;// /n char is just one char
-        }  // end of while
     }
 
     /**
@@ -293,7 +267,7 @@ public class GeneBankCreateBTree {
             System.out.println
                     ("<0/1(no/with Cache)>: 1 for run program with a Cache, 0 for without.");
             System.out.println
-                    ("<degree>: degree of the BTree.");
+                    ("<degree>: degree of the BTree, 0 or less to calculate degree based on disk block size of 4096.");
             System.out.println
                     ("<gbk file>: file name of the gene bank.");
             System.out.println
@@ -308,7 +282,6 @@ public class GeneBankCreateBTree {
         if (withOrWithoutCache != 0 && withOrWithoutCache != 1)
             throw new ParseArgumentException("With or Without Cache can only be 1 or 0.");
         int degree = Integer.parseInt(args[1]);
-        if (degree < 0) throw new ParseArgumentException("Degree must be 0 or greater, cannot be negative.");
         String gbkFileName = args[2];
         int sequenceLength = Integer.parseInt(args[3]);
         if (sequenceLength < 1 || sequenceLength > 31) throw new ParseArgumentException("Sequence length must be between 1 and 31 inclusive.");
