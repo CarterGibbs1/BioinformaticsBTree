@@ -145,7 +145,7 @@ public class GeneBankCreateBTree {
 			System.out.println(dump);
 
 			// print dump to file if debug level is 1
-			if (geneBankCreateBTreeArguments.isUseCache()) {
+			if (geneBankCreateBTreeArguments.getDebugLevel() == 1) {
 
 				File dumpFile = new File(DLocation
 						+ geneBankCreateBTreeArguments.getGbkFileName().substring(
