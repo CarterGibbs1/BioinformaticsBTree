@@ -8,6 +8,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
 
+import org.sqlite.SQLiteConfig;
+import org.sqlite.SQLiteConfig.Pragma;
+
 /**
  * Driver class to create a GeneBank BTree, parse a valid gbk file, fill a
  * SQL database, and output a dump file.
@@ -160,7 +163,14 @@ public class GeneBankCreateBTree {
 			try {
 				// create a database connection
 				Class.forName("org.sqlite.JDBC");
-				connection = DriverManager.getConnection("jdbc:sqlite:" + RAFLocation
+				SQLiteConfig config = new SQLiteConfig();
+				
+				//Optimize inserting, only dangerous if Onyx goes up in flames
+				config.setPragma(Pragma.SYNCHRONOUS, "0");
+				config.setPragma(Pragma.JOURNAL_MODE, "OFF");
+				config.setPragma(Pragma.LOCKING_MODE, "EXCLUSIVE");
+				
+				connection = config.createConnection("jdbc:sqlite:" + RAFLocation
 						+ geneBankCreateBTreeArguments.getGbkFileName().substring(
 								geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1,
 								geneBankCreateBTreeArguments.getGbkFileName().length())
@@ -171,28 +181,20 @@ public class GeneBankCreateBTree {
 				statement.setQueryTimeout(30); // set timeout to 30 sec.
 				statement.executeUpdate("drop table if exists btree;");
 				statement.executeUpdate("create table btree (dnaseq varchar(255), freq int);");
-
-				statement.execute("PRAGMA synchronous = OFF;");
-
-				System.out.println("Creating Database...");
-				progress = new ProgressBar(30, dump.length() - dump.replace("\n", "").length() + 1);
-
+				
+				//contain the entirety of insert statements in this String
+				StringBuilder statements = new StringBuilder();
 				Scanner scanDump = new Scanner(dump);
 				String dumpLine;
-
-				PreparedStatement insert = connection
-						.prepareStatement("insert into btree (dnaseq, freq) values (?, ?);");
 
 				while (scanDump.hasNextLine()) {
 					dumpLine = scanDump.nextLine();
 
-					insert.setString(1, dumpLine.substring(0, dumpLine.indexOf(' ')));
-					insert.setInt(2, Integer.parseInt(dumpLine.substring(dumpLine.lastIndexOf(' ') + 1)));
-					insert.executeUpdate();
-
-					progress.increaseProgress();
-				} // end of while
-
+					statements.append("insert into btree (dnaseq, freq) values (\'" + dumpLine.substring(0, dumpLine.indexOf(':'))
+									+ "\', " + dumpLine.substring(dumpLine.indexOf(' ') + 1) + ");");
+				}
+				
+				statement.executeUpdate(statements.toString()); //execute those statements
 				scanDump.close();
 			} catch (SQLException e) {
 				// if the error message is "out of memory",
@@ -302,19 +304,6 @@ public class GeneBankCreateBTree {
     }
 
     // HELPER METHODS FOR DRIVER
-
-    /**
-     * Takes in a string and returns true if the string is a number and false if it isn't
-     */
-    private static boolean isNumber(String line) {
-        try {
-            Integer.parseInt(line);
-            return true;
-        }
-        catch (NumberFormatException nfe) {
-            return false;
-        }
-    }
 
     /**
      * Print error message and exits program.

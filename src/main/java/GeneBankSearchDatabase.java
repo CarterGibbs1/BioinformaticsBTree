@@ -12,6 +12,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
 
+import org.sqlite.SQLiteConfig;
+import org.sqlite.SQLiteConfig.Pragma;
+
 /**
  * Searches through db file and query file, displays 0 for frequencies not in the database,
  * or number that represents the frequency of the found dna sequence.
@@ -37,10 +40,17 @@ public class GeneBankSearchDatabase
             GeneBankSearchDatabaseArguments a = parseArgs(args);
 
             // create a database connection
-            Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:" + a.getPathToDatabase());
-            Statement statement = connection.createStatement();
-            statement.setQueryTimeout(30);  // set timeout to 30 sec.
+			Class.forName("org.sqlite.JDBC");
+			SQLiteConfig config = new SQLiteConfig();
+
+			// Optimize searching, only dangerous if Onyx goes up in flames
+			config.setPragma(Pragma.SYNCHRONOUS, "0");
+			config.setPragma(Pragma.JOURNAL_MODE, "OFF");
+			config.setPragma(Pragma.LOCKING_MODE, "EXCLUSIVE");
+				          
+			connection = config.createConnection("jdbc:sqlite:" + a.getPathToDatabase());
+			Statement statement = connection.createStatement();
+			statement.setQueryTimeout(30); // set timeout to 30 sec.
 
             
             //if debug == 1, create new file to put query results in
