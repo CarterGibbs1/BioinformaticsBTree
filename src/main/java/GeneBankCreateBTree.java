@@ -165,34 +165,33 @@ public class GeneBankCreateBTree {
 			        // create a database connection
 		        	Class.forName("org.sqlite.JDBC");
 			        connection = DriverManager.getConnection("jdbc:sqlite:" + RAFLocation + geneBankCreateBTreeArguments.getGbkFileName().substring(geneBankCreateBTreeArguments.getGbkFileName().lastIndexOf('/') + 1, geneBankCreateBTreeArguments.getGbkFileName().length())
-			        		+  "btree.database." + geneBankCreateBTreeArguments.getSubsequenceLength() + "." + geneBankCreateBTreeArguments.getDegree() + ".db");
-
+			        		+  ".btree.database." + geneBankCreateBTreeArguments.getSubsequenceLength() + "." + geneBankCreateBTreeArguments.getDegree() + ".db");
+			        
 			        Statement statement = connection.createStatement();
 			        statement.setQueryTimeout(30); // set timeout to 30 sec.
 			        statement.executeUpdate("drop table if exists btree;");
 			        statement.executeUpdate("create table btree (dnaseq varchar(255), freq int);");
-
+			        
+			        statement.execute("PRAGMA synchronous = OFF;");
+			        
 			        System.out.println("Creating Database...");
-//			        progress = new ProgressBar(30, dump.length() - dump.replace("\n", "").length());
-
+			        progress = new ProgressBar(30, dump.length() - dump.replace("\n", "").length());
+			        
 			        Scanner scanDump = new Scanner(dump);
 			        String dumpLine;
-
+			        
+			        PreparedStatement insert = connection.prepareStatement("insert into btree (dnaseq, freq) values (?, ?);");
+			        
 			        while (scanDump.hasNextLine()) {
-				        dumpLine = scanDump.nextLine().replace(':', ' ');
-
-				        statements.append("insert into btree (dnaseq, freq) values (\'" + dumpLine.substring(0, dumpLine.indexOf(' '))
-				        + "\', " + dumpLine.substring(dumpLine.lastIndexOf(' ') + 1) + ");");
-
-
-//				        statement.executeUpdate(
-//				        "insert into btree (dnaseq, freq) values (\'" + dumpLine.substring(0, dumpLine.indexOf(' '))
-//				        + "\', " + dumpLine.substring(dumpLine.lastIndexOf(' ') + 1) + ");");
-
-//				        progress.increaseProgress();
+				        dumpLine = scanDump.nextLine();
+				        
+				        insert.setString(1, dumpLine.substring(0, dumpLine.indexOf(' ')));
+				        insert.setInt(2, Integer.parseInt(dumpLine.substring(dumpLine.lastIndexOf(' ') + 1)));
+				        insert.executeUpdate();
+				        
+				        progress.increaseProgress();
 			        } // end of while
 
-			        statement.executeUpdate(statements.toString());
 			        scanDump.close();
 		        } catch (SQLException e) {
 		        	// if the error message is "out of memory",
