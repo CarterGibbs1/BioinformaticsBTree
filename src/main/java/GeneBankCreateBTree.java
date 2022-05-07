@@ -77,6 +77,7 @@ public class GeneBankCreateBTree {
             
             //create a progress bar to show that things are happening
             ProgressBar progress = new ProgressBar(30, lineCount + 1);
+            progress.increaseProgress();
             
             
             bT = (geneBankCreateBTreeArguments.getDebugLevel() == 1) ?
@@ -208,7 +209,6 @@ public class GeneBankCreateBTree {
 				}
 			}
 
-            
             fileScan.close();
 
         } // end of try
@@ -289,15 +289,14 @@ public class GeneBankCreateBTree {
         int debugLevel = 0;
         if (withOrWithoutCache == 1 && args.length < 5) {
             throw new ParseArgumentException("If With/Without Cache is 1, then must provide Cache size.");
-        } else if (args.length >= 5){
-            cacheSize = Integer.parseInt(args[4]);
-            if (cacheSize <= 0) throw new ParseArgumentException("Cache size must be greater than 0.");
-            if (args.length == 6) {
-                debugLevel = Integer.parseInt(args[5]);
-                if (debugLevel != 1 && debugLevel != 0) throw new ParseArgumentException("Debug level must be either 0 or 1");
-            }
         }
-
+        else if(withOrWithoutCache == 1) {
+        	cacheSize = Integer.parseInt(args[4]);
+        	debugLevel =  args.length > 5 && Integer.parseInt(args[5]) == 1 ? 1 : 0;
+        }
+        else {
+        	debugLevel =  args.length > 4 && Integer.parseInt(args[4]) == 1 ? 1 : 0;
+        }
         return new GeneBankCreateBTreeArguments(withOrWithoutCache == 1, degree, gbkFileName, sequenceLength, cacheSize, debugLevel);
     }
 
